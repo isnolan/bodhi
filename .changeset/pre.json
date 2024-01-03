@@ -1,0 +1,11 @@
+{
+  "mode": "exit",
+  "tag": "beta",
+  "initialVersions": {
+    "@isnolan/monorepo1": "1.0.1",
+    "@isnolan/monorepo2": "1.0.1"
+  },
+  "changesets": [
+    "empty-pillows-search"
+  ]
+}
