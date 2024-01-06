@@ -77,6 +77,9 @@ importers:
       '@types/jest':
         specifier: ^29.5.11
         version: 29.5.11
+      '@types/node-fetch':
+        specifier: ^2.6.10
+        version: 2.6.10
       babel-plugin-module-resolver:
         specifier: ^5.0.0
         version: 5.0.0
@@ -2902,6 +2905,14 @@ packages:
       { integrity: sha512-hov8bUuiLiyFPGyFPE1lwWhmzYbirOXQNNo40+y3zow8aFVTeyn3VWL0VFFfdNddA8S4Vf0Tc062rzyNr7Paag== }
     dev: true
 
+  /@types/node-fetch@2.6.10:
+    resolution:
+      { integrity: sha512-PPpPK6F9ALFTn59Ka3BaL+qGuipRfxNE8qVgkp0bVixeiR2c2/L+IVOiBdu9JhhT22sWnQEp6YyHGI2b2+CMcA== }
+    dependencies:
+      '@types/node': 20.10.6
+      form-data: 4.0.0
+    dev: true
+
   /@types/node@12.20.55:
     resolution:
       { integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ== }
@@ -3738,7 +3749,6 @@ packages:
       { integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q== }
     requiresBuild: true
     dev: true
-    optional: true
 
   /at-least-node@1.0.0:
     resolution:
@@ -4488,7 +4498,6 @@ packages:
     dependencies:
       delayed-stream: 1.0.0
     dev: true
-    optional: true
 
   /commander@2.20.3:
     resolution:
@@ -5092,7 +5101,6 @@ packages:
     engines: { node: '>=0.4.0' }
     requiresBuild: true
     dev: true
-    optional: true
 
   /delegates@1.0.0:
     resolution:
@@ -6118,6 +6126,16 @@ packages:
       mime-types: 2.1.35
     dev: true
     optional: true
+
+  /form-data@4.0.0:
+    resolution:
+      { integrity: sha512-ETEklSGi5t0QMZuiXoA/Q6vcnxcLQP5vdugSpuAyi6SVGi2clPPp+xgEhuMaHC+zGgn31Kd235W35f7Hykkaww== }
+    engines: { node: '>= 6' }
+    dependencies:
+      asynckit: 0.4.0
+      combined-stream: 1.0.8
+      mime-types: 2.1.35
+    dev: true
 
   /fs-extra@10.1.0:
     resolution:

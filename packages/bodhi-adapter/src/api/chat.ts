@@ -1,29 +1,28 @@
-import { ChatGeminiAPI, ChatOpenAIAPI } from '@/supplier';
-import { ChatBaseAPI } from '@/supplier/base';
+import { Provider, ChatGeminiAPI, ChatOpenAIAPI } from '@/provider';
+import { ChatBaseAPI } from '@/provider/base';
 
-import { SUPPLIER } from './supplier';
 import * as types from '@/types';
 
 export class ChatAPI {
-  private supplier: ChatBaseAPI | null = null;
+  private provider: ChatBaseAPI | null = null;
 
-  constructor(supplier: string, opts: types.chat.ChatOptions) {
-    switch (supplier) {
-      case SUPPLIER.GEMINI:
-        this.supplier = new ChatGeminiAPI(opts);
+  constructor(provider: string, opts: types.chat.ChatOptions) {
+    switch (provider) {
+      case Provider.GEMINI:
+        this.provider = new ChatGeminiAPI(opts);
         break;
-      case SUPPLIER.OPENAI:
-        this.supplier = new ChatOpenAIAPI(opts);
+      case Provider.OPENAI:
+        this.provider = new ChatOpenAIAPI(opts);
         break;
       default:
-        throw new Error(`Unsupported supplier type: ${supplier}`);
+        throw new Error(`Unsupported supplier type: ${provider}`);
     }
   }
 
   public async sendMessage(opts: types.chat.SendOptions) {
-    if (!this.supplier) {
-      throw new Error('Supplier is not initialized');
+    if (!this.provider) {
+      throw new Error('Provider is not initialized');
     }
-    return await this.supplier.sendMessage(opts);
+    return await this.provider.sendMessage(opts);
   }
 }

@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
-import { ChatOpenAIAPI } from '../src/supplier';
+import { ChatOpenAIAPI } from '../src/provider';
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 describe('chat', () => {

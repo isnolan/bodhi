@@ -1,11 +1,101 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1704518531567" clover="3.2.0">
-  <project timestamp="1704518531567" name="All files">
-    <metrics statements="158" coveredstatements="109" conditionals="40" coveredconditionals="17" methods="19" coveredmethods="12" elements="217" coveredelements="138" complexity="0" loc="158" ncloc="158" packages="5" files="9" classes="9"/>
+<coverage generated="1704523629781" clover="3.2.0">
+  <project timestamp="1704523629781" name="All files">
+    <metrics statements="173" coveredstatements="106" conditionals="50" coveredconditionals="22" methods="20" coveredmethods="14" elements="243" coveredelements="142" complexity="0" loc="173" ncloc="173" packages="5" files="10" classes="10"/>
     <package name="api">
-      <metrics statements="28" coveredstatements="23" conditionals="11" coveredconditionals="5" methods="4" coveredmethods="4"/>
+      <metrics statements="35" coveredstatements="30" conditionals="17" coveredconditionals="8" methods="5" coveredmethods="5"/>
       <file name="chat.ts" path="/Users/yhostc/Project/bodhi/packages/bodhi-adapter/src/api/chat.ts">
-        <metrics statements="27" coveredstatements="22" conditionals="6" coveredconditionals="3" methods="3" coveredmethods="3"/>
+        <metrics statements="29" coveredstatements="24" conditionals="6" coveredconditionals="3" methods="3" coveredmethods="3"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="5" count="1" type="stmt"/>
+        <line num="6" count="1" type="stmt"/>
+        <line num="7" count="1" type="cond" truecount="1" falsecount="0"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="9" count="1" type="stmt"/>
+        <line num="10" count="1" type="cond" truecount="1" falsecount="0"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="12" count="1" type="stmt"/>
+        <line num="13" count="1" type="stmt"/>
+        <line num="14" count="1" type="stmt"/>
+        <line num="15" count="1" type="cond" truecount="0" falsecount="1"/>
+        <line num="16" count="0" type="stmt"/>
+        <line num="17" count="0" type="stmt"/>
+        <line num="18" count="1" type="cond" truecount="0" falsecount="1"/>
+        <line num="19" count="0" type="stmt"/>
+        <line num="20" count="1" type="stmt"/>
+        <line num="21" count="1" type="stmt"/>
+        <line num="22" count="1" type="stmt"/>
+        <line num="23" count="1" type="cond" truecount="1" falsecount="0"/>
+        <line num="24" count="1" type="cond" truecount="0" falsecount="1"/>
+        <line num="25" count="0" type="stmt"/>
+        <line num="26" count="0" type="stmt"/>
+        <line num="27" count="1" type="stmt"/>
+        <line num="28" count="1" type="stmt"/>
+        <line num="29" count="1" type="stmt"/>
+      </file>
+      <file name="index.ts" path="/Users/yhostc/Project/bodhi/packages/bodhi-adapter/src/api/index.ts">
+        <metrics statements="2" coveredstatements="2" conditionals="10" coveredconditionals="4" methods="2" coveredmethods="2"/>
+        <line num="1" count="1" type="cond" truecount="2" falsecount="3"/>
+        <line num="2" count="1" type="cond" truecount="2" falsecount="3"/>
+      </file>
+      <file name="provider.ts" path="/Users/yhostc/Project/bodhi/packages/bodhi-adapter/src/api/provider.ts">
+        <metrics statements="4" coveredstatements="4" conditionals="1" coveredconditionals="1" methods="0" coveredmethods="0"/>
+        <line num="1" count="1" type="cond" truecount="1" falsecount="0"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="4" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="provider">
+      <metrics statements="34" coveredstatements="31" conditionals="15" coveredconditionals="6" methods="6" coveredmethods="4"/>
+      <file name="base.ts" path="/Users/yhostc/Project/bodhi/packages/bodhi-adapter/src/provider/base.ts">
+        <metrics statements="32" coveredstatements="30" conditionals="6" coveredconditionals="3" methods="4" coveredmethods="3"/>
+        <line num="1" count="1" type="stmt"/>
+        <line num="2" count="1" type="stmt"/>
+        <line num="3" count="1" type="stmt"/>
+        <line num="4" count="1" type="cond" truecount="1" falsecount="0"/>
+        <line num="5" count="1" type="stmt"/>
+        <line num="6" count="1" type="stmt"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="9" count="1" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="12" count="1" type="cond" truecount="1" falsecount="0"/>
+        <line num="13" count="1" type="stmt"/>
+        <line num="14" count="1" type="stmt"/>
+        <line num="15" count="1" type="stmt"/>
+        <line num="16" count="1" type="cond" truecount="0" falsecount="1"/>
+        <line num="17" count="1" type="stmt"/>
+        <line num="18" count="1" type="stmt"/>
+        <line num="19" count="1" type="stmt"/>
+        <line num="20" count="0" type="stmt"/>
+        <line num="21" count="0" type="stmt"/>
+        <line num="22" count="1" type="stmt"/>
+        <line num="23" count="1" type="cond" truecount="1" falsecount="0"/>
+        <line num="24" count="1" type="stmt"/>
+        <line num="25" count="1" type="stmt"/>
+        <line num="26" count="1" type="cond" truecount="0" falsecount="1"/>
+        <line num="27" count="1" type="stmt"/>
+        <line num="28" count="1" type="cond" truecount="0" falsecount="1"/>
+        <line num="29" count="1" type="stmt"/>
+        <line num="30" count="1" type="stmt"/>
+        <line num="31" count="1" type="stmt"/>
+        <line num="32" count="1" type="stmt"/>
+      </file>
+      <file name="index.ts" path="/Users/yhostc/Project/bodhi/packages/bodhi-adapter/src/provider/index.ts">
+        <metrics statements="2" coveredstatements="1" conditionals="9" coveredconditionals="3" methods="2" coveredmethods="1"/>
+        <line num="1" count="1" type="cond" truecount="2" falsecount="3"/>
+        <line num="2" count="0" type="cond" truecount="1" falsecount="3"/>
+      </file>
+    </package>
+    <package name="provider.gemini">
+      <metrics statements="24" coveredstatements="22" conditionals="10" coveredconditionals="6" methods="5" coveredmethods="4"/>
+      <file name="chat.ts" path="/Users/yhostc/Project/bodhi/packages/bodhi-adapter/src/provider/gemini/chat.ts">
+        <metrics statements="23" coveredstatements="21" conditionals="5" coveredconditionals="4" methods="4" coveredmethods="3"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
         <line num="3" count="1" type="stmt"/>
@@ -18,111 +108,37 @@
         <line num="10" count="1" type="stmt"/>
         <line num="11" count="1" type="stmt"/>
         <line num="12" count="1" type="stmt"/>
-        <line num="13" count="1" type="cond" truecount="0" falsecount="1"/>
-        <line num="14" count="0" type="stmt"/>
-        <line num="15" count="0" type="stmt"/>
-        <line num="16" count="1" type="cond" truecount="0" falsecount="1"/>
-        <line num="17" count="0" type="stmt"/>
-        <line num="18" count="1" type="stmt"/>
-        <line num="19" count="1" type="stmt"/>
-        <line num="20" count="1" type="stmt"/>
-        <line num="21" count="1" type="cond" truecount="1" falsecount="0"/>
-        <line num="22" count="1" type="cond" truecount="0" falsecount="1"/>
-        <line num="23" count="0" type="stmt"/>
-        <line num="24" count="0" type="stmt"/>
-        <line num="25" count="1" type="stmt"/>
-        <line num="26" count="1" type="stmt"/>
-        <line num="27" count="1" type="stmt"/>
-      </file>
-      <file name="index.ts" path="/Users/yhostc/Project/bodhi/packages/bodhi-adapter/src/api/index.ts">
-        <metrics statements="1" coveredstatements="1" conditionals="5" coveredconditionals="2" methods="1" coveredmethods="1"/>
-        <line num="1" count="1" type="cond" truecount="2" falsecount="3"/>
-      </file>
-    </package>
-    <package name="supplier">
-      <metrics statements="35" coveredstatements="30" conditionals="15" coveredconditionals="6" methods="7" coveredmethods="4"/>
-      <file name="base.ts" path="/Users/yhostc/Project/bodhi/packages/bodhi-adapter/src/supplier/base.ts">
-        <metrics statements="33" coveredstatements="29" conditionals="6" coveredconditionals="3" methods="5" coveredmethods="3"/>
-        <line num="1" count="1" type="stmt"/>
-        <line num="2" count="1" type="stmt"/>
-        <line num="3" count="1" type="stmt"/>
-        <line num="4" count="1" type="stmt"/>
-        <line num="5" count="1" type="cond" truecount="1" falsecount="0"/>
-        <line num="6" count="1" type="stmt"/>
-        <line num="7" count="1" type="stmt"/>
-        <line num="8" count="1" type="stmt"/>
-        <line num="9" count="1" type="stmt"/>
-        <line num="10" count="1" type="stmt"/>
-        <line num="11" count="1" type="cond" truecount="1" falsecount="0"/>
-        <line num="12" count="1" type="stmt"/>
-        <line num="13" count="1" type="stmt"/>
-        <line num="14" count="1" type="stmt"/>
-        <line num="15" count="1" type="cond" truecount="0" falsecount="1"/>
+        <line num="13" count="1" type="cond" truecount="1" falsecount="0"/>
+        <line num="14" count="1" type="cond" truecount="1" falsecount="0"/>
+        <line num="15" count="1" type="stmt"/>
         <line num="16" count="1" type="stmt"/>
         <line num="17" count="1" type="stmt"/>
-        <line num="18" count="1" type="stmt"/>
+        <line num="18" count="1" type="cond" truecount="0" falsecount="1"/>
         <line num="19" count="0" type="stmt"/>
         <line num="20" count="0" type="stmt"/>
         <line num="21" count="1" type="stmt"/>
-        <line num="22" count="1" type="cond" truecount="1" falsecount="0"/>
+        <line num="22" count="1" type="stmt"/>
         <line num="23" count="1" type="stmt"/>
-        <line num="24" count="1" type="stmt"/>
-        <line num="25" count="1" type="cond" truecount="0" falsecount="1"/>
-        <line num="26" count="1" type="stmt"/>
-        <line num="27" count="1" type="cond" truecount="0" falsecount="1"/>
-        <line num="28" count="1" type="stmt"/>
-        <line num="29" count="0" type="stmt"/>
-        <line num="30" count="0" type="stmt"/>
-        <line num="31" count="1" type="stmt"/>
-        <line num="32" count="1" type="stmt"/>
-        <line num="33" count="1" type="stmt"/>
       </file>
-      <file name="index.ts" path="/Users/yhostc/Project/bodhi/packages/bodhi-adapter/src/supplier/index.ts">
-        <metrics statements="2" coveredstatements="1" conditionals="9" coveredconditionals="3" methods="2" coveredmethods="1"/>
-        <line num="1" count="1" type="cond" truecount="2" falsecount="3"/>
-        <line num="2" count="0" type="cond" truecount="1" falsecount="3"/>
-      </file>
-    </package>
-    <package name="supplier.gemini">
-      <metrics statements="17" coveredstatements="17" conditionals="7" coveredconditionals="4" methods="3" coveredmethods="3"/>
-      <file name="chat.ts" path="/Users/yhostc/Project/bodhi/packages/bodhi-adapter/src/supplier/gemini/chat.ts">
-        <metrics statements="16" coveredstatements="16" conditionals="2" coveredconditionals="2" methods="2" coveredmethods="2"/>
-        <line num="1" count="1" type="stmt"/>
-        <line num="2" count="1" type="stmt"/>
-        <line num="3" count="1" type="stmt"/>
-        <line num="4" count="1" type="stmt"/>
-        <line num="5" count="1" type="cond" truecount="1" falsecount="0"/>
-        <line num="6" count="1" type="stmt"/>
-        <line num="7" count="1" type="stmt"/>
-        <line num="8" count="1" type="stmt"/>
-        <line num="9" count="1" type="stmt"/>
-        <line num="10" count="1" type="cond" truecount="1" falsecount="0"/>
-        <line num="11" count="1" type="stmt"/>
-        <line num="12" count="1" type="stmt"/>
-        <line num="13" count="1" type="stmt"/>
-        <line num="14" count="1" type="stmt"/>
-        <line num="15" count="1" type="stmt"/>
-        <line num="16" count="1" type="stmt"/>
-      </file>
-      <file name="index.ts" path="/Users/yhostc/Project/bodhi/packages/bodhi-adapter/src/supplier/gemini/index.ts">
+      <file name="index.ts" path="/Users/yhostc/Project/bodhi/packages/bodhi-adapter/src/provider/gemini/index.ts">
         <metrics statements="1" coveredstatements="1" conditionals="5" coveredconditionals="2" methods="1" coveredmethods="1"/>
         <line num="1" count="1" type="cond" truecount="2" falsecount="3"/>
       </file>
     </package>
-    <package name="supplier.openai">
-      <metrics statements="21" coveredstatements="8" conditionals="4" coveredconditionals="1" methods="3" coveredmethods="0"/>
-      <file name="chat.ts" path="/Users/yhostc/Project/bodhi/packages/bodhi-adapter/src/supplier/openai/chat.ts">
-        <metrics statements="20" coveredstatements="8" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="0"/>
+    <package name="provider.openai">
+      <metrics statements="23" coveredstatements="4" conditionals="5" coveredconditionals="1" methods="2" coveredmethods="0"/>
+      <file name="chat.ts" path="/Users/yhostc/Project/bodhi/packages/bodhi-adapter/src/provider/openai/chat.ts">
+        <metrics statements="22" coveredstatements="4" conditionals="1" coveredconditionals="0" methods="1" coveredmethods="0"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
         <line num="3" count="1" type="stmt"/>
-        <line num="4" count="1" type="stmt"/>
-        <line num="5" count="1" type="stmt"/>
+        <line num="4" count="1" type="cond" truecount="0" falsecount="1"/>
+        <line num="5" count="0" type="stmt"/>
         <line num="6" count="0" type="stmt"/>
         <line num="7" count="0" type="stmt"/>
         <line num="8" count="0" type="stmt"/>
-        <line num="9" count="1" type="stmt"/>
-        <line num="10" count="1" type="stmt"/>
+        <line num="9" count="0" type="stmt"/>
+        <line num="10" count="0" type="stmt"/>
         <line num="11" count="0" type="stmt"/>
         <line num="12" count="0" type="stmt"/>
         <line num="13" count="0" type="stmt"/>
@@ -132,17 +148,19 @@
         <line num="17" count="0" type="stmt"/>
         <line num="18" count="0" type="stmt"/>
         <line num="19" count="0" type="stmt"/>
-        <line num="20" count="1" type="stmt"/>
+        <line num="20" count="0" type="stmt"/>
+        <line num="21" count="0" type="stmt"/>
+        <line num="22" count="0" type="stmt"/>
       </file>
-      <file name="index.ts" path="/Users/yhostc/Project/bodhi/packages/bodhi-adapter/src/supplier/openai/index.ts">
+      <file name="index.ts" path="/Users/yhostc/Project/bodhi/packages/bodhi-adapter/src/provider/openai/index.ts">
         <metrics statements="1" coveredstatements="0" conditionals="4" coveredconditionals="1" methods="1" coveredmethods="0"/>
         <line num="1" count="0" type="cond" truecount="1" falsecount="3"/>
       </file>
     </package>
     <package name="utils">
-      <metrics statements="57" coveredstatements="31" conditionals="3" coveredconditionals="1" methods="2" coveredmethods="1"/>
+      <metrics statements="57" coveredstatements="19" conditionals="3" coveredconditionals="1" methods="2" coveredmethods="1"/>
       <file name="fetch-sse-api.ts" path="/Users/yhostc/Project/bodhi/packages/bodhi-adapter/src/utils/fetch-sse-api.ts">
-        <metrics statements="57" coveredstatements="31" conditionals="3" coveredconditionals="1" methods="2" coveredmethods="1"/>
+        <metrics statements="57" coveredstatements="19" conditionals="3" coveredconditionals="1" methods="2" coveredmethods="1"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
         <line num="3" count="1" type="stmt"/>
@@ -167,9 +185,9 @@
         <line num="22" count="1" type="stmt"/>
         <line num="23" count="1" type="stmt"/>
         <line num="24" count="1" type="stmt"/>
-        <line num="25" count="1" type="stmt"/>
-        <line num="26" count="1" type="stmt"/>
-        <line num="27" count="1" type="cond" truecount="0" falsecount="1"/>
+        <line num="25" count="1" type="cond" truecount="0" falsecount="1"/>
+        <line num="26" count="0" type="stmt"/>
+        <line num="27" count="0" type="stmt"/>
         <line num="28" count="0" type="stmt"/>
         <line num="29" count="0" type="stmt"/>
         <line num="30" count="0" type="stmt"/>
@@ -180,26 +198,26 @@
         <line num="35" count="0" type="stmt"/>
         <line num="36" count="0" type="stmt"/>
         <line num="37" count="0" type="stmt"/>
-        <line num="38" count="1" type="stmt"/>
-        <line num="39" count="1" type="stmt"/>
-        <line num="40" count="0" type="stmt"/>
+        <line num="38" count="0" type="stmt"/>
+        <line num="39" count="0" type="stmt"/>
+        <line num="40" count="1" type="cond" truecount="0" falsecount="1"/>
         <line num="41" count="0" type="stmt"/>
         <line num="42" count="0" type="stmt"/>
-        <line num="43" count="1" type="stmt"/>
-        <line num="44" count="1" type="stmt"/>
-        <line num="45" count="1" type="stmt"/>
-        <line num="46" count="1" type="stmt"/>
-        <line num="47" count="1" type="cond" truecount="0" falsecount="1"/>
+        <line num="43" count="0" type="stmt"/>
+        <line num="44" count="0" type="stmt"/>
+        <line num="45" count="0" type="stmt"/>
+        <line num="46" count="0" type="stmt"/>
+        <line num="47" count="0" type="stmt"/>
         <line num="48" count="0" type="stmt"/>
         <line num="49" count="0" type="stmt"/>
-        <line num="50" count="1" type="stmt"/>
-        <line num="51" count="1" type="stmt"/>
+        <line num="50" count="0" type="stmt"/>
+        <line num="51" count="0" type="stmt"/>
         <line num="52" count="0" type="stmt"/>
         <line num="53" count="0" type="stmt"/>
         <line num="54" count="0" type="stmt"/>
         <line num="55" count="0" type="stmt"/>
-        <line num="56" count="1" type="stmt"/>
-        <line num="57" count="1" type="stmt"/>
+        <line num="56" count="0" type="stmt"/>
+        <line num="57" count="0" type="stmt"/>
       </file>
     </package>
   </project>

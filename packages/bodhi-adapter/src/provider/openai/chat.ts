@@ -2,6 +2,8 @@ import * as types from '@/types';
 import { ChatBaseAPI } from '../base';
 
 export class ChatOpenAIAPI extends ChatBaseAPI {
+  protected provider: string = 'openai';
+
   constructor(opts: types.chat.ChatOptions) {
     const options = Object.assign({ baseURL: 'https://api.openai.com/v1' }, opts);
     super(options);
@@ -15,6 +17,6 @@ export class ChatOpenAIAPI extends ChatBaseAPI {
       messages: opts.history,
       stream: true,
     };
-    return this.fetch({ url, headers, body });
+    return this.fetchSSE({ url, headers, body });
   }
 }
