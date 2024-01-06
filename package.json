@@ -2,19 +2,31 @@
   "name": "pnpm-monorepo-demo",
   "private": true,
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
-    "postinstall": "husky install",
-    "build": "pnpm --filter=@isnolan/* run build",
+    "build": "turbo run build",
     "commit": "cz",
-    "clear": "rimraf 'packages/*/{lib,node_modules}' && rimraf node_modules",
+    "build:clean": "turbo run clean:build",
+    "lint-format": "turbo run --parallel lint format ",
+    "lint-format:fix": "turbo run --parallel lint:fix format:fix",
+    "lint": "eslint . --ext .js,.ts",
+    "lint:fix": "eslint . --ext .js,.ts --fix",
+    "format": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "test": "turbo run --parallel test",
+    "typecheck": "turbo run --parallel typecheck",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "pnpm build && pnpm release:only",
-    "release:only": "changeset publish --registry=https://registry.npmjs.com/"
+    "release:only": "changeset publish --registry=https://registry.npmjs.com/",
+    "preinstall": "npx only-allow pnpm",
+    "postinstall": "husky install"
   },
   "packageManager": "pnpm@7.0.1",
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
-    "node": ">=14.19.0"
+    "node": ">=18",
+    "pnpm": ">=7.5.1"
   },
   "lint-staged": {
     "*.ts": [
