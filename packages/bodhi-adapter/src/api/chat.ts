@@ -1,4 +1,4 @@
-import { Provider, ChatGeminiAPI, ChatOpenAIAPI } from '@/provider';
+import { ChatGeminiAPI, ChatOpenAIAPI, ChatVertexAPI } from '@/provider';
 import { ChatBaseAPI } from '@/provider/base';
 
 import * as types from '@/types';
@@ -8,10 +8,13 @@ export class ChatAPI {
 
   constructor(provider: string, opts: types.chat.ChatOptions) {
     switch (provider) {
-      case Provider.GEMINI:
+      case types.Provider.GEMINI:
         this.provider = new ChatGeminiAPI(opts);
         break;
-      case Provider.OPENAI:
+      case types.Provider.VERTEX:
+        this.provider = new ChatVertexAPI(opts);
+        break;
+      case types.Provider.OPENAI:
         this.provider = new ChatOpenAIAPI(opts);
         break;
       default:

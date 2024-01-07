@@ -41,4 +41,10 @@ export namespace chat {
     body: any;
     onMessage: (event: ParseEvent) => void;
   }
+
+  export type Choice = {
+    index: number;
+    delta: { content: string };
+    finish_reason: 'finished' | 'safety' | 'max_tokens' | string | null;
+  };
 }
