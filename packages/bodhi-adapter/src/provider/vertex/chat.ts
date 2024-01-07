@@ -14,6 +14,10 @@ export class ChatVertexAPI extends ChatBaseAPI {
     super(options);
   }
 
+  public models(): string[] {
+    return ['gemini-pro', 'gemini-pro-vision', 'medlm-medium', 'medlm-large'];
+  }
+
   /**
    * 根据服务账号获取 access token
    */

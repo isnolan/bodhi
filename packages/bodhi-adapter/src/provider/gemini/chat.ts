@@ -13,6 +13,10 @@ export class ChatGeminiAPI extends ChatBaseAPI {
     super(options);
   }
 
+  public models(): string[] {
+    return ['gemini-pro', 'gemini-pro-vision'];
+  }
+
   /**
    *
    * https://ai.google.dev/docs/gemini_api_overview?hl=zh-cn#curl_3

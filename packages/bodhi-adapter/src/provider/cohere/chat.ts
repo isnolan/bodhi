@@ -45,16 +45,16 @@ export class ChatCohereAPI extends ChatBaseAPI {
 
           // 整理数据
           const choice: types.chat.Choice[] = [];
-          response.candidates.map((item: any) => {
-            choice.push({
-              index: item.index,
-              delta: { content: item.content.parts[0] },
-              finish_reason: item.finish_reason,
-            });
-          });
-          console.log(`[fetch]sse`, choice);
+          // response.candidates.map((item: any) => {
+          //   choice.push({
+          //     index: item.index,
+          //     delta: { content: item.content.parts[0] },
+          //     finish_reason: item.finish_reason,
+          //   });
+          // });
+          console.log(`[fetch]sse`, response);
 
-          onProgress?.(choice);
+          // onProgress?.(choice);
         }
       });
       body.on('readable', async () => {

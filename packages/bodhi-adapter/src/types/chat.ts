@@ -31,14 +31,15 @@ export namespace chat {
   };
 
   export type ChatResponse = {
-    candidates: any[];
+    id: string;
     model: string;
-    time: number;
+    choices: Choice[];
+    useage: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
   };
 
   export type Choice = {
     index: number;
-    delta: { content: string };
-    finish_reason: 'finished' | 'safety' | 'max_tokens' | string | null;
+    message: { role: string; content: string };
+    finish_reason: 'stop' | 'tool_calls' | string | null;
   };
 }
