@@ -1,43 +1,30 @@
 import fetchSSE from 'node-fetch';
-import { GoogleAuth } from 'google-auth-library';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { createParser, type ParseEvent, type ReconnectInterval } from 'eventsource-parser';
 
 import * as types from '@/types';
 import { ChatBaseAPI } from '../base';
 
-export class ChatVertexAPI extends ChatBaseAPI {
-  protected provider: string = 'vertex';
+export class ChatClaudeAPI extends ChatBaseAPI {
+  protected provider: string = 'claude';
 
   constructor(opts: types.chat.ChatOptions) {
-    const options = Object.assign({ baseURL: 'https://asia-southeast1-aiplatform.googleapis.com/v1' }, opts);
+    const options = Object.assign({ baseURL: 'https://generativelanguage.googleapis.com/v1' }, opts);
     super(options);
   }
 
   /**
-   * 根据服务账号获取 access token
-   */
-  private async getToken(): Promise<string> {
-    const auth: GoogleAuth = new GoogleAuth({ scopes: 'https://www.googleapis.com/auth/cloud-platform' });
-    return (await auth.getAccessToken()) as string;
-  }
-
-  /**
-   * 发送消息
-   * @param opts <types.chat.SendOptions>
-   * Reference: https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/gemini?hl=zh-cn
-   * Multi-modal: https://cloud.google.com/vertex-ai/docs/generative-ai/multimodal/send-multimodal-prompts?hl=zh-cn#gemini-send-multimodal-samples-drest
-   * Tools: https://cloud.google.com/vertex-ai/docs/generative-ai/multimodal/function-calling?hl=zh-cn
+   * Send message
+   * https://docs.anthropic.com/claude/reference/messages_post
+   * @param opts
    * @returns
    */
   public async sendMessage(opts: types.chat.SendOptions) {
     const { onProgress = () => {}, ...options } = opts;
-
     return new Promise(async (resolove, reject) => {
-      const token = await this.getToken();
-      const url = `${this.baseURL}/projects/darftai/locations/asia-southeast1/publishers/google/models/gemini-pro:streamGenerateContent?alt=sse`;
+      const url = `${this.baseURL}/models/gemini-pro:streamGenerateContent?alt=sse`;
       const res = await fetchSSE(url, {
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': this.apiKey },
         body: JSON.stringify(this.convertParams(options)),
         agent: this.agent ? new HttpsProxyAgent(this.agent) : undefined,
         method: 'POST',
@@ -59,9 +46,13 @@ export class ChatVertexAPI extends ChatBaseAPI {
           // 整理数据
           const choice: types.chat.Choice[] = [];
           response.candidates.map((item: any) => {
-            choice.push(item.content);
+            choice.push({
+              index: item.index,
+              delta: { content: item.content.parts[0] },
+              finish_reason: item.finish_reason,
+            });
           });
-          console.log(`[fetch]sse`, JSON.stringify(choice, null, 2));
+          console.log(`[fetch]sse`, choice);
 
           onProgress?.(choice);
         }
@@ -110,15 +101,16 @@ export class ChatVertexAPI extends ChatBaseAPI {
         // }
       ],
       safety_settings: [
-        // { category: 'BLOCK_NONE', threshold: 'HARM_CATEGORY_UNSPECIFIED' },
+        //
+        { category: 'BLOCK_NONE', threshold: 'HARM_CATEGORY_UNSPECIFIED' },
       ],
       generationConfig: {
-        temperature: opts.temperature || 0.9, // gemini-pro:0.9, gemini-pro-vision:0.4
-        topP: opts.top_p || undefined, // gemini-pro:none, gemini-pro-vision:32
-        topK: opts.top_k || undefined,
-        candidateCount: opts.n || 1,
-        maxOutputTokens: opts.max_tokens || 2048, // gemini-pro:2048, gemini-pro-vision:8192
-        stopSequences: opts.stop_sequences || undefined,
+        temperature: 0.9, // gemini-pro:0.9, gemini-pro-vision:0.4
+        topP: 30, // gemini-pro:none, gemini-pro-vision:32
+        topK: 1.0,
+        candidateCount: 1,
+        maxOutputTokens: 2048, // gemini-pro:2048, gemini-pro-vision:8192
+        stopSequences: [],
       },
     };
   }

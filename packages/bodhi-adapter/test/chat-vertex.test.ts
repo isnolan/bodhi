@@ -21,7 +21,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
   // it('sendMessage', async () => {
   const res = await api.sendMessage({
     model: 'gemini-pro',
-    history: [
+    messages: [
       { role: 'user', parts: [{ text: 'Hello, 我们家有两只狗' }] },
       { role: 'model', parts: [{ text: 'Great to meet you. What would you like to know?' }] },
       { role: 'user', parts: [{ text: '请写一篇关于我家小狗子的故事，要求字数不少于200字' }] },

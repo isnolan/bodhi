@@ -22,7 +22,7 @@ describe('chat', () => {
   it('sendMessage', async () => {
     const res = await api.sendMessage({
       model: 'gpt-3.5-turbo-1106',
-      history: [
+      messages: [
         { role: 'system', content: 'You are a helpful assistant.' },
         { role: 'user', content: '请写一篇关于我家小狗子的故事，要求字数不少于200字!' },
       ],

@@ -5,26 +5,26 @@ import { createParser, type ParseEvent, type ReconnectInterval } from 'eventsour
 import * as types from '@/types';
 import { ChatBaseAPI } from '../base';
 
-export class ChatGeminiAPI extends ChatBaseAPI {
-  protected provider: string = 'gemini';
+export class ChatCohereAPI extends ChatBaseAPI {
+  protected provider: string = 'cohere';
 
   constructor(opts: types.chat.ChatOptions) {
-    const options = Object.assign({ baseURL: 'https://generativelanguage.googleapis.com/v1' }, opts);
+    const options = Object.assign({ baseURL: 'https://api.cohere.ai/v1' }, opts);
     super(options);
   }
 
   /**
-   *
-   * https://ai.google.dev/docs/gemini_api_overview?hl=zh-cn#curl_3
+   * Cohere Support
+   * https://docs.cohere.com/reference/customer-support
    * @param opts
    * @returns
    */
   public async sendMessage(opts: types.chat.SendOptions) {
     const { onProgress = () => {}, ...options } = opts;
     return new Promise(async (resolove, reject) => {
-      const url = `${this.baseURL}/models/gemini-pro:streamGenerateContent?alt=sse`;
+      const url = `${this.baseURL}/classify`;
       const res = await fetchSSE(url, {
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': this.apiKey },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.apiKey}` },
         body: JSON.stringify(this.convertParams(options)),
         agent: this.agent ? new HttpsProxyAgent(this.agent) : undefined,
         method: 'POST',
@@ -72,45 +72,19 @@ export class ChatGeminiAPI extends ChatBaseAPI {
   }
 
   /**
-   * 转换为 Gemini 要求的请求参数
-   * https://cloud.google.com/vertex-ai/docs/reference/rest/v1/GenerateContentResponse
-   * @returns
+   * https://docs.cohere.com/reference/chat
    */
   private convertParams(opts: types.chat.SendOptions) {
     return {
-      contents: {
-        role: 'user',
-        parts: [
-          { part: 'text', text: '你好，我是小冰' }, // text
-          // { inline_data: { mime_type: 'image/jpeg', data: image_base64_string } }, // image
-          // { file: { uri: 'gs://bucket-name/path/to/file' } },  // file
-          // { video_metadata: { start_offset: { seconds: 0, nanos: 0 }, end_offset: { seconds: 0, nanos: 0 } } }, // video
-        ],
-      },
-      tools: [
-        // {
-        //   "functionDeclarations": [
-        //     {
-        //       "name": string,
-        //       "description": string,
-        //       "parameters": {
-        //         object (OpenAPI Object Schema)
-        //       }
-        //     }
-        //   ]
-        // }
+      model: opts.model || 'command',
+      chat_history: [
+        { role: 'USER', message: 'Who discovered gravity?' },
+        { role: 'CHATBOT', message: 'The man who is widely credited with discovering gravity is Sir Isaac Newton' },
       ],
-      safety_settings: [
-        // { category: 'BLOCK_NONE', threshold: 'HARM_CATEGORY_UNSPECIFIED' },
-      ],
-      generationConfig: {
-        temperature: opts.temperature || 0.9, // gemini-pro:0.9, gemini-pro-vision:0.4
-        topP: opts.top_p || undefined, // gemini-pro:none, gemini-pro-vision:32
-        topK: opts.top_k || undefined,
-        candidateCount: opts.n || 1,
-        maxOutputTokens: opts.max_tokens || 2048, // gemini-pro:2048, gemini-pro-vision:8192
-        stopSequences: opts.stop_sequences || undefined,
-      },
+      message: 'What year was he born?',
+      temperature: opts.temperature || 0.3,
+      connectors: [{ id: 'web-search' }],
+      stream: true,
     };
   }
 

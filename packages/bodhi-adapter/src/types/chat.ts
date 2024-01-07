@@ -1,46 +1,40 @@
 import { ParseEvent } from 'eventsource-parser';
 
 export namespace chat {
+  export class ChatError extends Error {
+    name: 'ChatError';
+    code: number;
+    constructor(message: string, code: number) {
+      super(message);
+      this.code = code;
+    }
+  }
+
   export type ChatOptions = {
-    baseURL?: string;
     agent?: string;
+    baseURL?: string;
     apiKey: string;
     timeout?: number;
   };
 
   export type SendOptions = {
     model: string;
-    history: any[];
-    temperature?: number;
-    presence_penalty?: number;
-    frequency_penalty?: number;
+    messages: any[];
     tools?: any[];
+    temperature?: number;
+    top_p?: number;
+    top_k?: number;
     n?: number;
     max_tokens?: number;
+    stop_sequences?: string[];
     onProgress?: (event: any) => void;
   };
 
-  export class ChatError extends Error {
-    code: number;
-    message: string;
-
-    constructor(message: string, code: number) {
-      super(message);
-      this.name = 'ChatError';
-      this.code = code;
-      this.message = message;
-      // 当使用 TypeScript 的 target 为 ES5 时，需要以下设置，以便能够正确捕获堆栈跟踪
-      // Object.setPrototypeOf(this, new.target.prototype);
-    }
-  }
-
-  export interface FetchOptions {
-    url: string;
-    method?: string;
-    headers?: any;
-    body: any;
-    onMessage: (event: ParseEvent) => void;
-  }
+  export type ChatResponse = {
+    candidates: any[];
+    model: string;
+    time: number;
+  };
 
   export type Choice = {
     index: number;
