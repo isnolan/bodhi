@@ -26,7 +26,8 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
   public async sendMessage(opts: types.chat.SendOptions) {
     const { onProgress = () => {}, ...options } = opts;
     return new Promise(async (resolove, reject) => {
-      const url = `${this.baseURL}/models/gemini-pro:streamGenerateContent?alt=sse`;
+      const model = opts.model || 'gemini-pro';
+      const url = `${this.baseURL}/models/${model}:streamGenerateContent?alt=sse`;
       const res = await fetchSSE(url, {
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': this.apiKey },
         body: JSON.stringify(this.convertParams(options)),
@@ -70,7 +71,6 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
       });
 
       body.on('end', () => {
-        console.log(`[fetch]sse`, 'finished'); // finished
         resolove(response);
       });
     });
@@ -83,23 +83,23 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
    */
   private convertParams(opts: types.chat.SendOptions) {
     return {
-      contents: [
-        // {
-        //   role: 'user',
-        //   parts: [
-        //     { part: 'text', text: '你好，我是小冰' }, // text
-        //     { inline_data: { mime_type: 'image/jpeg', data: image_base64_string } }, // image
-        //     { file: { uri: 'gs://bucket-name/path/to/file' } }, // file
-        //     { video_metadata: { start_offset: { seconds: 0, nanos: 0 }, end_offset: { seconds: 0, nanos: 0 } } }, // video
-        //   ],
-        // },
-        { role: 'user', parts: [{ text: 'Hello, 我们家有两只狗' }] },
-        { role: 'model', parts: [{ text: 'Great to meet you. What would you like to know?' }] },
-        { role: 'user', parts: [{ text: '请写一篇关于我家小狗子的故事，要求不少于100字' }] },
-
-        // function call
-        // { role: 'user', parts: { text: 'Which theaters in Mountain View show Barbie movie?' } },
-      ],
+      contents: opts.messages,
+      // contents: [
+      // {
+      //   role: 'user',
+      //   parts: [
+      //     { part: 'text', text: '你好，我是小冰' }, // text
+      //     { inline_data: { mime_type: 'image/jpeg', data: image_base64_string } }, // image
+      //     { file: { uri: 'gs://bucket-name/path/to/file' } }, // file
+      //     { video_metadata: { start_offset: { seconds: 0, nanos: 0 }, end_offset: { seconds: 0, nanos: 0 } } }, // video
+      //   ],
+      // },
+      // { role: 'user', parts: [{ text: 'Hello, 我们家有两只狗' }] },
+      // { role: 'model', parts: [{ text: 'Great to meet you. What would you like to know?' }] },
+      // { role: 'user', parts: [{ text: '请写一篇关于我家小狗子的故事，要求不少于100字' }] },
+      // function call
+      // { role: 'user', parts: { text: 'Which theaters in Mountain View show Barbie movie?' } },
+      // ],
       tools: [
         // {
         //   function_declarations: [

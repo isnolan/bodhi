@@ -27,25 +27,32 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
 
       if (!res.ok) {
         const reason = await res.json();
-        throw new types.chat.ChatError(reason[0].error?.message || 'request error', res.status);
+        throw new types.chat.ChatError(reason.error?.message || 'request error', res.status);
       }
 
       // only get content from node-fetch
+      let response: any;
       const body: NodeJS.ReadableStream = res.body;
       body.on('error', (err) => reject(new types.chat.ChatError(err.message, 500)));
-      let response;
       const parser = createParser((event: ParseEvent | ReconnectInterval) => {
         if (event.type === 'event') {
-          response = JSON.parse(event.data);
+          if (event.data === '[DONE]') {
+            resolove(response);
+          } else {
+            try {
+              response = JSON.parse(event.data);
+              onProgress?.(response);
+            } catch (e) {
+              // ignore
+            }
+          }
 
           // 整理数据
-          const choice: types.chat.Choice[] = [];
-          response.candidates.map((item: any) => {
-            choice.push(item.content);
-          });
-          console.log(`[fetch]sse`, JSON.stringify(choice, null, 2));
-
-          onProgress?.(choice);
+          // const choice: types.chat.Choice[] = [];
+          // response.candidates.map((item: any) => {
+          //   choice.push(item.content);
+          // });
+          // console.log(`[fetch]sse`, JSON.stringify(choice, null, 2));
         }
       });
       body.on('readable', async () => {
@@ -55,10 +62,7 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
         }
       });
 
-      body.on('end', () => {
-        console.log(`[fetch]sse`, 'finished'); // finished
-        resolove({});
-      });
+      body.on('end', () => {});
     });
   }
 
@@ -71,8 +75,7 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
     return {
       model: opts.model || 'gpt-3.5-turbo-1106',
       messages: opts.messages || [],
-      // messages: [{ role: 'user', content: 'What is the weather like in Boston?' }],
-      tools: opts?.tools || [],
+      // tools: opts?.tools,
       // tools: [
       //   {
       //     type: 'function',

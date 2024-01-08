@@ -20,9 +20,9 @@
         <h1><a href="../../index.html">All files</a> / <a href="index.html">provider/google</a> vertex.ts</h1>
         <div class="clearfix">
           <div class="fl pad1y space-right2">
-            <span class="strong">7.14% </span>
+            <span class="strong">7.75% </span>
             <span class="quiet">Statements</span>
-            <span class="fraction">9/126</span>
+            <span class="fraction">9/116</span>
           </div>
 
           <div class="fl pad1y space-right2">
@@ -38,9 +38,9 @@
           </div>
 
           <div class="fl pad1y space-right2">
-            <span class="strong">7.14% </span>
+            <span class="strong">7.75% </span>
             <span class="quiet">Lines</span>
-            <span class="fraction">9/126</span>
+            <span class="fraction">9/116</span>
           </div>
         </div>
         <p class="quiet">
@@ -172,17 +172,7 @@
 <a name='L114'></a><a href='#L114'>114</a>
 <a name='L115'></a><a href='#L115'>115</a>
 <a name='L116'></a><a href='#L116'>116</a>
-<a name='L117'></a><a href='#L117'>117</a>
-<a name='L118'></a><a href='#L118'>118</a>
-<a name='L119'></a><a href='#L119'>119</a>
-<a name='L120'></a><a href='#L120'>120</a>
-<a name='L121'></a><a href='#L121'>121</a>
-<a name='L122'></a><a href='#L122'>122</a>
-<a name='L123'></a><a href='#L123'>123</a>
-<a name='L124'></a><a href='#L124'>124</a>
-<a name='L125'></a><a href='#L125'>125</a>
-<a name='L126'></a><a href='#L126'>126</a>
-<a name='L127'></a><a href='#L127'>127</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L117'></a><a href='#L117'>117</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -191,16 +181,6 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -349,7 +329,8 @@ export <span class="fstat-no" title="function not covered" ><span class="branch-
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >    return new Promise(async (resolove, reject) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >      const token = await this.getToken();</span>
-<span class="cstat-no" title="statement not covered" >      const url = `${this.baseURL}/projects/darftai/locations/asia-southeast1/publishers/google/models/gemini-pro:streamGenerateContent?alt=sse`;</span>
+<span class="cstat-no" title="statement not covered" >      const model = opts.model || 'gemini-pro';</span>
+<span class="cstat-no" title="statement not covered" >      const url = `${this.baseURL}/projects/darftai/locations/asia-southeast1/publishers/google/models/${model}:streamGenerateContent?alt=sse`;</span>
 <span class="cstat-no" title="statement not covered" >      const res = await fetchSSE(url, {</span>
 <span class="cstat-no" title="statement not covered" >        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },</span>
 <span class="cstat-no" title="statement not covered" >        body: JSON.stringify(this.convertParams(options)),</span>
@@ -359,25 +340,24 @@ export <span class="fstat-no" title="function not covered" ><span class="branch-
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >      if (!res.ok) {</span>
 <span class="cstat-no" title="statement not covered" >        const reason = await res.json();</span>
-<span class="cstat-no" title="statement not covered" >        throw new types.chat.ChatError(reason[0].error?.message || 'request error', res.status);</span>
+<span class="cstat-no" title="statement not covered" >        throw new types.chat.ChatError(reason.error?.message || 'request error', res.status);</span>
 <span class="cstat-no" title="statement not covered" >      }</span>
 <span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >      // only get content from node-fetch</span>
+<span class="cstat-no" title="statement not covered" >      let response: any;</span>
 <span class="cstat-no" title="statement not covered" >      const body: NodeJS.ReadableStream = res.body;</span>
 <span class="cstat-no" title="statement not covered" >      body.on('error', (err) =&gt; reject(new types.chat.ChatError(err.message, 500)));</span>
-<span class="cstat-no" title="statement not covered" >      let response;</span>
+<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >      // streaming</span>
 <span class="cstat-no" title="statement not covered" >      const parser = createParser((event: ParseEvent | ReconnectInterval) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >        if (event.type === 'event') {</span>
 <span class="cstat-no" title="statement not covered" >          response = JSON.parse(event.data);</span>
-<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" >          // 整理数据</span>
-<span class="cstat-no" title="statement not covered" >          const choice: types.chat.Choice[] = [];</span>
-<span class="cstat-no" title="statement not covered" >          response.candidates.map((item: any) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >            choice.push(item.content);</span>
-<span class="cstat-no" title="statement not covered" >          });</span>
-<span class="cstat-no" title="statement not covered" >          console.log(`[fetch]sse`, JSON.stringify(choice, null, 2));</span>
-<span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >          onProgress?.(choice);</span>
+<span class="cstat-no" title="statement not covered" >          // const choice: types.chat.Choice[] = [];</span>
+<span class="cstat-no" title="statement not covered" >          // response.candidates.map((item: any) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >          //   choice.push(item.content);</span>
+<span class="cstat-no" title="statement not covered" >          // });</span>
+<span class="cstat-no" title="statement not covered" >          onProgress?.(response);</span>
 <span class="cstat-no" title="statement not covered" >        }</span>
 <span class="cstat-no" title="statement not covered" >      });</span>
 <span class="cstat-no" title="statement not covered" >      body.on('readable', async () =&gt; {</span>
@@ -387,10 +367,8 @@ export <span class="fstat-no" title="function not covered" ><span class="branch-
 <span class="cstat-no" title="statement not covered" >        }</span>
 <span class="cstat-no" title="statement not covered" >      });</span>
 <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >      body.on('end', () =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >        console.log(`[fetch]sse`, 'finished'); // finished</span>
-<span class="cstat-no" title="statement not covered" >        resolove({});</span>
-<span class="cstat-no" title="statement not covered" >      });</span>
+<span class="cstat-no" title="statement not covered" >      // finished</span>
+<span class="cstat-no" title="statement not covered" >      body.on('end', () =&gt; resolove(response));</span>
 <span class="cstat-no" title="statement not covered" >    });</span>
 <span class="cstat-no" title="statement not covered" >  }</span>
 <span class="cstat-no" title="statement not covered" ></span>
@@ -401,15 +379,7 @@ export <span class="fstat-no" title="function not covered" ><span class="branch-
 <span class="cstat-no" title="statement not covered" >   */</span>
 <span class="cstat-no" title="statement not covered" >  private convertParams(opts: types.chat.SendOptions) {</span>
 <span class="cstat-no" title="statement not covered" >    return {</span>
-<span class="cstat-no" title="statement not covered" >      contents: {</span>
-<span class="cstat-no" title="statement not covered" >        role: 'user',</span>
-<span class="cstat-no" title="statement not covered" >        parts: [</span>
-<span class="cstat-no" title="statement not covered" >          { part: 'text', text: '你好，我是小冰' }, // text</span>
-<span class="cstat-no" title="statement not covered" >          // { inline_data: { mime_type: 'image/jpeg', data: image_base64_string } }, // image</span>
-<span class="cstat-no" title="statement not covered" >          // { file: { uri: 'gs://bucket-name/path/to/file' } },  // file</span>
-<span class="cstat-no" title="statement not covered" >          // { video_metadata: { start_offset: { seconds: 0, nanos: 0 }, end_offset: { seconds: 0, nanos: 0 } } }, // video</span>
-<span class="cstat-no" title="statement not covered" >        ],</span>
-<span class="cstat-no" title="statement not covered" >      },</span>
+<span class="cstat-no" title="statement not covered" >      contents: opts.messages,</span>
 <span class="cstat-no" title="statement not covered" >      tools: [],</span>
 <span class="cstat-no" title="statement not covered" >      safety_settings: [</span>
 <span class="cstat-no" title="statement not covered" >        // { category: 'BLOCK_NONE', threshold: 'HARM_CATEGORY_UNSPECIFIED' },</span>
@@ -443,7 +413,7 @@ export <span class="fstat-no" title="function not covered" ><span class="branch-
     <div class="footer quiet pad2 space-top1 center small">
       Code coverage generated by
       <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-      at 2024-01-08T01:43:04.041Z
+      at 2024-01-08T03:03:37.123Z
     </div>
     <script src="../../prettify.js"></script>
     <script>

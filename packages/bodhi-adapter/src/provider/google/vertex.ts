@@ -39,7 +39,8 @@ export class GoogleVertexAPI extends ChatBaseAPI {
 
     return new Promise(async (resolove, reject) => {
       const token = await this.getToken();
-      const url = `${this.baseURL}/projects/darftai/locations/asia-southeast1/publishers/google/models/gemini-pro:streamGenerateContent?alt=sse`;
+      const model = opts.model || 'gemini-pro';
+      const url = `${this.baseURL}/projects/darftai/locations/asia-southeast1/publishers/google/models/${model}:streamGenerateContent?alt=sse`;
       const res = await fetchSSE(url, {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(this.convertParams(options)),
@@ -49,25 +50,24 @@ export class GoogleVertexAPI extends ChatBaseAPI {
 
       if (!res.ok) {
         const reason = await res.json();
-        throw new types.chat.ChatError(reason[0].error?.message || 'request error', res.status);
+        throw new types.chat.ChatError(reason.error?.message || 'request error', res.status);
       }
 
       // only get content from node-fetch
+      let response: any;
       const body: NodeJS.ReadableStream = res.body;
       body.on('error', (err) => reject(new types.chat.ChatError(err.message, 500)));
-      let response;
+
+      // streaming
       const parser = createParser((event: ParseEvent | ReconnectInterval) => {
         if (event.type === 'event') {
           response = JSON.parse(event.data);
-
           // 整理数据
-          const choice: types.chat.Choice[] = [];
-          response.candidates.map((item: any) => {
-            choice.push(item.content);
-          });
-          console.log(`[fetch]sse`, JSON.stringify(choice, null, 2));
-
-          onProgress?.(choice);
+          // const choice: types.chat.Choice[] = [];
+          // response.candidates.map((item: any) => {
+          //   choice.push(item.content);
+          // });
+          onProgress?.(response);
         }
       });
       body.on('readable', async () => {
@@ -77,10 +77,8 @@ export class GoogleVertexAPI extends ChatBaseAPI {
         }
       });
 
-      body.on('end', () => {
-        console.log(`[fetch]sse`, 'finished'); // finished
-        resolove({});
-      });
+      // finished
+      body.on('end', () => resolove(response));
     });
   }
 
@@ -91,15 +89,7 @@ export class GoogleVertexAPI extends ChatBaseAPI {
    */
   private convertParams(opts: types.chat.SendOptions) {
     return {
-      contents: {
-        role: 'user',
-        parts: [
-          { part: 'text', text: '你好，我是小冰' }, // text
-          // { inline_data: { mime_type: 'image/jpeg', data: image_base64_string } }, // image
-          // { file: { uri: 'gs://bucket-name/path/to/file' } },  // file
-          // { video_metadata: { start_offset: { seconds: 0, nanos: 0 }, end_offset: { seconds: 0, nanos: 0 } } }, // video
-        ],
-      },
+      contents: opts.messages,
       tools: [],
       safety_settings: [
         // { category: 'BLOCK_NONE', threshold: 'HARM_CATEGORY_UNSPECIFIED' },
