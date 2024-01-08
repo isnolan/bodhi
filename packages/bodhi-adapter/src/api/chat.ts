@@ -1,4 +1,5 @@
-import { OpenAICompletionsAPI, OpenAIAssistantsAPI, GoogleVertexAPI, GoogleGeminiAPI, AliyunQwenAPI } from '@/provider';
+import { OpenAICompletionsAPI, OpenAIAssistantsAPI, GoogleVertexAPI, GoogleGeminiAPI } from '@/provider';
+import { AliyunQwenAPI, AliyunWanxAPI } from '@/provider';
 import { ChatBaseAPI } from '@/provider/base';
 
 import * as types from '@/types';
@@ -23,12 +24,15 @@ export class ChatAPI {
       case types.Provider.ALIYUN_QWEN:
         this.provider = new AliyunQwenAPI(opts);
         break;
+      case types.Provider.ALIYUN_WANX:
+        this.provider = new AliyunWanxAPI(opts);
+        break;
       default:
         throw new Error(`Unsupported supplier: ${provider}`);
     }
   }
 
-  public async sendMessage(opts: types.chat.SendOptions) {
+  public async sendMessage(opts: types.chat.SendOptions | types.image.SendOptions) {
     if (!this.provider) {
       throw new Error('Provider is not initialized');
     }

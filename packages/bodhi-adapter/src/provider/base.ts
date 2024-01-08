@@ -18,7 +18,11 @@ export class ChatBaseAPI {
     throw new Error('Not implemented');
   }
 
-  public async sendMessage(opts: types.chat.SendOptions): Promise<any> {
+  public async sendMessage(opts: types.chat.SendOptions | types.image.SendOptions): Promise<any> {
+    throw new Error('Not implemented');
+  }
+
+  public async getTaskResult(task_id: string): Promise<any> {
     throw new Error('Not implemented');
   }
 }

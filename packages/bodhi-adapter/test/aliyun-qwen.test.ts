@@ -19,7 +19,7 @@ describe('chat', () => {
 
   it('text: streaming', async () => {
     const res = await api.sendMessage({
-      model: 'qwen-turbo',
+      model: 'llama2-7b-chat-v2',
       messages: [
         { role: 'system', content: 'You are a helpful assistant.' },
         { role: 'user', content: '你好，哪个公园距离我最近？' },

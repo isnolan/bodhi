@@ -14,7 +14,20 @@ export class AliyunQwenAPI extends ChatBaseAPI {
   }
 
   public models(): string[] {
-    return ['qwen-turbo', 'qwen-plus', 'qwen-max', 'qwen-max-1201', 'qwen-max-longcontext', 'qwen-vl-plus'];
+    return [
+      // free
+      'qwen-vl-chat-v1',
+
+      // cheap
+      'qwen-turbo',
+      'qwen-max',
+      'qwen-max-1201',
+      'qwen-max-longcontext',
+
+      // paid
+      'qwen-plus',
+      'qwen-vl-plus',
+    ];
   }
 
   /**

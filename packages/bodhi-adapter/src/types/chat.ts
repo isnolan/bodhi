@@ -30,6 +30,11 @@ export namespace chat {
     onProgress?: (event: any) => void;
   };
 
+  export type SendImageOptions = {
+    model: string;
+    prompt: string;
+  };
+
   export type ChatResponse = {
     id: string;
     model: string;
