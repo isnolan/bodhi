@@ -2,7 +2,6 @@ import { setTimeout } from 'node:timers/promises';
 import { describe, expect, test } from '@jest/globals';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
-import delay from 'delay';
 
 import { Provider, ImageAPI } from '../src/api';
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
