@@ -5,24 +5,19 @@ import { createParser, type ParseEvent, type ReconnectInterval } from 'eventsour
 import * as types from '@/types';
 import { ChatBaseAPI } from '../base';
 
-export class ChatCohereAPI extends ChatBaseAPI {
-  protected provider: string = 'cohere';
+export class OpenAICompletionsAPI extends ChatBaseAPI {
+  protected provider: string = 'openai';
 
   constructor(opts: types.chat.ChatOptions) {
-    const options = Object.assign({ baseURL: 'https://api.cohere.ai/v1' }, opts);
+    const options = Object.assign({ baseURL: 'https://api.openai.com/v1' }, opts);
     super(options);
   }
 
-  /**
-   * Cohere Support
-   * https://docs.cohere.com/reference/customer-support
-   * @param opts
-   * @returns
-   */
-  public async sendMessage(opts: types.chat.SendOptions) {
+  async sendMessage(opts: types.chat.SendOptions) {
     const { onProgress = () => {}, ...options } = opts;
+
     return new Promise(async (resolove, reject) => {
-      const url = `${this.baseURL}/classify`;
+      const url = `${this.baseURL}/chat/completions`;
       const res = await fetchSSE(url, {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.apiKey}` },
         body: JSON.stringify(this.convertParams(options)),
@@ -45,16 +40,12 @@ export class ChatCohereAPI extends ChatBaseAPI {
 
           // 整理数据
           const choice: types.chat.Choice[] = [];
-          // response.candidates.map((item: any) => {
-          //   choice.push({
-          //     index: item.index,
-          //     delta: { content: item.content.parts[0] },
-          //     finish_reason: item.finish_reason,
-          //   });
-          // });
-          console.log(`[fetch]sse`, response);
+          response.candidates.map((item: any) => {
+            choice.push(item.content);
+          });
+          console.log(`[fetch]sse`, JSON.stringify(choice, null, 2));
 
-          // onProgress?.(choice);
+          onProgress?.(choice);
         }
       });
       body.on('readable', async () => {
@@ -72,18 +63,38 @@ export class ChatCohereAPI extends ChatBaseAPI {
   }
 
   /**
-   * https://docs.cohere.com/reference/chat
+   * 转换为 Gemini 要求的请求参数
+   * https://platform.openai.com/docs/api-reference/chat/create
+   * @returns
    */
   private convertParams(opts: types.chat.SendOptions) {
     return {
-      model: opts.model || 'command',
-      chat_history: [
-        { role: 'USER', message: 'Who discovered gravity?' },
-        { role: 'CHATBOT', message: 'The man who is widely credited with discovering gravity is Sir Isaac Newton' },
-      ],
-      message: 'What year was he born?',
-      temperature: opts.temperature || 0.3,
-      connectors: [{ id: 'web-search' }],
+      model: opts.model || 'gpt-3.5-turbo-1106',
+      messages: opts.messages || [],
+      // messages: [{ role: 'user', content: 'What is the weather like in Boston?' }],
+      tools: opts?.tools || [],
+      // tools: [
+      //   {
+      //     type: 'function',
+      //     function: {
+      //       name: 'get_current_weather',
+      //       description: 'Get the current weather in a given location',
+      //       parameters: {
+      //         type: 'object',
+      //         properties: {
+      //           location: { type: 'string', description: 'The city and state, e.g. San Francisco, CA' },
+      //           unit: { type: 'string', enum: ['celsius', 'fahrenheit'] },
+      //         },
+      //         required: ['location'],
+      //       },
+      //     },
+      //   },
+      // ],
+      temperature: opts?.temperature || 0.9,
+      top_p: opts?.top_p || 1,
+      n: opts.n || 1,
+      max_tokens: opts?.max_tokens || null,
+      stop: opts?.stop_sequences || null,
       stream: true,
     };
   }

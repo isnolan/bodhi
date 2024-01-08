@@ -5,8 +5,8 @@ import { createParser, type ParseEvent, type ReconnectInterval } from 'eventsour
 import * as types from '@/types';
 import { ChatBaseAPI } from '../base';
 
-export class ChatClaudeAPI extends ChatBaseAPI {
-  protected provider: string = 'claude';
+export class AnthropicClaudeAPI extends ChatBaseAPI {
+  protected provider: string = 'anthropic';
 
   constructor(opts: types.chat.ChatOptions) {
     const options = Object.assign({ baseURL: 'https://generativelanguage.googleapis.com/v1' }, opts);

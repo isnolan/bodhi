@@ -12,8 +12,8 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 //   });
 
 (async () => {
-  const api = new ChatAPI(Provider.VERTEX, {
-    apiKey: process.env?.GEMINI as string, // 使用你的 API 密钥
+  const api = new ChatAPI(Provider.GOOGLE_VERTEX, {
+    apiKey: process.env?.GEMINI as string,
     agent: process.env.PROXY_URL as string,
   });
 
@@ -27,7 +27,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
       { role: 'user', parts: [{ text: '请写一篇关于我家小狗子的故事，要求字数不少于200字' }] },
     ],
   });
-  console.log(`[gemini]`, res);
+  console.log(`[vertex]`, res);
 })();
 
 //     expect(res).toBeUndefined();

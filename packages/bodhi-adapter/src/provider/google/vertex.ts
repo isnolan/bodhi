@@ -6,8 +6,8 @@ import { createParser, type ParseEvent, type ReconnectInterval } from 'eventsour
 import * as types from '@/types';
 import { ChatBaseAPI } from '../base';
 
-export class ChatVertexAPI extends ChatBaseAPI {
-  protected provider: string = 'vertex';
+export class GoogleVertexAPI extends ChatBaseAPI {
+  protected provider: string = 'google';
 
   constructor(opts: types.chat.ChatOptions) {
     const options = Object.assign({ baseURL: 'https://asia-southeast1-aiplatform.googleapis.com/v1' }, opts);
@@ -100,19 +100,7 @@ export class ChatVertexAPI extends ChatBaseAPI {
           // { video_metadata: { start_offset: { seconds: 0, nanos: 0 }, end_offset: { seconds: 0, nanos: 0 } } }, // video
         ],
       },
-      tools: [
-        // {
-        //   "functionDeclarations": [
-        //     {
-        //       "name": string,
-        //       "description": string,
-        //       "parameters": {
-        //         object (OpenAPI Object Schema)
-        //       }
-        //     }
-        //   ]
-        // }
-      ],
+      tools: [],
       safety_settings: [
         // { category: 'BLOCK_NONE', threshold: 'HARM_CATEGORY_UNSPECIFIED' },
       ],

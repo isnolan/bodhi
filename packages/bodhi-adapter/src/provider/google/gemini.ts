@@ -5,11 +5,11 @@ import { createParser, type ParseEvent, type ReconnectInterval } from 'eventsour
 import * as types from '@/types';
 import { ChatBaseAPI } from '../base';
 
-export class ChatGeminiAPI extends ChatBaseAPI {
-  protected provider: string = 'gemini';
+export class GoogleGeminiAPI extends ChatBaseAPI {
+  protected provider: string = 'google';
 
   constructor(opts: types.chat.ChatOptions) {
-    const options = Object.assign({ baseURL: 'https://generativelanguage.googleapis.com/v1' }, opts);
+    const options = Object.assign({ baseURL: 'https://generativelanguage.googleapis.com/v1beta' }, opts);
     super(options);
   }
 
@@ -33,32 +33,33 @@ export class ChatGeminiAPI extends ChatBaseAPI {
         agent: this.agent ? new HttpsProxyAgent(this.agent) : undefined,
         method: 'POST',
       });
+      // console.log(`[fetch]result`, res);
 
       if (!res.ok) {
         const reason = await res.json();
-        throw new types.chat.ChatError(reason[0].error?.message || 'request error', res.status);
+        throw new types.chat.ChatError(reason.error?.message || 'request error', res.status);
       }
 
       // only get content from node-fetch
       const body: NodeJS.ReadableStream = res.body;
       body.on('error', (err) => reject(new types.chat.ChatError(err.message, 500)));
-      let response;
+      let response: any;
       const parser = createParser((event: ParseEvent | ReconnectInterval) => {
         if (event.type === 'event') {
           response = JSON.parse(event.data);
 
           // 整理数据
-          const choice: types.chat.Choice[] = [];
-          response.candidates.map((item: any) => {
-            choice.push({
-              index: item.index,
-              delta: { content: item.content.parts[0] },
-              finish_reason: item.finish_reason,
-            });
-          });
-          console.log(`[fetch]sse`, choice);
+          // const choice: types.chat.Choice[] = [];
+          // response.candidates.map((item: any) => {
+          //   choice.push({
+          //     index: item.index,
+          //     delta: { content: item.content.parts[0] },
+          //     finish_reason: item.finish_reason,
+          //   });
+          // });
+          // console.log(`[fetch]->`, JSON.stringify(response.candidates, null, 2));
 
-          onProgress?.(choice);
+          onProgress?.(response);
         }
       });
       body.on('readable', async () => {
@@ -70,7 +71,7 @@ export class ChatGeminiAPI extends ChatBaseAPI {
 
       body.on('end', () => {
         console.log(`[fetch]sse`, 'finished'); // finished
-        resolove({});
+        resolove(response);
       });
     });
   }
@@ -82,27 +83,44 @@ export class ChatGeminiAPI extends ChatBaseAPI {
    */
   private convertParams(opts: types.chat.SendOptions) {
     return {
-      contents: {
-        role: 'user',
-        parts: [
-          { part: 'text', text: '你好，我是小冰' }, // text
-          // { inline_data: { mime_type: 'image/jpeg', data: image_base64_string } }, // image
-          // { file: { uri: 'gs://bucket-name/path/to/file' } },  // file
-          // { video_metadata: { start_offset: { seconds: 0, nanos: 0 }, end_offset: { seconds: 0, nanos: 0 } } }, // video
-        ],
-      },
+      contents: [
+        // {
+        //   role: 'user',
+        //   parts: [
+        //     { part: 'text', text: '你好，我是小冰' }, // text
+        //     { inline_data: { mime_type: 'image/jpeg', data: image_base64_string } }, // image
+        //     { file: { uri: 'gs://bucket-name/path/to/file' } }, // file
+        //     { video_metadata: { start_offset: { seconds: 0, nanos: 0 }, end_offset: { seconds: 0, nanos: 0 } } }, // video
+        //   ],
+        // },
+        { role: 'user', parts: [{ text: 'Hello, 我们家有两只狗' }] },
+        { role: 'model', parts: [{ text: 'Great to meet you. What would you like to know?' }] },
+        { role: 'user', parts: [{ text: '请写一篇关于我家小狗子的故事，要求不少于100字' }] },
+
+        // function call
+        // { role: 'user', parts: { text: 'Which theaters in Mountain View show Barbie movie?' } },
+      ],
       tools: [
         // {
-        //   "functionDeclarations": [
+        //   function_declarations: [
         //     {
-        //       "name": string,
-        //       "description": string,
-        //       "parameters": {
-        //         object (OpenAPI Object Schema)
-        //       }
-        //     }
-        //   ]
-        // }
+        //       name: 'find_theaters',
+        //       description:
+        //         'find theaters based on location and optionally movie title which are is currently playing in theaters',
+        //       parameters: {
+        //         type: 'object',
+        //         properties: {
+        //           location: {
+        //             type: 'string',
+        //             description: 'The city and state, e.g. San Francisco, CA or a zip code e.g. 95616',
+        //           },
+        //           movie: { type: 'string', description: 'Any movie title' },
+        //         },
+        //         required: ['location'],
+        //       },
+        //     },
+        //   ],
+        // },
       ],
       safety_settings: [
         // { category: 'BLOCK_NONE', threshold: 'HARM_CATEGORY_UNSPECIFIED' },

@@ -42,4 +42,12 @@ export namespace chat {
     message: { role: string; content: string };
     finish_reason: 'stop' | 'tool_calls' | string | null;
   };
+
+  export interface File {
+    id: string;
+    name: string;
+    size?: number;
+    mimetype?: string;
+    url?: string;
+  }
 }
