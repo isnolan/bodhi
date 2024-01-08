@@ -1,4 +1,4 @@
-import { OpenAICompletionsAPI, OpenAIAssistantsAPI, GoogleVertexAPI, GoogleGeminiAPI } from '@/provider';
+import { OpenAICompletionsAPI, OpenAIAssistantsAPI, GoogleVertexAPI, GoogleGeminiAPI, AliyunQwenAPI } from '@/provider';
 import { ChatBaseAPI } from '@/provider/base';
 
 import * as types from '@/types';
@@ -19,6 +19,9 @@ export class ChatAPI {
         break;
       case types.Provider.OPENAI_ASSISTANTS:
         this.provider = new OpenAIAssistantsAPI(opts);
+        break;
+      case types.Provider.ALIYUN_QWEN:
+        this.provider = new AliyunQwenAPI(opts);
         break;
       default:
         throw new Error(`Unsupported supplier: ${provider}`);

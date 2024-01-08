@@ -4,4 +4,5 @@ export enum Provider {
   OPENAI_COMPLETIONS = 'openai-completion',
   OPENAI_ASSISTANTS = 'openai-assistant',
   ANTHROPIC_CLAUDE = 'anthropic-claude',
+  ALIYUN_QWEN = 'aliyun-qwen',
 }
