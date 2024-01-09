@@ -14,6 +14,7 @@ export namespace chat {
     agent?: string;
     baseURL?: string;
     apiKey: string;
+    apiSecret?: string;
     timeout?: number;
   };
 

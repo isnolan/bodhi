@@ -5,12 +5,14 @@ export class ChatBaseAPI {
   protected agent?: string = '';
   protected baseURL: string = '';
   protected apiKey: string = '';
+  protected apiSecret?: string = '';
   protected timeout?: number = 10000;
 
   constructor(opts: types.chat.ChatOptions) {
     opts.agent && (this.agent = opts.agent);
     opts.baseURL && (this.baseURL = opts.baseURL);
     opts.apiKey && (this.apiKey = opts.apiKey);
+    opts.apiSecret && (this.apiSecret = opts.apiSecret);
     opts.timeout && (this.timeout = opts.timeout);
   }
 

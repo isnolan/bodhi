@@ -7,6 +7,10 @@
     "test": "jest"
   },
   "dependencies": {
+    "@aws-crypto/sha256-js": "^5.2.0",
+    "@aws-sdk/protocol-http": "^3.374.0",
+    "@aws-sdk/signature-v4": "^3.374.0",
+    "@smithy/signature-v4": "^2.0.19",
     "dotenv": "^16.3.1",
     "eventsource": "^2.0.2",
     "eventsource-parser": "^1.1.1",

@@ -1,4 +1,11 @@
-import { OpenAICompletionsAPI, OpenAIAssistantsAPI, GoogleVertexAPI, GoogleGeminiAPI } from '@/provider';
+import {
+  OpenAICompletionsAPI,
+  OpenAIAssistantsAPI,
+  GoogleVertexAPI,
+  GoogleGeminiAPI,
+  AnthropicClaudeAPI,
+  AnthropicBedrockAPI,
+} from '@/provider';
 import { AliyunQwenAPI, AliyunWanxAPI } from '@/provider';
 import { ChatBaseAPI } from '@/provider/base';
 
@@ -26,6 +33,12 @@ export class ChatAPI {
         break;
       case types.Provider.ALIYUN_WANX:
         this.provider = new AliyunWanxAPI(opts);
+        break;
+      case types.Provider.ANTHROPIC_CLAUDE:
+        this.provider = new AnthropicClaudeAPI(opts);
+        break;
+      case types.Provider.ANTHROPIC_BEDROCK:
+        this.provider = new AnthropicBedrockAPI(opts);
         break;
       default:
         throw new Error(`Unsupported supplier: ${provider}`);
