@@ -1,4 +1,8 @@
+import { get_encoding } from 'tiktoken';
+import fetch from 'node-fetch';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 import * as types from '@/types';
+
 export class ChatBaseAPI {
   protected provider: string = '';
 
@@ -26,5 +30,23 @@ export class ChatBaseAPI {
 
   public async getTaskResult(task_id: string): Promise<any> {
     throw new Error('Not implemented');
+  }
+
+  protected async fetchFile(url: string) {
+    const response = await fetch(url, {
+      headers: {
+        'user-agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      },
+      agent: this.agent ? new HttpsProxyAgent(this.agent) : undefined,
+    });
+    const buffer = await response.buffer();
+    const base64 = buffer.toString('base64');
+    const mime_type = response.headers.get('content-type') as string;
+    return { mime_type, data: base64 };
+  }
+
+  protected getTokenCount(text: string) {
+    return get_encoding('cl100k_base').encode(text).length;
   }
 }

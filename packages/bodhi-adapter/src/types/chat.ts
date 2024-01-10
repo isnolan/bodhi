@@ -1,5 +1,8 @@
 import { ParseEvent } from 'eventsource-parser';
 
+/**
+ * Chat
+ */
 export namespace chat {
   export class ChatError extends Error {
     name: 'ChatError';
@@ -18,10 +21,13 @@ export namespace chat {
     timeout?: number;
   };
 
+  /**
+   * Request
+   */
   export type SendOptions = {
     model: string;
-    messages: any[];
-    tools?: any[];
+    messages: Message[];
+    tools?: Tools[];
     temperature?: number;
     top_p?: number;
     top_k?: number;
@@ -31,11 +37,26 @@ export namespace chat {
     onProgress?: (event: any) => void;
   };
 
-  export type SendImageOptions = {
-    model: string;
-    prompt: string;
+  /* Message */
+  export type Message = { role: string; parts: Part[] };
+
+  export type Part = TextPart | FilePart | FunctionPart;
+  export type TextPart = { type: 'text'; text: string };
+  export type FilePart = { type: 'image' | 'video' | 'file'; url: string };
+  export type FunctionPart = { type: 'function_call'; name: string; args: any };
+
+  /* Function  */
+  export type Tools = { type: 'function'; function: Function };
+
+  export type Function = {
+    name: string;
+    description: string;
+    parameters: { type: string; properties: any; required: string[] };
   };
 
+  /**
+   * Response
+   */
   export type ChatResponse = {
     id: string;
     model: string;
@@ -45,15 +66,8 @@ export namespace chat {
 
   export type Choice = {
     index: number;
-    message: { role: string; content: string };
-    finish_reason: 'stop' | 'tool_calls' | string | null;
+    role: string;
+    parts: Part[];
+    finish_reason: 'stop' | 'function_call' | string | null;
   };
-
-  export interface File {
-    id: string;
-    name: string;
-    size?: number;
-    mimetype?: string;
-    url?: string;
-  }
 }

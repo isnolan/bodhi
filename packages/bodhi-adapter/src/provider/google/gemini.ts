@@ -1,8 +1,10 @@
+import { v4 as uuidv4 } from 'uuid';
 import fetchSSE from 'node-fetch';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { createParser, type ParseEvent, type ReconnectInterval } from 'eventsource-parser';
 
 import * as types from '@/types';
+import { gemini } from './types';
 import { ChatBaseAPI } from '../base';
 
 export class GoogleGeminiAPI extends ChatBaseAPI {
@@ -28,9 +30,12 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
     return new Promise(async (resolove, reject) => {
       const model = opts.model || 'gemini-pro';
       const url = `${this.baseURL}/models/${model}:streamGenerateContent?alt=sse`;
+      const params: gemini.Request = await this.convertParams(options);
+      // console.log(`[fetch]params`, JSON.stringify(params, null, 2));
+
       const res = await fetchSSE(url, {
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': this.apiKey },
-        body: JSON.stringify(this.convertParams(options)),
+        body: JSON.stringify(params),
         agent: this.agent ? new HttpsProxyAgent(this.agent) : undefined,
         method: 'POST',
       });
@@ -44,23 +49,15 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
       // only get content from node-fetch
       const body: NodeJS.ReadableStream = res.body;
       body.on('error', (err) => reject(new types.chat.ChatError(err.message, 500)));
-      let response: any;
+      const choicesList: types.chat.Choice[] = [];
       const parser = createParser((event: ParseEvent | ReconnectInterval) => {
         if (event.type === 'event') {
-          response = JSON.parse(event.data);
+          const res = JSON.parse(event.data);
+          // console.log(`->`, JSON.stringify(res));
+          const choices = this.convertChoices(res.candidates);
+          onProgress?.(choices);
 
-          // 整理数据
-          // const choice: types.chat.Choice[] = [];
-          // response.candidates.map((item: any) => {
-          //   choice.push({
-          //     index: item.index,
-          //     delta: { content: item.content.parts[0] },
-          //     finish_reason: item.finish_reason,
-          //   });
-          // });
-          // console.log(`[fetch]->`, JSON.stringify(response.candidates, null, 2));
-
-          onProgress?.(response);
+          choicesList.push(...choices);
         }
       });
       body.on('readable', async () => {
@@ -71,7 +68,10 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
       });
 
       body.on('end', () => {
-        resolove(response);
+        const choices: types.chat.Choice[] = this.combineChoices(choicesList);
+        // TODO: Google AI Gemini not found usageMetadata, but vertex founded.
+        const useage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+        resolove({ id: uuidv4(), model: opts.model, choices, useage });
       });
     });
   }
@@ -81,47 +81,10 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
    * https://cloud.google.com/vertex-ai/docs/reference/rest/v1/GenerateContentResponse
    * @returns
    */
-  private convertParams(opts: types.chat.SendOptions) {
+  private async convertParams(opts: types.chat.SendOptions): Promise<gemini.Request> {
     return {
-      contents: opts.messages,
-      // contents: [
-      // {
-      //   role: 'user',
-      //   parts: [
-      //     { part: 'text', text: '你好，我是小冰' }, // text
-      //     { inline_data: { mime_type: 'image/jpeg', data: image_base64_string } }, // image
-      //     { file: { uri: 'gs://bucket-name/path/to/file' } }, // file
-      //     { video_metadata: { start_offset: { seconds: 0, nanos: 0 }, end_offset: { seconds: 0, nanos: 0 } } }, // video
-      //   ],
-      // },
-      // { role: 'user', parts: [{ text: 'Hello, 我们家有两只狗' }] },
-      // { role: 'model', parts: [{ text: 'Great to meet you. What would you like to know?' }] },
-      // { role: 'user', parts: [{ text: '请写一篇关于我家小狗子的故事，要求不少于100字' }] },
-      // function call
-      // { role: 'user', parts: { text: 'Which theaters in Mountain View show Barbie movie?' } },
-      // ],
-      tools: [
-        // {
-        //   function_declarations: [
-        //     {
-        //       name: 'find_theaters',
-        //       description:
-        //         'find theaters based on location and optionally movie title which are is currently playing in theaters',
-        //       parameters: {
-        //         type: 'object',
-        //         properties: {
-        //           location: {
-        //             type: 'string',
-        //             description: 'The city and state, e.g. San Francisco, CA or a zip code e.g. 95616',
-        //           },
-        //           movie: { type: 'string', description: 'Any movie title' },
-        //         },
-        //         required: ['location'],
-        //       },
-        //     },
-        //   ],
-        // },
-      ],
+      contents: await this.corvertContents(opts),
+      tools: this.corvertTools(opts),
       safety_settings: [
         // { category: 'BLOCK_NONE', threshold: 'HARM_CATEGORY_UNSPECIFIED' },
       ],
@@ -136,12 +99,87 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
     };
   }
 
-  // 将 Gemini 的结果转换为你的数据格式
-  private convertResult(result: any) {
-    return {
-      // 根据你的数据格式，从 Gemini 的结果中提取数据
-      history: result.contents,
-      // 其他数据...
-    };
+  private async corvertContents(opts: types.chat.SendOptions): Promise<gemini.Content[]> {
+    return Promise.all(
+      opts.messages.map(async (item) => {
+        const parts: gemini.Part[] = [];
+        await Promise.all(
+          item.parts.map(async (part: types.chat.Part) => {
+            if (part.type === 'text') {
+              parts.push({ text: part.text });
+            }
+            if (['image', 'video'].includes(part.type)) {
+              // TODO: fetch 下载图片并转化buffer为base64
+              const inline_data = await this.fetchFile((part as types.chat.FilePart).url);
+              console.log(`->`, inline_data);
+              parts.push({ inline_data });
+            }
+            if (part.type === 'function_call') {
+              parts.push({ functionCall: { name: part.name, args: part.args } });
+            }
+          }),
+        );
+        item.role = item.role === 'assistant' ? 'model' : item.role;
+
+        return { role: item.role, parts } as gemini.Content;
+      }),
+    );
+  }
+
+  private corvertTools(opts: types.chat.SendOptions): gemini.Tools[] {
+    const tools: gemini.Tools[] = [];
+    if (opts.tools) {
+      opts.tools.map((item) => {
+        if (item.type === 'function') {
+          tools.push({ functionDeclarations: [item.function] });
+        }
+      });
+    }
+    return tools;
+  }
+
+  private convertChoices(candidates: gemini.Candidate[]): types.chat.Choice[] {
+    const choices: types.chat.Choice[] = [];
+    candidates.map(({ index, content, finishReason }: any) => {
+      const parts: types.chat.Part[] = [];
+      content.parts.map((part: any) => {
+        if (part.text) {
+          parts.push({ type: 'text', text: part.text });
+        }
+        // if (part.inline_data) {
+        //   parts.push({ type: 'image', url: part.inline_data.data });
+        // }
+      });
+      choices.push({ index, role: 'assistant', parts, finish_reason: finishReason });
+    });
+    return choices;
+  }
+
+  private combineChoices(choices: types.chat.Choice[]): types.chat.Choice[] {
+    return choices.reduce((acc: types.chat.Choice[], item: types.chat.Choice) => {
+      const existingItem = acc.find((i: types.chat.Choice) => i.index === item.index);
+      if (existingItem) {
+        item.parts.forEach((part: types.chat.Part) => {
+          if (part.type === 'text') {
+            const existingPart = existingItem.parts.find((p: types.chat.Part) => p.type === 'text');
+            if (existingPart) {
+              (existingPart as types.chat.TextPart).text += (part as types.chat.TextPart).text;
+            } else {
+              existingItem.parts.push(part);
+            }
+          } else {
+            const existingPart = existingItem.parts.find(
+              (p: types.chat.Part) => JSON.stringify(p) === JSON.stringify(part),
+            );
+            if (!existingPart) {
+              existingItem.parts.push(part);
+            }
+          }
+        });
+      } else {
+        acc.push(item);
+      }
+      return acc;
+    }, []);
   }
 }

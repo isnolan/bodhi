@@ -15,7 +15,7 @@ export class GoogleVertexAPI extends ChatBaseAPI {
   }
 
   public models(): string[] {
-    return ['gemini-pro', 'gemini-pro-vision', 'medlm-medium', 'medlm-large'];
+    return ['gemini-pro', 'gemini-pro-vision'];
   }
 
   /**
