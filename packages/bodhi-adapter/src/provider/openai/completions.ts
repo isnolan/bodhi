@@ -101,13 +101,4 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
       stream: true,
     };
   }
-
-  // 将 Gemini 的结果转换为你的数据格式
-  private convertResult(result: any) {
-    return {
-      // 根据你的数据格式，从 Gemini 的结果中提取数据
-      history: result.contents,
-      // 其他数据...
-    };
-  }
 }

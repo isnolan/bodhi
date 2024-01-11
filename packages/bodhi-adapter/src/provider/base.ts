@@ -46,6 +46,34 @@ export class ChatBaseAPI {
     return { mime_type, data: base64 };
   }
 
+  protected combineChoices(choices: types.chat.Choice[]): types.chat.Choice[] {
+    return choices.reduce((acc: types.chat.Choice[], item: types.chat.Choice) => {
+      const existingItem = acc.find((i: types.chat.Choice) => i.index === item.index);
+      if (existingItem) {
+        item.parts.forEach((part: types.chat.Part) => {
+          if (part.type === 'text') {
+            const existingPart = existingItem.parts.find((p: types.chat.Part) => p.type === 'text');
+            if (existingPart) {
+              (existingPart as types.chat.TextPart).text += (part as types.chat.TextPart).text;
+            } else {
+              existingItem.parts.push(part);
+            }
+          } else {
+            const existingPart = existingItem.parts.find(
+              (p: types.chat.Part) => JSON.stringify(p) === JSON.stringify(part),
+            );
+            if (!existingPart) {
+              existingItem.parts.push(part);
+            }
+          }
+        });
+      } else {
+        acc.push(item);
+      }
+      return acc;
+    }, []);
+  }
+
   protected getTokenCount(text: string) {
     return get_encoding('cl100k_base').encode(text).length;
   }

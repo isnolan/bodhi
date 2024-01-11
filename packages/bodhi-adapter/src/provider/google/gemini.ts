@@ -1,5 +1,5 @@
-import { v4 as uuidv4 } from 'uuid';
 import fetchSSE from 'node-fetch';
+import { v4 as uuidv4 } from 'uuid';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { createParser, type ParseEvent, type ReconnectInterval } from 'eventsource-parser';
 
@@ -113,7 +113,6 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
             if (['image', 'video'].includes(part.type)) {
               // TODO: fetch 下载图片并转化buffer为base64
               const inline_data = await this.fetchFile((part as types.chat.FilePart).url);
-              console.log(`->`, inline_data);
               parts.push({ inline_data });
             }
             if (part.type === 'function_call') {
@@ -162,33 +161,5 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
       console.warn(err);
     }
     return choices;
-  }
-
-  protected combineChoices(choices: types.chat.Choice[]): types.chat.Choice[] {
-    return choices.reduce((acc: types.chat.Choice[], item: types.chat.Choice) => {
-      const existingItem = acc.find((i: types.chat.Choice) => i.index === item.index);
-      if (existingItem) {
-        item.parts.forEach((part: types.chat.Part) => {
-          if (part.type === 'text') {
-            const existingPart = existingItem.parts.find((p: types.chat.Part) => p.type === 'text');
-            if (existingPart) {
-              (existingPart as types.chat.TextPart).text += (part as types.chat.TextPart).text;
-            } else {
-              existingItem.parts.push(part);
-            }
-          } else {
-            const existingPart = existingItem.parts.find(
-              (p: types.chat.Part) => JSON.stringify(p) === JSON.stringify(part),
-            );
-            if (!existingPart) {
-              existingItem.parts.push(part);
-            }
-          }
-        });
-      } else {
-        acc.push(item);
-      }
-      return acc;
-    }, []);
   }
 }

@@ -31,7 +31,7 @@ describe('chat', () => {
         expect(choices).toBeInstanceOf(Object);
       },
     });
-    console.log(`[gemini]result:`, JSON.stringify(res, null, 2));
+    console.log(`[gemini]result:`, JSON.stringify(res));
     expect(res).toBeInstanceOf(Object);
   }, 30000);
 
@@ -96,6 +96,7 @@ describe('chat', () => {
         expect(choices).toBeInstanceOf(Object);
       },
     });
+    console.log(`[gemini]result:`, JSON.stringify(result));
     expect(result).toBeInstanceOf(Object);
   }, 30000);
 });

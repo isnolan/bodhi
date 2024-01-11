@@ -45,7 +45,7 @@ export class GoogleVertexAPI extends GoogleGeminiAPI {
       const model = opts.model || 'gemini-pro';
       const url = `${this.baseURL}/projects/darftai/locations/asia-southeast1/publishers/google/models/${model}:streamGenerateContent?alt=sse`;
       const params: gemini.Request = await this.convertParams(options);
-      console.log(`[fetch]params`, JSON.stringify(params, null, 2));
+      // console.log(`[fetch]params`, JSON.stringify(params, null, 2));
 
       const res = await fetchSSE(url, {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
