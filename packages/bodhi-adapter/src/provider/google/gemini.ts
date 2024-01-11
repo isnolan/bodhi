@@ -53,7 +53,7 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
       const parser = createParser((event: ParseEvent | ReconnectInterval) => {
         if (event.type === 'event') {
           const res = JSON.parse(event.data);
-          // console.log(`->`, JSON.stringify(res));
+          console.log(`->`, JSON.stringify(res));
           const choices = this.convertChoices(res.candidates);
           onProgress?.(choices);
 
@@ -140,17 +140,20 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
 
   private convertChoices(candidates: gemini.Candidate[]): types.chat.Choice[] {
     const choices: types.chat.Choice[] = [];
-    candidates.map(({ index, content, finishReason }: any) => {
+    candidates.map(({ index, content, finishReason }: gemini.Candidate) => {
       const parts: types.chat.Part[] = [];
       content.parts.map((part: any) => {
-        if (part.text) {
+        if ('text' in part.type) {
           parts.push({ type: 'text', text: part.text });
+        }
+        if ('functionCall' in part) {
+          parts.push({ type: 'function', function: part.functionCall });
         }
         // if (part.inline_data) {
         //   parts.push({ type: 'image', url: part.inline_data.data });
         // }
       });
-      choices.push({ index, role: 'assistant', parts, finish_reason: finishReason });
+      choices.push({ index, role: 'assistant', parts, finish_reason: 'stop' });
     });
     return choices;
   }

@@ -43,7 +43,9 @@ export namespace chat {
   export type Part = TextPart | FilePart | FunctionPart;
   export type TextPart = { type: 'text'; text: string };
   export type FilePart = { type: 'image' | 'video' | 'file'; url: string };
-  export type FunctionPart = { type: 'function_call'; name: string; args: any };
+  export type FunctionPart =
+    | { type: 'function_call'; name: string; args: any }
+    | { type: 'function'; function: Function };
 
   /* Function  */
   export type Tools = { type: 'function'; function: Function };

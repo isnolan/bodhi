@@ -23,7 +23,7 @@ export namespace gemini {
     parts: Part[];
   };
 
-  export type Role = 'user' | 'model';
+  export type Role = 'user' | 'model' | '';
 
   export type Part = TextPart | FilePart | ToolPart;
   export type TextPart = { text: string };
@@ -31,7 +31,6 @@ export namespace gemini {
   export type ToolPart = { functionCall: { name: string; args: any } };
 
   export type Tools = { functionDeclarations: types.chat.Function[] };
-
   export type safetyRating = { category: string; probability: string };
 
   /**
