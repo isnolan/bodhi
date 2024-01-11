@@ -49,11 +49,13 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
       // only get content from node-fetch
       const body: NodeJS.ReadableStream = res.body;
       body.on('error', (err) => reject(new types.chat.ChatError(err.message, 500)));
+
+      // streaming
       const choicesList: types.chat.Choice[] = [];
       const parser = createParser((event: ParseEvent | ReconnectInterval) => {
         if (event.type === 'event') {
           const res = JSON.parse(event.data);
-          console.log(`->`, JSON.stringify(res));
+          // console.log(`->`, JSON.stringify(res));
           const choices = this.convertChoices(res.candidates);
           onProgress?.(choices);
 
@@ -81,7 +83,7 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
    * https://cloud.google.com/vertex-ai/docs/reference/rest/v1/GenerateContentResponse
    * @returns
    */
-  private async convertParams(opts: types.chat.SendOptions): Promise<gemini.Request> {
+  protected async convertParams(opts: types.chat.SendOptions): Promise<gemini.Request> {
     return {
       contents: await this.corvertContents(opts),
       tools: this.corvertTools(opts),
@@ -126,7 +128,7 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
     );
   }
 
-  private corvertTools(opts: types.chat.SendOptions): gemini.Tools[] {
+  protected corvertTools(opts: types.chat.SendOptions): gemini.Tools[] {
     const tools: gemini.Tools[] = [];
     if (opts.tools) {
       opts.tools.map((item) => {
@@ -138,27 +140,31 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
     return tools;
   }
 
-  private convertChoices(candidates: gemini.Candidate[]): types.chat.Choice[] {
+  protected convertChoices(candidates: gemini.Candidate[]): types.chat.Choice[] {
     const choices: types.chat.Choice[] = [];
-    candidates.map(({ index, content, finishReason }: gemini.Candidate) => {
-      const parts: types.chat.Part[] = [];
-      content.parts.map((part: any) => {
-        if ('text' in part.type) {
-          parts.push({ type: 'text', text: part.text });
-        }
-        if ('functionCall' in part) {
-          parts.push({ type: 'function', function: part.functionCall });
-        }
-        // if (part.inline_data) {
-        //   parts.push({ type: 'image', url: part.inline_data.data });
-        // }
+    try {
+      candidates.map(({ index, content, finishReason }: gemini.Candidate) => {
+        const parts: types.chat.Part[] = [];
+        content.parts.map((part: any) => {
+          if ('text' in part) {
+            parts.push({ type: 'text', text: part.text });
+          }
+          if ('functionCall' in part) {
+            parts.push({ type: 'function', function: part.functionCall });
+          }
+          // if (part.inline_data) {
+          //   parts.push({ type: 'image', url: part.inline_data.data });
+          // }
+        });
+        choices.push({ index, role: 'assistant', parts, finish_reason: 'stop' });
       });
-      choices.push({ index, role: 'assistant', parts, finish_reason: 'stop' });
-    });
+    } catch (err) {
+      console.warn(err);
+    }
     return choices;
   }
 
-  private combineChoices(choices: types.chat.Choice[]): types.chat.Choice[] {
+  protected combineChoices(choices: types.chat.Choice[]): types.chat.Choice[] {
     return choices.reduce((acc: types.chat.Choice[], item: types.chat.Choice) => {
       const existingItem = acc.find((i: types.chat.Choice) => i.index === item.index);
       if (existingItem) {

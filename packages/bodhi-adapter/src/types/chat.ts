@@ -63,7 +63,7 @@ export namespace chat {
     id: string;
     model: string;
     choices: Choice[];
-    useage: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
+    useage: Useage;
   };
 
   export type Choice = {
@@ -72,4 +72,6 @@ export namespace chat {
     parts: Part[];
     finish_reason: 'stop' | 'function_call' | string | null;
   };
+
+  export type Useage = { prompt_tokens: number; completion_tokens: number; total_tokens: number };
 }

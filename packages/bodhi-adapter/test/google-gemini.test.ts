@@ -46,7 +46,7 @@ describe('chat', () => {
             { type: 'text', text: 'Describe this image' },
             {
               type: 'image',
-              url: 'https://miro.medium.com/v2/resize:fit:720/format:webp/1*YMJDp-kqus7i-ktWtksNjg.jpeg',
+              url: 'https://miro.medium.com/v2/resize:fit:720/format:jpeg/1*YMJDp-kqus7i-ktWtksNjg.jpeg',
             },
           ],
         },

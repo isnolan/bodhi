@@ -32,12 +32,14 @@ export namespace gemini {
 
   export type Tools = { functionDeclarations: types.chat.Function[] };
   export type safetyRating = { category: string; probability: string };
+  export type usageMetadata = { promptTokenCount: number; candidatesTokenCount: number; totalTokenCount: number };
 
   /**
    * Response
    */
   export type Response = {
     candidates: Candidate[];
+    usageMetadata: usageMetadata;
   };
 
   export type Candidate = {
