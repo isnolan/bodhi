@@ -1,0 +1,60 @@
+{"context":"RoutesResolver","level":"info","message":"AppController {/v1}:","timestamp":"2024-01-12T11:26:40.551Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/health, GET} route","timestamp":"2024-01-12T11:26:40.553Z"}
+{"context":"RoutesResolver","level":"info","message":"FileController {/v1/file}:","timestamp":"2024-01-12T11:26:40.553Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/file, GET} route","timestamp":"2024-01-12T11:26:40.553Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/file/upload, POST} route","timestamp":"2024-01-12T11:26:40.553Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/file/files, GET} route","timestamp":"2024-01-12T11:26:40.554Z"}
+{"context":"RoutesResolver","level":"info","message":"ChatController {/v1/chat}:","timestamp":"2024-01-12T11:26:40.554Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/chat/completions, POST} route","timestamp":"2024-01-12T11:26:40.554Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/chat/agent, POST} route","timestamp":"2024-01-12T11:26:40.554Z"}
+{"context":"NestApplication","level":"info","message":"Nest application successfully started","timestamp":"2024-01-12T11:26:40.558Z"}
+{"context":"RoutesResolver","level":"info","message":"AppController {/v1}:","timestamp":"2024-01-12T11:27:40.622Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/health, GET} route","timestamp":"2024-01-12T11:27:40.623Z"}
+{"context":"RoutesResolver","level":"info","message":"FileController {/v1/file}:","timestamp":"2024-01-12T11:27:40.623Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/file, GET} route","timestamp":"2024-01-12T11:27:40.624Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/file/upload, POST} route","timestamp":"2024-01-12T11:27:40.624Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/file/files, GET} route","timestamp":"2024-01-12T11:27:40.624Z"}
+{"context":"RoutesResolver","level":"info","message":"ChatController {/v1/chat}:","timestamp":"2024-01-12T11:27:40.624Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/chat/completions, POST} route","timestamp":"2024-01-12T11:27:40.624Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/chat/agent, POST} route","timestamp":"2024-01-12T11:27:40.625Z"}
+{"context":"NestApplication","level":"info","message":"Nest application successfully started","timestamp":"2024-01-12T11:27:40.628Z"}
+{"context":"RoutesResolver","level":"info","message":"AppController {/v1}:","timestamp":"2024-01-12T11:28:04.765Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/health, GET} route","timestamp":"2024-01-12T11:28:04.767Z"}
+{"context":"RoutesResolver","level":"info","message":"FileController {/v1/file}:","timestamp":"2024-01-12T11:28:04.767Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/file, GET} route","timestamp":"2024-01-12T11:28:04.767Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/file/upload, POST} route","timestamp":"2024-01-12T11:28:04.767Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/file/files, GET} route","timestamp":"2024-01-12T11:28:04.768Z"}
+{"context":"RoutesResolver","level":"info","message":"ChatController {/v1/chat}:","timestamp":"2024-01-12T11:28:04.768Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/chat/completions, POST} route","timestamp":"2024-01-12T11:28:04.768Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/chat/agent, POST} route","timestamp":"2024-01-12T11:28:04.768Z"}
+{"context":"NestApplication","level":"info","message":"Nest application successfully started","timestamp":"2024-01-12T11:28:04.771Z"}
+{"context":"RoutesResolver","level":"info","message":"AppController {/v1}:","timestamp":"2024-01-12T11:28:14.450Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/health, GET} route","timestamp":"2024-01-12T11:28:14.452Z"}
+{"context":"RoutesResolver","level":"info","message":"FileController {/v1/file}:","timestamp":"2024-01-12T11:28:14.452Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/file, GET} route","timestamp":"2024-01-12T11:28:14.452Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/file/upload, POST} route","timestamp":"2024-01-12T11:28:14.452Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/file/files, GET} route","timestamp":"2024-01-12T11:28:14.453Z"}
+{"context":"RoutesResolver","level":"info","message":"ChatController {/v1/chat}:","timestamp":"2024-01-12T11:28:14.453Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/chat/completions, POST} route","timestamp":"2024-01-12T11:28:14.453Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/chat/agent, POST} route","timestamp":"2024-01-12T11:28:14.453Z"}
+{"context":"NestApplication","level":"info","message":"Nest application successfully started","timestamp":"2024-01-12T11:28:14.456Z"}
+{"context":"RoutesResolver","level":"info","message":"AppController {/v1}:","timestamp":"2024-01-12T11:29:44.809Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/health, GET} route","timestamp":"2024-01-12T11:29:44.811Z"}
+{"context":"RoutesResolver","level":"info","message":"FileController {/v1/file}:","timestamp":"2024-01-12T11:29:44.811Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/file, GET} route","timestamp":"2024-01-12T11:29:44.811Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/file/upload, POST} route","timestamp":"2024-01-12T11:29:44.811Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/file/files, GET} route","timestamp":"2024-01-12T11:29:44.812Z"}
+{"context":"RoutesResolver","level":"info","message":"ChatController {/v1/chat}:","timestamp":"2024-01-12T11:29:44.812Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/chat/completions, POST} route","timestamp":"2024-01-12T11:29:44.812Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/chat/agent, POST} route","timestamp":"2024-01-12T11:29:44.812Z"}
+{"context":"NestApplication","level":"info","message":"Nest application successfully started","timestamp":"2024-01-12T11:29:44.815Z"}
+{"context":"RoutesResolver","level":"info","message":"AppController {/v1}:","timestamp":"2024-01-12T11:31:08.251Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/health, GET} route","timestamp":"2024-01-12T11:31:08.253Z"}
+{"context":"RoutesResolver","level":"info","message":"FileController {/v1/file}:","timestamp":"2024-01-12T11:31:08.253Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/file, GET} route","timestamp":"2024-01-12T11:31:08.253Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/file/upload, POST} route","timestamp":"2024-01-12T11:31:08.253Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/file/files, GET} route","timestamp":"2024-01-12T11:31:08.254Z"}
+{"context":"RoutesResolver","level":"info","message":"ChatController {/v1/chat}:","timestamp":"2024-01-12T11:31:08.254Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/chat/completions, POST} route","timestamp":"2024-01-12T11:31:08.254Z"}
+{"context":"RouterExplorer","level":"info","message":"Mapped {/v1/chat/agent, POST} route","timestamp":"2024-01-12T11:31:08.254Z"}
+{"context":"NestApplication","level":"info","message":"Nest application successfully started","timestamp":"2024-01-12T11:31:08.257Z"}

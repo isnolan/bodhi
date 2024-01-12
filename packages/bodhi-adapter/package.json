@@ -1,5 +1,5 @@
 {
-  "name": "bodhi-adapter",
+  "name": "@isnolan/bodhi-adapter",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
