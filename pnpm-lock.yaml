@@ -96,7 +96,7 @@ importers:
         version: 8.2.1(socket.io-adapter@2.5.2)
       '@yhostc/chatbot-puppet':
         specifier: ^1.4.37
-        version: 1.4.37(typescript@4.7.4)
+        version: 1.4.37(typescript@5.3.3)
       ali-oss:
         specifier: ^6.18.0
         version: 6.19.0
@@ -109,6 +109,9 @@ importers:
       delay:
         specifier: ^6.0.0
         version: 6.0.0
+      dotenv:
+        specifier: ^16.3.1
+        version: 16.3.1
       hashids:
         specifier: ^2.3.0
         version: 2.3.0
@@ -172,7 +175,7 @@ importers:
         version: 9.5.0
       '@nestjs/schematics':
         specifier: ^9.0.1
-        version: 9.2.0(typescript@4.7.4)
+        version: 9.2.0(typescript@5.3.3)
       '@nestjs/testing':
         specifier: ^9.0.11
         version: 9.4.3(@nestjs/common@9.4.3)(@nestjs/core@9.4.3)(@nestjs/platform-express@9.4.3)
@@ -215,9 +218,6 @@ importers:
       jest:
         specifier: 28.1.2
         version: 28.1.2(@types/node@18.0.3)(ts-node@10.9.2)
-      prettier:
-        specifier: 2.7.1
-        version: 2.7.1
       rimraf:
         specifier: 3.0.2
         version: 3.0.2
@@ -4025,7 +4025,7 @@ packages:
       - chokidar
     dev: true
 
-  /@nestjs/schematics@9.2.0(typescript@4.7.4):
+  /@nestjs/schematics@9.2.0(typescript@5.3.3):
     resolution:
       { integrity: sha512-wHpNJDPzM6XtZUOB3gW0J6mkFCSJilzCM3XrHI1o0C8vZmFE1snbmkIXNyoi1eV0Nxh1BMymcgz5vIMJgQtTqw== }
     peerDependencies:
@@ -4035,7 +4035,7 @@ packages:
       '@angular-devkit/schematics': 16.0.1(chokidar@3.5.3)
       jsonc-parser: 3.2.0
       pluralize: 8.0.0
-      typescript: 4.7.4
+      typescript: 5.3.3
     transitivePeerDependencies:
       - chokidar
     dev: true
@@ -5912,7 +5912,7 @@ packages:
       { integrity: sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ== }
     dev: true
 
-  /@yhostc/chatbot-puppet@1.4.37(typescript@4.7.4):
+  /@yhostc/chatbot-puppet@1.4.37(typescript@5.3.3):
     resolution:
       { integrity: sha512-SZg5NJSbJz4I8Iee1UlAZpbKgmF1fyKm7SjVGFw0l+C6ELn/4uYKrMCnMMXHJiNFqRhAjNBcrwaXl44Bzx0eDQ== }
     dependencies:
@@ -5928,7 +5928,7 @@ packages:
       https-proxy-agent: 7.0.2
       node-fetch: 3.3.2
       p-timeout: 6.1.2
-      puppeteer: 21.7.0(typescript@4.7.4)
+      puppeteer: 21.7.0(typescript@5.3.3)
       puppeteer-extra: 3.3.6(puppeteer@21.7.0)
       puppeteer-extra-plugin-stealth: 2.11.2(puppeteer-extra@3.3.6)
       puppeteer-extra-plugin-user-data-dir: 2.4.1(puppeteer-extra@3.3.6)
@@ -7809,23 +7809,6 @@ packages:
       yaml: 1.10.2
     dev: true
 
-  /cosmiconfig@8.3.6(typescript@4.7.4):
-    resolution:
-      { integrity: sha512-kcZ6+W5QzcJ3P1Mt+83OUv/oHFqZHIx8DuxG6eZ5RGMERoLqp4BuGjhHLYGK+Kf5XVkQvqBSmAy/nGWN3qDgEA== }
-    engines: { node: '>=14' }
-    peerDependencies:
-      typescript: '>=4.9.5'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-    dependencies:
-      import-fresh: 3.3.0
-      js-yaml: 4.1.0
-      parse-json: 5.2.0
-      path-type: 4.0.0
-      typescript: 4.7.4
-    dev: false
-
   /cosmiconfig@8.3.6(typescript@5.3.3):
     resolution:
       { integrity: sha512-kcZ6+W5QzcJ3P1Mt+83OUv/oHFqZHIx8DuxG6eZ5RGMERoLqp4BuGjhHLYGK+Kf5XVkQvqBSmAy/nGWN3qDgEA== }
@@ -7841,7 +7824,6 @@ packages:
       parse-json: 5.2.0
       path-type: 4.0.0
       typescript: 5.3.3
-    dev: true
 
   /create-jest@29.7.0(@types/node@18.19.4)(ts-node@10.9.2):
     resolution:
@@ -15427,12 +15409,12 @@ packages:
       '@types/debug': 4.1.12
       debug: 4.3.4(supports-color@9.4.0)
       deepmerge: 4.3.1
-      puppeteer: 21.7.0(typescript@4.7.4)
+      puppeteer: 21.7.0(typescript@5.3.3)
     transitivePeerDependencies:
       - supports-color
     dev: false
 
-  /puppeteer@21.7.0(typescript@4.7.4):
+  /puppeteer@21.7.0(typescript@5.3.3):
     resolution:
       { integrity: sha512-Yy+UUy0b9siJezbhHO/heYUoZQUwyqDK1yOQgblTt0l97tspvDVFkcW9toBlnSvSfkDmMI3Dx9cZL6R8bDArHA== }
     engines: { node: '>=16.13.2' }
@@ -15440,7 +15422,7 @@ packages:
     requiresBuild: true
     dependencies:
       '@puppeteer/browsers': 1.9.1
-      cosmiconfig: 8.3.6(typescript@4.7.4)
+      cosmiconfig: 8.3.6(typescript@5.3.3)
       puppeteer-core: 21.7.0
     transitivePeerDependencies:
       - bufferutil
@@ -17832,6 +17814,7 @@ packages:
       { integrity: sha512-C0WQT0gezHuw6AdY1M2jxUO83Rjf0HP7Sk1DtXj6j1EwkQNZrHAg2XPWlq62oqEhYvONq5pkC2Y9oPljWToLmQ== }
     engines: { node: '>=4.2.0' }
     hasBin: true
+    dev: true
 
   /typescript@4.9.5:
     resolution:

@@ -1,17 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 module.exports = {
-  root: true,
-  env: { node: true },
-  extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:@typescript-eslint/recommended-requiring-type-checking',
-    'prettier',
-  ],
-  plugins: ['@typescript-eslint'],
-  parser: '@typescript-eslint/parser',
-  parserOptions: {
-    tsconfigRootDir: __dirname,
-    project: './tsconfig.base.json',
+  plugins: ['@typescript-eslint/eslint-plugin'],
+  extends: ['plugin:prettier/recommended'],
+  ignorePatterns: ['.eslintrc.js', 'dist'],
+  rules: {
+    'prettier/prettier': ['error', { singleQuote: true, endOfLine: 'auto' }],
+    'max-params': ['error', 3],
+    'max-lines-per-function': ['error', 70],
   },
 };
