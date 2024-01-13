@@ -18,7 +18,7 @@ export enum InstanceEnum {
   ASSISTANT = 'assistant',
 }
 
-@Entity('agent_supplier')
+@Entity('bodhi_supplier')
 export class Supplier extends Base {
   @Column({ type: 'mediumint', comment: 'Server ID', default: null, nullable: true })
   server_id: number;

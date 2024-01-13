@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@liaoliaots/nestjs-redis": "^9.0.5",
+    "@nestjs-modules/mailer": "^1.10.3",
     "@nestjs/bull": "^0.6.3",
     "@nestjs/common": "^9.0.11",
     "@nestjs/config": "^2.2.0",
@@ -59,6 +60,7 @@
     "tiktoken": "^1.0.10",
     "typeorm": "^0.3.12",
     "uuid": "^9.0.1",
+    "validator": "^13.11.0",
     "winston": "^3.8.1",
     "winston-daily-rotate-file": "^4.7.1"
   },

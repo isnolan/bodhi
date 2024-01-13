@@ -1,7 +1,7 @@
 import { Base } from 'src/modules/common/base.entity';
 import { Entity, Column } from 'typeorm';
 
-@Entity('agent_conversation')
+@Entity('bodhi_conversation')
 export class ChatConversation extends Base {
   @Column({ type: 'varchar', length: 40, comment: '会话ID', default: '' })
   conversation_id: string;

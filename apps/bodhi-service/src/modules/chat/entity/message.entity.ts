@@ -7,7 +7,7 @@ export enum RoleEnum {
   USER = 'user',
 }
 
-@Entity('agent_message')
+@Entity('bodhi_message')
 export class ChatMessage extends Base {
   @Column({ comment: 'Conversation Id', default: 0 })
   conversation_id: number;
