@@ -28,7 +28,7 @@ async function bootstrap() {
   const options = new DocumentBuilder()
     .setTitle('Bodhi API')
     .setVersion('1.0')
-    .addServer('http://127.0.0.1:3200/api', 'Stage')
+    .addServer('http://127.0.0.1:3200', 'Stage')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, options);

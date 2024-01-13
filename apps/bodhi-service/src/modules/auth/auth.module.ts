@@ -11,11 +11,12 @@ import { AuthVerification } from './entity/verification.entity';
 import { AuthController } from './auth.controller';
 import { NotificationModule } from '../notification/notification.module';
 import { AuthUsers } from './entity/users.entity';
-import { AuthUsersService, AuthSessionService, AuthVerificationsService } from './service';
+import { AuthUsersService, AuthSessionService, AuthVerificationsService, AuthKeysService } from './service';
+import { AuthKeys } from './entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([AuthUsers, AuthSession, AuthVerification]),
+    TypeOrmModule.forFeature([AuthUsers, AuthSession, AuthVerification, AuthKeys]),
 
     // JWT
     JwtModule.registerAsync({
@@ -28,6 +29,13 @@ import { AuthUsersService, AuthSessionService, AuthVerificationsService } from '
   ],
 
   controllers: [AuthController],
-  providers: [AuthService, AuthUsersService, AuthSessionService, AuthVerificationsService, ...Strategy],
+  providers: [
+    AuthService,
+    AuthUsersService,
+    AuthKeysService,
+    AuthSessionService,
+    AuthVerificationsService,
+    ...Strategy,
+  ],
 })
 export class AuthModule {}
