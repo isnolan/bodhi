@@ -1,10 +1,7 @@
-import Redis from 'ioredis';
 import { v4 as uuidv4 } from 'uuid';
-import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Controller, Res, Post, Req, Body, HttpException, HttpStatus } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiBody } from '@nestjs/swagger';
 
-import { SupplierService } from '../supplier/supplier.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { ChatService } from './chat.service';
 import { ChatConversationService } from './conversation.service';
@@ -12,19 +9,10 @@ import { SendMessageDto } from './dto/send-message.dto';
 import { CreateAgentDto } from './dto/create-agent.dto';
 import { Request, Response } from 'express';
 
-// const importDynamic = new Function('modulePath', 'return import(modulePath)');
-// const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
 @ApiTags('chat')
 @Controller('chat')
 export class ChatController {
-  constructor(
-    @InjectRedis()
-    private readonly redis: Redis,
-    private readonly service: ChatService,
-    private readonly conversation: ChatConversationService,
-    private readonly supplier: SupplierService,
-  ) {}
+  constructor(private readonly service: ChatService, private readonly conversation: ChatConversationService) {}
 
   /**
    * 创建聊天会话

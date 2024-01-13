@@ -28,8 +28,7 @@ async function bootstrap() {
   const options = new DocumentBuilder()
     .setTitle('ChatBot API')
     .setVersion('1.0')
-    .addServer('https://api.zhangguiyi.com/rest/chatbot', 'Stage')
-    .addServer('https://api.zhangguiyi.cn/rest/chatbot', 'Dev')
+    .addServer('http://127.0.0.1:3200/api', 'Stage')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, options);
