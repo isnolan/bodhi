@@ -2,7 +2,7 @@ import Hashids from 'hashids/cjs';
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AuthUsers } from './entity/users.entity';
+import { AuthUsers } from '../entity/users.entity';
 
 @Injectable()
 export class AuthUsersService {

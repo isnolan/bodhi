@@ -26,7 +26,7 @@ async function bootstrap() {
 
   // swagger
   const options = new DocumentBuilder()
-    .setTitle('ChatBot API')
+    .setTitle('Bodhi API')
     .setVersion('1.0')
     .addServer('http://127.0.0.1:3200/api', 'Stage')
     .addBearerAuth()

@@ -5,13 +5,12 @@ import { Controller, Req, Ip, Post, Body, Request, Get, Query } from '@nestjs/co
 import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
-import { AuthUsersService } from './users.service';
 import { MailService } from '../notification/mail.service';
 import { AuthResponse } from './interface/user.interface';
 import { VerificationState, VerificationType } from './entity';
 import { captchaDto, loginDto } from './dto/auth.dto';
 import { ErrorDto } from '../common/base.dto';
-import { AuthVerificationsService } from './verification.service';
+import { AuthUsersService, AuthVerificationsService } from './service';
 
 @ApiTags('auth')
 @Controller('auth')

@@ -4,7 +4,7 @@ import { plainToClass } from 'class-transformer';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import 'moment/locale/zh-cn';
-import { AuthSession } from './entity/session.entity';
+import { AuthSession } from '../entity/session.entity';
 
 @Injectable()
 export class AuthSessionService {
@@ -27,12 +27,4 @@ export class AuthSessionService {
   async findOne(id: number): Promise<AuthSession> {
     return await this.repository.findOne({ where: [{ id }] });
   }
-
-  // async getTodaySession(userId: number): Promise<any> {
-  //   const today: string = moment().format('YYYY-MM-DD 00:00:00.000');
-  //   return await this.repository
-  //     .createQueryBuilder('draft_users_session')
-  //     .where('UserId=:userId AND CreateTime>=:today', { userId, today })
-  //     .getOne();
-  // }
 }

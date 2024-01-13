@@ -5,7 +5,7 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get('welcome')
+  @Get()
   welcome(): string {
     console.log('Welcome to Bodhi AI!');
     return 'Welcome to Bodhi AI!';

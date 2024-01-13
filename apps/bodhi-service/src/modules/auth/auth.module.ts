@@ -9,11 +9,9 @@ import Strategy from './strategies';
 import { AuthSession } from './entity/session.entity';
 import { AuthVerification } from './entity/verification.entity';
 import { AuthController } from './auth.controller';
-import { AuthSessionService } from './session.service';
 import { NotificationModule } from '../notification/notification.module';
-import { AuthVerificationsService } from './verification.service';
 import { AuthUsers } from './entity/users.entity';
-import { AuthUsersService } from './users.service';
+import { AuthUsersService, AuthSessionService, AuthVerificationsService } from './service';
 
 @Module({
   imports: [

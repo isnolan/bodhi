@@ -3,7 +3,6 @@ import 'winston-daily-rotate-file';
 import { Module } from '@nestjs/common';
 import { WinstonModule } from 'nest-winston';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ServeStaticModule } from '@nestjs/serve-static';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RedisModule, RedisModuleOptions } from '@liaoliaots/nestjs-redis';
 
@@ -11,6 +10,7 @@ import Modules from './modules';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
 import configuration from './config/configuration';
+import path from 'path';
 
 @Module({
   imports: [
@@ -19,12 +19,6 @@ import configuration from './config/configuration';
       isGlobal: true,
       envFilePath: [`./.env.${process.env.NODE_ENV}`, `./.env`],
       load: [configuration],
-    }),
-
-    // Transfer Static file
-    ServeStaticModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: () => [{ rootPath: './tmp' }],
     }),
 
     // TypeORM
