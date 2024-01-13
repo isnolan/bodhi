@@ -7,4 +7,5 @@ export enum Provider {
   ANTHROPIC_BEDROCK = 'anthropic-bedrock',
   ALIYUN_QWEN = 'aliyun-qwen',
   ALIYUN_WANX = 'aliyun-wanx',
+  TENCENT_HUNYUAN = 'tencent-hunyuan',
 }

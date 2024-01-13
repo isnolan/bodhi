@@ -8,6 +8,7 @@ import {
 } from '@/provider';
 import { AliyunQwenAPI, AliyunWanxAPI } from '@/provider';
 import { ChatBaseAPI } from '@/provider/base';
+import { TencentHunyuanAPI } from '@/provider/tencent';
 
 import * as types from '@/types';
 
@@ -39,6 +40,9 @@ export class ChatAPI {
         break;
       case types.Provider.ANTHROPIC_BEDROCK:
         this.provider = new AnthropicBedrockAPI(opts);
+        break;
+      case types.Provider.TENCENT_HUNYUAN:
+        this.provider = new TencentHunyuanAPI(opts);
         break;
       default:
         throw new Error(`Unsupported supplier: ${provider}`);
