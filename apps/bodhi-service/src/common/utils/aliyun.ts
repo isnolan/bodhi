@@ -29,9 +29,7 @@ function bufferToStream(binary) {
 export async function putStream(filepath, file) {
   try {
     // const filepath = '/uploads/avatar/b.jpg';
-    const result = await client.putStream(filepath, bufferToStream(file.buffer), {
-      contentLength: file.size,
-    });
+    const result = await client.putStream(filepath, bufferToStream(file.buffer));
     return result;
   } catch (err) {
     console.error(err.message);

@@ -51,6 +51,7 @@
     "node-fetch": "^2.7.0",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
+    "passport-local": "^1.0.0",
     "redis": "^4.6.4",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
@@ -62,6 +63,7 @@
     "winston-daily-rotate-file": "^4.7.1"
   },
   "devDependencies": {
+    "@jest/globals": "^29.7.0",
     "@nestjs/cli": "^9.0.0",
     "@nestjs/schematics": "^9.0.1",
     "@nestjs/testing": "^9.0.11",
@@ -74,6 +76,7 @@
     "@types/node": "18.0.3",
     "@types/node-fetch": "^2.6.10",
     "@types/passport-jwt": "^3.0.13",
+    "@types/passport-local": "^1.0.38",
     "@types/uuid": "^9.0.7",
     "class-transformer": "0.5.1",
     "class-validator": "0.13.2",
