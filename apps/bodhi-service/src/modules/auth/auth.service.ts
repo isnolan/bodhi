@@ -38,8 +38,7 @@ export class AuthService {
 
     // profile & token
     const user = await this.user.findOne(session.user_id);
-    const access_token = await this.jwt.signAsync({ user_id: session.user_id, session_id: session.id });
     delete user['id'];
-    return { profile: user, abilities: [], access_token };
+    return { profile: user, abilities: [] };
   }
 }

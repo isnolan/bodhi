@@ -2,7 +2,7 @@
 export default () => {
   return {
     jwt: {
-      secret: '3vRk^ga52xVP$B2vYK$%r8a8hctLgbU0',
+      secret: process.env.JWT_SECRET,
       expiresIn: '604800s',
     },
 
@@ -16,10 +16,17 @@ export default () => {
       autoLoadEntities: true,
       timezone: 'Z',
       synchronize: process.env.NODE_ENV == 'development', // only dev
-      // debug: true,
+      debug: false,
     },
 
     redis: { host: process.env.REDIS_HOST, port: process.env.REDIS_PORT || 6379 },
+
+    mail: {
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT || 465,
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASSWORD,
+    },
 
     proxy: process.env.PROXY_AGENT,
   };

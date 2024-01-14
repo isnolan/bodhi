@@ -27,4 +27,12 @@ export class AuthSessionService {
   async findOne(id: number): Promise<AuthSession> {
     return await this.repository.findOne({ where: [{ id }] });
   }
+
+  async validateSession(id: number): Promise<AuthSession | null> {
+    const session = await this.repository.findOne({ where: { id } });
+    if (session.expire_at < new Date() || session.status < 1) {
+      return null;
+    }
+    return session;
+  }
 }

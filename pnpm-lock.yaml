@@ -142,6 +142,9 @@ importers:
       passport:
         specifier: ^0.6.0
         version: 0.6.0
+      passport-headerapikey:
+        specifier: ^1.2.2
+        version: 1.2.2
       passport-jwt:
         specifier: ^4.0.1
         version: 4.0.1
@@ -230,6 +233,12 @@ importers:
       class-validator:
         specifier: 0.13.2
         version: 0.13.2
+      eslint-import-resolver-typescript:
+        specifier: ^3.6.1
+        version: 3.6.1(@typescript-eslint/parser@5.62.0)(eslint-plugin-import@2.26.0)(eslint@8.56.0)
+      eslint-plugin-simple-import-sort:
+        specifier: ^10.0.0
+        version: 10.0.0(eslint@8.56.0)
       jest:
         specifier: 28.1.2
         version: 28.1.2(@types/node@18.0.3)(ts-node@10.9.2)
@@ -266,15 +275,9 @@ importers:
       https-proxy-agent:
         specifier: ^7.0.2
         version: 7.0.2
-      install:
-        specifier: ^0.13.0
-        version: 0.13.0
       node-fetch:
         specifier: ^2.7.0
         version: 2.7.0
-      npm:
-        specifier: ^10.3.0
-        version: 10.3.0
       stream:
         specifier: ^0.0.2
         version: 0.0.2
@@ -9304,6 +9307,15 @@ packages:
       - supports-color
     dev: true
 
+  /eslint-plugin-simple-import-sort@10.0.0(eslint@8.56.0):
+    resolution:
+      { integrity: sha512-AeTvO9UCMSNzIHRkg8S6c3RPy5YEwKWSQPx3DYghLedo2ZQxowPFLGDN1AZ2evfg6r6mjBSZSLxLFsWSu3acsw== }
+    peerDependencies:
+      eslint: '>=5.0.0'
+    dependencies:
+      eslint: 8.56.0
+    dev: true
+
   /eslint-scope@5.1.1:
     resolution:
       { integrity: sha512-2NxwbF/hZ0KpepYN0cNbo+FN6XoK7GaHlQhgx/hIZl6Va0bF45RQOOwhLIy8lQDbuCiadSLCBnH2CFYquit5bw== }
@@ -11311,12 +11323,6 @@ packages:
       through: 2.3.8
       wrap-ansi: 7.0.0
     dev: true
-
-  /install@0.13.0:
-    resolution:
-      { integrity: sha512-zDml/jzr2PKU9I8J/xyZBQn8rPCAY//UOYNmR01XwNwyfhEWObo2SWfSl1+0tm1u6PhxLwDnfsT/6jB7OUxqFA== }
-    engines: { node: '>= 0.10' }
-    dev: false
 
   /internal-slot@1.0.6:
     resolution:
@@ -15115,85 +15121,6 @@ packages:
       path-key: 3.1.1
     dev: true
 
-  /npm@10.3.0:
-    resolution:
-      { integrity: sha512-9u5GFc1UqI2DLlGI7QdjkpIaBs3UhTtY8KoCqYJK24gV/j/tByaI4BA4R7RkOc+ASqZMzFPKt4Pj2Z8JcGo//A== }
-    engines: { node: ^18.17.0 || >=20.5.0 }
-    hasBin: true
-    dev: false
-    bundledDependencies:
-      - '@isaacs/string-locale-compare'
-      - '@npmcli/arborist'
-      - '@npmcli/config'
-      - '@npmcli/fs'
-      - '@npmcli/map-workspaces'
-      - '@npmcli/package-json'
-      - '@npmcli/promise-spawn'
-      - '@npmcli/run-script'
-      - '@sigstore/tuf'
-      - abbrev
-      - archy
-      - cacache
-      - chalk
-      - ci-info
-      - cli-columns
-      - cli-table3
-      - columnify
-      - fastest-levenshtein
-      - fs-minipass
-      - glob
-      - graceful-fs
-      - hosted-git-info
-      - ini
-      - init-package-json
-      - is-cidr
-      - json-parse-even-better-errors
-      - libnpmaccess
-      - libnpmdiff
-      - libnpmexec
-      - libnpmfund
-      - libnpmhook
-      - libnpmorg
-      - libnpmpack
-      - libnpmpublish
-      - libnpmsearch
-      - libnpmteam
-      - libnpmversion
-      - make-fetch-happen
-      - minimatch
-      - minipass
-      - minipass-pipeline
-      - ms
-      - node-gyp
-      - nopt
-      - normalize-package-data
-      - npm-audit-report
-      - npm-install-checks
-      - npm-package-arg
-      - npm-pick-manifest
-      - npm-profile
-      - npm-registry-fetch
-      - npm-user-validate
-      - npmlog
-      - p-map
-      - pacote
-      - parse-conflict-json
-      - proc-log
-      - qrcode-terminal
-      - read
-      - semver
-      - spdx-expression-parse
-      - ssri
-      - strip-ansi
-      - supports-color
-      - tar
-      - text-table
-      - tiny-relative-date
-      - treeverse
-      - validate-npm-package-name
-      - which
-      - write-file-atomic
-
   /npmlog@4.1.2:
     resolution:
       { integrity: sha512-2uUqazuKlTaSI/dC8AzicUck7+IrEaOnN/e0jd3Xtt1KcGpwx30v50mL7oPyr/h9bL3E4aZccVwpwP+5W9Vjkg== }
@@ -15673,6 +15600,14 @@ packages:
     resolution:
       { integrity: sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ== }
     engines: { node: '>= 0.8' }
+
+  /passport-headerapikey@1.2.2:
+    resolution:
+      { integrity: sha512-4BvVJRrWsNJPrd3UoZfcnnl4zvUWYKEtfYkoDsaOKBsrWHYmzTApCjs7qUbncOLexE9ul0IRiYBFfBG0y9IVQA== }
+    dependencies:
+      lodash: 4.17.21
+      passport-strategy: 1.0.0
+    dev: false
 
   /passport-jwt@4.0.1:
     resolution:

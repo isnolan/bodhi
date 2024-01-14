@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 // import { ValidationPipe } from '@nestjs/common';
-// import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder, SwaggerCustomOptions } from '@nestjs/swagger';
 
@@ -20,7 +20,7 @@ async function bootstrap() {
   app.useWebSocketAdapter(redisIoAdapter);
 
   // logger
-  // const nestWinston = app.get(WINSTON_MODULE_NEST_PROVIDER);
+  const nestWinston = app.get(WINSTON_MODULE_NEST_PROVIDER);
   // app.useLogger(nestWinston);
   // app.useGlobalPipes(new ValidationPipe());
 

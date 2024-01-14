@@ -32,5 +32,5 @@ export class AuthResponse {
   abilities: string[];
 
   @ApiProperty()
-  access_token: string;
+  access_token?: string;
 }

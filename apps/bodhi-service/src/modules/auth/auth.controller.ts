@@ -1,13 +1,13 @@
 import validator from 'validator';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { Controller, Req, Ip, Post, Body, Get, Query, Request } from '@nestjs/common';
 import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
 import { MailService } from '../notification/mail.service';
 import { AuthResponse } from './interface/user.interface';
-import { AuthKeys, VerificationState, VerificationType } from './entity';
+import { VerificationState, VerificationType } from './entity';
 import { captchaDto, loginDto } from './dto/auth.dto';
 import { ErrorDto } from '../common/base.dto';
 import { AuthUsersService, AuthVerificationsService } from './service';
@@ -92,9 +92,9 @@ export class AuthController {
   @ApiOperation({ summary: 'Create API Keys', description: 'Create API Keys' })
   @ApiResponse({ status: 200, description: 'success', type: AuthResponse })
   @ApiResponse({ status: 401, description: 'session is expired!' })
-  async createKeys(@Request() req) {
+  async createKeys(@Request() req, @Body('foreign_id') foreign_id: string) {
     const { user_id } = req.user;
-    const { id, secret_key, create_time } = await this.keys.create(user_id, { note: 'test' });
+    const { id, secret_key, create_time } = await this.keys.create(user_id, { foreign_id });
     return { id, secret_key, create_time };
   }
 
@@ -105,8 +105,15 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'success', type: AuthResponse })
   @ApiResponse({ status: 401, description: 'session is expired!' })
   async getSessionStatus(@Request() req): Promise<AuthResponse> {
-    const { user_id, session_id } = req.user;
-    console.log(`[status]`, user_id, session_id);
+    const { session_id } = req.user;
     return await this.auth.validateSession(session_id);
   }
+
+  // @Post('keys')
+  // @ApiBearerAuth()
+  // @UseGuards(AuthGuard('api-key'))
+  // async getKeys(@Request() req) {
+  //   console.log(`->req`, req.user);
+  //   return req.user;
+  // }
 }

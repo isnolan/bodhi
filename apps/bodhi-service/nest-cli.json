@@ -10,6 +10,13 @@
       {
         "include": "assets/**/*",
         "outDir": "dist/src"
+      },
+      {
+        "include": "i18n/**/*",
+        "watchAssets": true
+      },
+      {
+        "include": "modules/notification/templates/**/*"
       }
     ]
   }
