@@ -4,16 +4,17 @@ import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import Strategy from './strategies';
-import { AuthKeys, AuthSession, AuthUsers } from './entity';
+import { AuthSession } from './entity';
 import { AuthVerification } from './entity/verification.entity';
 import { AuthController } from './auth.controller';
 import { NotificationModule } from '../notification/notification.module';
 import { AuthService } from './auth.service';
-import { AuthUsersService, AuthSessionService, AuthVerificationsService, AuthKeysService } from './service';
+import { AuthSessionService, AuthVerificationsService } from './service';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([AuthUsers, AuthSession, AuthVerification, AuthKeys]),
+    TypeOrmModule.forFeature([AuthSession, AuthVerification]),
 
     // JWT
     JwtModule.registerAsync({
@@ -21,17 +22,12 @@ import { AuthUsersService, AuthSessionService, AuthVerificationsService, AuthKey
       inject: [ConfigService],
       useFactory: (config: ConfigService) => config.get('jwt') as JwtModuleOptions,
     }),
+
+    UsersModule,
     NotificationModule,
   ],
 
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    AuthUsersService,
-    AuthKeysService,
-    AuthSessionService,
-    AuthVerificationsService,
-    ...Strategy,
-  ],
+  providers: [AuthService, AuthSessionService, AuthVerificationsService, ...Strategy],
 })
 export class AuthModule {}

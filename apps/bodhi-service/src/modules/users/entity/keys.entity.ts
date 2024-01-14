@@ -1,13 +1,13 @@
 import { Entity, Column } from 'typeorm';
 import { Base } from '@/modules/common/base.entity';
 
-export enum AuthKeysState {
+export enum UsersKeysState {
   INVALID = 0,
   VALID = 1,
 }
 
-@Entity('bodhi_auth_keys')
-export class AuthKeys extends Base {
+@Entity('bodhi_users_keys')
+export class UsersKeys extends Base {
   @Column({ comment: 'user_id' })
   user_id: number;
 
@@ -23,6 +23,6 @@ export class AuthKeys extends Base {
   @Column({ type: 'datetime', comment: 'ExpireAt', nullable: true })
   expire_at: Date;
 
-  @Column({ type: 'tinyint', comment: '状态', default: AuthKeysState.VALID })
-  state: AuthKeysState;
+  @Column({ type: 'tinyint', comment: '状态', default: UsersKeysState.VALID })
+  state: UsersKeysState;
 }

@@ -2,13 +2,14 @@ import { JwtService } from '@nestjs/jwt';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 
 import { AuthResponse } from './interface/user.interface';
-import { AuthUsersService, AuthSessionService } from './service';
+import { AuthSessionService } from './service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwt: JwtService,
-    private readonly user: AuthUsersService,
+    private readonly user: UsersService,
     private readonly session: AuthSessionService,
   ) {}
 

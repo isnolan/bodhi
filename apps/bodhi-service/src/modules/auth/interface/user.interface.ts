@@ -1,5 +1,5 @@
+import { Users } from '@/modules/users/entity/users.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { AuthUsers } from '../entity/users.entity';
 
 export class UserResponse {
   @ApiProperty()
@@ -26,7 +26,7 @@ export class UserResponse {
 
 export class AuthResponse {
   @ApiProperty({ type: UserResponse })
-  profile: AuthUsers;
+  profile: Users;
 
   @ApiProperty()
   abilities: string[];

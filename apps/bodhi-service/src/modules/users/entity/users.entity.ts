@@ -3,7 +3,7 @@ import { Entity, Column } from 'typeorm';
 import { Base } from '@/modules/common/base.entity';
 
 @Entity('bodhi_auth_users')
-export class AuthUsers extends Base {
+export class Users extends Base {
   @ApiProperty()
   @Column({ type: 'varchar', length: 10, comment: 'user_id', nullable: true })
   user_id: string;

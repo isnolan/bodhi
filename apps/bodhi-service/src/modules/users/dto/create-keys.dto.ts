@@ -13,14 +13,3 @@ export class CreateAuthKeysDto {
   @IsString()
   note: string;
 }
-
-export class AuthDto {
-  @IsNumber()
-  id: number;
-
-  @IsString()
-  secret_key: string;
-
-  @IsString()
-  create_time: Date;
-}

@@ -10,17 +10,15 @@ import { AuthResponse } from './interface/user.interface';
 import { VerificationState, VerificationType } from './entity';
 import { captchaDto, loginDto } from './dto/auth.dto';
 import { ErrorDto } from '../common/base.dto';
-import { AuthUsersService, AuthVerificationsService } from './service';
-import { AuthKeysService } from './service/keys.service';
-import { AuthDto, CreateAuthKeysDto } from './dto/create-keys.dto';
+import { AuthVerificationsService } from './service';
+import { UsersService } from '../users/users.service';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly auth: AuthService,
-    private readonly user: AuthUsersService,
-    private readonly keys: AuthKeysService,
+    private readonly user: UsersService,
     private readonly mail: MailService,
     private readonly verification: AuthVerificationsService,
   ) {}
@@ -87,19 +85,6 @@ export class AuthController {
     throw new HttpException('Unsupport auth type!', HttpStatus.BAD_REQUEST);
   }
 
-  @Post('keys/create')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
-  @ApiOperation({ summary: 'Create API Keys', description: 'Create API Keys' })
-  @ApiResponse({ status: 200, description: 'success', type: AuthDto })
-  @ApiResponse({ status: 401, description: 'session is expired!' })
-  async createKeys(@Request() req, @Body() payload: CreateAuthKeysDto): Promise<AuthDto> {
-    const { user_id } = req.user;
-    const { foreign_id, note, expire_at } = payload;
-    const { id, secret_key, create_time } = await this.keys.create(user_id, { foreign_id, note, expire_at });
-    return { id, secret_key, create_time };
-  }
-
   @Get('status')
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
@@ -110,12 +95,4 @@ export class AuthController {
     const { session_id } = req.user;
     return await this.auth.validateSession(session_id);
   }
-
-  // @Post('keys')
-  // @ApiBearerAuth()
-  // @UseGuards(AuthGuard('api-key'))
-  // async getKeys(@Request() req) {
-  //   console.log(`->req`, req.user);
-  //   return req.user;
-  // }
 }

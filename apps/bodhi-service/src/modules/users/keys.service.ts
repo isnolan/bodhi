@@ -2,20 +2,20 @@ import { v4 as uuidv4 } from 'uuid';
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AuthKeys, AuthKeysState } from '../entity';
+import { UsersKeys, UsersKeysState } from './entity/keys.entity';
 
 @Injectable()
-export class AuthKeysService {
+export class UsersKeysService {
   constructor(
-    @InjectRepository(AuthKeys)
-    private readonly repository: Repository<AuthKeys>,
+    @InjectRepository(UsersKeys)
+    private readonly repository: Repository<UsersKeys>,
   ) {}
 
   /**
    * Create a new secret key
    * @returns
    */
-  async create(user_id: number, opts: Partial<AuthKeys>): Promise<AuthKeys> {
+  async create(user_id: number, opts: Partial<UsersKeys>): Promise<UsersKeys> {
     const { foreign_id = '', note = '' } = opts;
     const secret_key = `sk-` + uuidv4();
     const model = this.repository.create({ user_id, secret_key, foreign_id, note });
@@ -27,11 +27,18 @@ export class AuthKeysService {
    * @param secret_key
    * @returns
    */
-  async validateKey(secret_key: string): Promise<AuthKeys> {
-    const keys = await this.repository.findOne({ where: { secret_key, state: AuthKeysState.VALID } });
+  async validateKey(secret_key: string): Promise<UsersKeys> {
+    const keys = await this.repository.findOne({ where: { secret_key, state: UsersKeysState.VALID } });
     if (keys && (!keys.expire_at || keys.expire_at > new Date())) {
       return keys;
     }
     return null;
+  }
+
+  async getKeysList(user_id: number): Promise<UsersKeys[]> {
+    return await this.repository.find({
+      select: ['id', 'secret_key', 'foreign_id', 'note', 'expire_at', 'create_time'],
+      where: { user_id },
+    });
   }
 }

@@ -21,7 +21,7 @@ async function bootstrap() {
 
   // logger
   const nestWinston = app.get(WINSTON_MODULE_NEST_PROVIDER);
-  // app.useLogger(nestWinston);
+  app.useLogger(nestWinston);
   // app.useGlobalPipes(new ValidationPipe());
 
   // swagger
