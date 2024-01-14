@@ -17,6 +17,12 @@ export class AuthKeys extends Base {
   @Column({ type: 'varchar', length: 40, comment: 'Note', default: '' })
   foreign_id: string;
 
+  @Column({ type: 'varchar', length: 100, comment: 'Note', default: '' })
+  note: string;
+
+  @Column({ type: 'datetime', comment: 'ExpireAt', nullable: true })
+  expire_at: Date;
+
   @Column({ type: 'tinyint', comment: '状态', default: AuthKeysState.VALID })
   state: AuthKeysState;
 }

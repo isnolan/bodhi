@@ -12,6 +12,7 @@ import { captchaDto, loginDto } from './dto/auth.dto';
 import { ErrorDto } from '../common/base.dto';
 import { AuthUsersService, AuthVerificationsService } from './service';
 import { AuthKeysService } from './service/keys.service';
+import { AuthDto, CreateAuthKeysDto } from './dto/create-keys.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -90,11 +91,12 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @ApiOperation({ summary: 'Create API Keys', description: 'Create API Keys' })
-  @ApiResponse({ status: 200, description: 'success', type: AuthResponse })
+  @ApiResponse({ status: 200, description: 'success', type: AuthDto })
   @ApiResponse({ status: 401, description: 'session is expired!' })
-  async createKeys(@Request() req, @Body('foreign_id') foreign_id: string) {
+  async createKeys(@Request() req, @Body() payload: CreateAuthKeysDto): Promise<AuthDto> {
     const { user_id } = req.user;
-    const { id, secret_key, create_time } = await this.keys.create(user_id, { foreign_id });
+    const { foreign_id, note, expire_at } = payload;
+    const { id, secret_key, create_time } = await this.keys.create(user_id, { foreign_id, note, expire_at });
     return { id, secret_key, create_time };
   }
 
