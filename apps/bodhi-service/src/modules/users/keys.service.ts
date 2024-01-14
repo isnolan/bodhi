@@ -32,7 +32,7 @@ export class UsersKeysService {
     const keys = await this.repository.findOne({ where: { secret_key, state: UsersKeysState.VALID } });
     if (keys && (!keys.expire_at || keys.expire_at > new Date())) {
       // update last used time
-      await this.repository.update(keys.id, { update_time: moment.utc() });
+      this.repository.update(keys.id, { update_time: moment.utc().toDate() });
       return keys;
     }
     return null;
