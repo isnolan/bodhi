@@ -19,9 +19,9 @@ export class AuthSessionService {
    * @param ClientIp
    * @returns
    */
-  async createOne(user_id: number, user_ip: string): Promise<AuthSession> {
+  async createOne(user_id: number, user_ip: string, locale?: string): Promise<AuthSession> {
     const expire_at = moment.utc().add(30, 'days').toDate();
-    return await this.repository.save(plainToClass(AuthSession, { user_id, user_ip, expire_at }));
+    return await this.repository.save(plainToClass(AuthSession, { user_id, user_ip, expire_at, locale }));
   }
 
   async findOne(id: number): Promise<AuthSession> {

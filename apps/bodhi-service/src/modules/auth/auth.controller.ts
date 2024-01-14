@@ -81,7 +81,7 @@ export class AuthController {
       if (!user) {
         user = await this.user.createOneWithEmail(account, { locale });
       }
-      return this.auth.login(user.id, clientIp);
+      return this.auth.login(user.id, clientIp, locale);
     }
 
     throw new HttpException('Unsupport auth type!', HttpStatus.BAD_REQUEST);

@@ -12,9 +12,9 @@ export class AuthService {
     private readonly session: AuthSessionService,
   ) {}
 
-  async login(userId: number, clientIp?: string): Promise<AuthResponse> {
+  async login(userId: number, clientIp?: string, locale?: string): Promise<AuthResponse> {
     // session
-    const session = await this.session.createOne(userId, clientIp);
+    const session = await this.session.createOne(userId, clientIp, locale);
     // profile & token
     const user = await this.user.findOne(userId);
     const access_token = await this.jwt.signAsync({ user_id: userId, session_id: session.id });
