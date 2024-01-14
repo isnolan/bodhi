@@ -1,1 +1,1 @@
-export * from './api/openai.api';
+export * from './api/chat';
