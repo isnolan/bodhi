@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Repository } from 'typeorm';
+import * as moment from 'moment-timezone';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersKeys, UsersKeysState } from './entity/keys.entity';
@@ -30,15 +31,21 @@ export class UsersKeysService {
   async validateKey(secret_key: string): Promise<UsersKeys> {
     const keys = await this.repository.findOne({ where: { secret_key, state: UsersKeysState.VALID } });
     if (keys && (!keys.expire_at || keys.expire_at > new Date())) {
+      // update last used time
+      await this.repository.update(keys.id, { update_time: moment.utc() });
       return keys;
     }
     return null;
   }
 
-  async getKeysList(user_id: number): Promise<UsersKeys[]> {
+  async getList(user_id: number): Promise<UsersKeys[]> {
     return await this.repository.find({
       select: ['id', 'secret_key', 'foreign_id', 'note', 'expire_at', 'create_time'],
       where: { user_id },
     });
+  }
+
+  async delete(user_id: number, foreign_id: string) {
+    return await this.repository.update({ user_id, foreign_id }, { state: UsersKeysState.DELETED });
   }
 }

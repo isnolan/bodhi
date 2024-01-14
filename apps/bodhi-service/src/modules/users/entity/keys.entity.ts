@@ -2,8 +2,9 @@ import { Entity, Column } from 'typeorm';
 import { Base } from '@/modules/common/base.entity';
 
 export enum UsersKeysState {
-  INVALID = 0,
   VALID = 1,
+  INVALID = 0,
+  DELETED = -1,
 }
 
 @Entity('bodhi_users_keys')

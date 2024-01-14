@@ -19,7 +19,10 @@ export default () => {
       debug: false,
     },
 
-    redis: { host: process.env.REDIS_HOST, port: process.env.REDIS_PORT || 6379 },
+    redis: {
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT || 6379,
+    },
 
     mail: {
       host: process.env.SMTP_HOST,

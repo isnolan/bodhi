@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsNumber, IsString } from 'class-validator';
 
-export class CreateAuthKeysDto {
+export class CreateKeysDto {
   @ApiPropertyOptional({ description: 'foreign id', example: '' })
   @IsString()
   foreign_id: string;
