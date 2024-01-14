@@ -11,6 +11,10 @@ export class GetKeysDto {
   secret_key: string;
 
   @ApiProperty()
+  @IsNumber()
+  quota: number;
+
+  @ApiProperty()
   @IsString()
   foreign_id: string;
 

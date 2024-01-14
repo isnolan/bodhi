@@ -40,12 +40,17 @@ export class UsersKeysService {
 
   async getList(user_id: number): Promise<UsersKeys[]> {
     return await this.repository.find({
-      select: ['id', 'secret_key', 'foreign_id', 'note', 'expire_at', 'create_time'],
+      select: ['id', 'secret_key', 'quota', 'foreign_id', 'note', 'expire_at', 'create_time'],
       where: { user_id },
     });
   }
 
   async delete(user_id: number, foreign_id: string) {
     return await this.repository.update({ user_id, foreign_id }, { state: UsersKeysState.DELETED });
+  }
+
+  async update(user_id: number, foreign_id: string, opts: Partial<UsersKeys>) {
+    const { quota, note, expire_at } = opts;
+    return await this.repository.update({ user_id, foreign_id }, { quota, note, expire_at });
   }
 }

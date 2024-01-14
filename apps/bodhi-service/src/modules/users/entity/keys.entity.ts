@@ -18,6 +18,9 @@ export class UsersKeys extends Base {
   @Column({ type: 'varchar', length: 40, comment: 'Note', default: '' })
   foreign_id: string;
 
+  @Column({ type: 'int', comment: 'Quota', default: 0 })
+  quota: number;
+
   @Column({ type: 'varchar', length: 100, comment: 'Note', default: '' })
   note: string;
 

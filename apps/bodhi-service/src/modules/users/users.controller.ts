@@ -35,9 +35,9 @@ export class UsersController {
   @ApiResponse({ status: 401, description: 'session is expired!' })
   async createKeys(@Request() req, @Body() payload: CreateKeysDto): Promise<GetKeysDto> {
     const { user_id } = req.user;
-    const { foreign_id, note, expire_at } = payload;
+    const { quota, foreign_id, note, expire_at } = payload;
     const { id, secret_key, create_time } = await this.keys.create(user_id, { foreign_id, note, expire_at });
-    return { id, secret_key, foreign_id, note, expire_at, create_time };
+    return { id, secret_key, quota, foreign_id, note, expire_at, create_time };
   }
 
   @Post('keys/delete')
@@ -49,7 +49,18 @@ export class UsersController {
   async deleteKeys(@Request() req, @Body() payload: DeleteKeysDto) {
     const { user_id } = req.user;
     const { foreign_id } = payload;
-
     return await this.keys.delete(user_id, foreign_id);
+  }
+
+  @Post('keys/update')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Create API Keys', description: 'Create API Keys' })
+  @ApiResponse({ status: 201, description: 'success' })
+  @ApiResponse({ status: 401, description: 'session is expired!' })
+  async updateKeys(@Request() req, @Body() payload: CreateKeysDto) {
+    const { user_id } = req.user;
+    const { foreign_id, quota, note } = payload;
+    return await this.keys.update(user_id, foreign_id, { quota, note });
   }
 }
