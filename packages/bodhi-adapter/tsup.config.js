@@ -6,7 +6,7 @@ export default defineConfig([
     outDir: 'dist',
     target: 'node19',
     platform: 'node',
-    format: ['esm'],
+    format: ['esm', 'cjs'],
     splitting: false,
     sourcemap: true,
     minify: false,
