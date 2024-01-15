@@ -1,10 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { chat } from '@isnolan/bodhi-adapter';
+import { v4 as uuidv4 } from 'uuid';
 
 export class CreateCompletionDto {
   /* 基本内容 */
-  @ApiProperty({ default: 'gpt-3.5-turbo' })
+  @ApiProperty({ default: 'gemini-pro' })
   @IsNotEmpty()
   @IsString()
   model: string;
@@ -39,17 +40,17 @@ export class CreateCompletionDto {
   n?: 1;
 
   /* 会话保持 */
-  @ApiProperty({ default: undefined })
+  @ApiProperty({ default: uuidv4() })
   @IsOptional()
   @IsString()
   conversation_id?: string;
 
-  @ApiPropertyOptional({ default: undefined })
+  @ApiPropertyOptional({ default: uuidv4() })
   @IsOptional()
   @IsString()
   message_id?: string;
 
-  @ApiPropertyOptional({ default: undefined })
+  @ApiPropertyOptional({ default: uuidv4() })
   @IsOptional()
   @IsString()
   parent_id?: string;

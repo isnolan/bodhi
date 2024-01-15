@@ -58,7 +58,7 @@ describe('chat', () => {
     });
     console.log(`[gemini]result:`, JSON.stringify(res, null, 2));
     expect(res).toBeInstanceOf(Object);
-  }, 10000);
+  }, 20000);
 
   // function call
   it('function call', async () => {

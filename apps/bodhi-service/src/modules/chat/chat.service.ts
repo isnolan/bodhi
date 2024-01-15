@@ -25,10 +25,10 @@ export class ChatService {
     private readonly queue: Queue,
     @InjectRedis()
     private readonly redis: Redis,
+    private readonly supplier: SupplierService,
+    private readonly message: ChatMessageService,
     private readonly configService: ConfigService,
     private readonly conversation: ChatConversationService,
-    private readonly message: ChatMessageService,
-    private readonly supplier: SupplierService,
   ) {
     // redis
     const option = this.configService.get('redis');
@@ -67,13 +67,21 @@ export class ChatService {
     let { parent_id } = options;
 
     // 存储消息
-    if (conversation.supplier_id === 0) {
-      // parent_id = uuidv4();
-      // const a1: CreateMessageDto = { conversation_id, message_id: parent_id, role: 'system', content: system_prompt };
-      // const { tokens } = await this.message.save({ ...a1, parent_id: '' });
-      // console.log(`[chat]send:system`, a1, tokens);
-      // await this.queue.add('archives', { ...a1, tokens });
-    }
+    messages.map(async (m) => {
+      const { role, parts } = m;
+      // const message_id = uuidv4();
+      const a1: CreateMessageDto = { conversation_id, message_id, user_id, role, parts, parent_id };
+      const { tokens } = await this.message.save({ ...a1, parent_id });
+      await this.queue.add('archives', { ...a1, tokens });
+    });
+
+    // if (conversation.supplier_id === 0) {
+    // parent_id = uuidv4();
+    // const a1: CreateMessageDto = { conversation_id, message_id: parent_id, role: 'system', content: system_prompt };
+    // const { tokens } = await this.message.save({ ...a1, parent_id: '' });
+    // console.log(`[chat]send:system`, a1, tokens);
+    // await this.queue.add('archives', { ...a1, tokens });
+    // }
 
     // 存储消息:用户
     // const a2: CreateMessageDto = { conversation_id, message_id, user_id, role: 'user', content: prompt, attachments };
@@ -113,7 +121,7 @@ export class ChatService {
       await this.conversation.updateSupplier(conversation.id, supplier.id);
       console.log(`[socket]conversation:inactive`, supplier.id);
     }
-
+    console.log(`[chat]complete`);
     // 加入消息发送队列
     // const supplier_id = supplier.id;
     // const s1: QueueMessageDto = { channel, supplier_id, conversation_id, content: prompt, parent_id: message_id };
@@ -145,27 +153,27 @@ export class ChatService {
    * @param content
    * @returns
    */
-  async autoAgent(conversation: ChatConversation, channel: string, opts: any) {
-    const { parent_id, prompt } = opts;
-    const conversation_id = conversation.id;
+  // async autoAgent(conversation: ChatConversation, channel: string, opts: any) {
+  //   const { parent_id, prompt } = opts;
+  //   const conversation_id = conversation.id;
 
-    // 获取供应商
-    const { id: supplierId } = await this.supplier.getInactive('gpt-3.5', 0, true); // configuration.model
-    const supplier = (await this.supplier.get(supplierId)) as Supplier;
+  //   // 获取供应商
+  //   const { id: supplierId } = await this.supplier.getInactive('gpt-3.5', 0, true); // configuration.model
+  //   const supplier = (await this.supplier.get(supplierId)) as Supplier;
 
-    // 存储消息:用户
-    const message_id = uuidv4();
-    const user_id = conversation.user_id;
-    const a2: CreateMessageDto = { conversation_id, message_id, user_id, role: 'user', content: prompt, parent_id };
-    Object.assign(a2, { status: 0 });
-    const { tokens } = await this.message.save(a2);
-    await this.queue.add('archives', { ...a2, tokens });
+  //   // 存储消息:用户
+  //   const message_id = uuidv4();
+  //   const user_id = conversation.user_id;
+  //   const a2: CreateMessageDto = { conversation_id, message_id, user_id, role: 'user', content: prompt, parent_id };
+  //   Object.assign(a2, { status: 0 });
+  //   const { tokens } = await this.message.save(a2);
+  //   await this.queue.add('archives', { ...a2, tokens });
 
-    // 加入消息发送队列
-    const s2: QueueAgentDto = { channel, supplier_id: supplier.id, parent_id, message_id, prompt };
+  //   // 加入消息发送队列
+  //   const s2: QueueAgentDto = { channel, supplier_id: supplier.id, parent_id, message_id, prompt };
 
-    // 消息队列
-    const { id } = await this.queue.add('agent', s2);
-    console.log(`[chat]agent`, id, supplier.id, supplier.provider);
-  }
+  //   // 消息队列
+  //   const { id } = await this.queue.add('agent', s2);
+  //   console.log(`[chat]agent`, id, supplier.id, supplier.provider);
+  // }
 }

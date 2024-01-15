@@ -113,44 +113,44 @@ export class SupplierOpenAIProcessor {
     });
   }
 
-  @Process('agent')
-  async subject(job: Job<QueueAgentDto>) {
-    // console.log(`[api]job:`, job.data);
-    const { channel, supplier_id, parent_id, message_id, prompt } = job.data;
-    return new Promise(async (resolve) => {
-      try {
-        const supplier = (await this.supplier.get(supplier_id)) as Supplier;
-        const { ChatGPTAPI, AzureChatGPTAPI } = await importDynamic('@yhostc/chatbot-puppet');
-        const { apiKey } = JSON.parse(supplier.authorisation);
-        const opts = { apiKey, proxyAgent: process.env.PROXY_AGENT };
-        const api = supplier.provider == 'openai' ? new ChatGPTAPI(opts) : new AzureChatGPTAPI(opts);
+  // @Process('agent')
+  // async subject(job: Job<QueueAgentDto>) {
+  //   // console.log(`[api]job:`, job.data);
+  //   const { channel, supplier_id, parent_id, message_id, prompt } = job.data;
+  //   return new Promise(async (resolve) => {
+  //     try {
+  //       const supplier = (await this.supplier.get(supplier_id)) as Supplier;
+  //       const { ChatGPTAPI, AzureChatGPTAPI } = await importDynamic('@yhostc/chatbot-puppet');
+  //       const { apiKey } = JSON.parse(supplier.authorisation);
+  //       const opts = { apiKey, proxyAgent: process.env.PROXY_AGENT };
+  //       const api = supplier.provider == 'openai' ? new ChatGPTAPI(opts) : new AzureChatGPTAPI(opts);
 
-        const message = (await this.message.findMyMessageId(parent_id)) as ChatMessage;
-        const res = await api.sendMessage([
-          { role: 'system', content: prompt },
-          { role: 'user', content: message.content },
-        ]);
+  //       const message = (await this.message.findMyMessageId(parent_id)) as ChatMessage;
+  //       const res = await api.sendMessage([
+  //         { role: 'system', content: prompt },
+  //         { role: 'user', content: message.content },
+  //       ]);
 
-        const content = res.choices[0].message.content;
-        const tokens = res.usage?.completion_tokens;
-        console.log(`[agent]`, channel, new Date().toLocaleTimeString('zh-CN'));
-        console.log(`->`, content);
+  //       const content = res.choices[0].message.content;
+  //       const tokens = res.usage?.completion_tokens;
+  //       console.log(`[agent]`, channel, new Date().toLocaleTimeString('zh-CN'));
+  //       console.log(`->`, content);
 
-        await this.service.reply(channel, res);
+  //       await this.service.reply(channel, res);
 
-        // ready to archives
-        const payload = { conversation_id: message.conversation_id, message_id: res.id, role: 'assistant', content };
-        Object.assign(payload, { tokens, status: 0, parent_id: message_id });
-        await this.queue.add('archives', payload);
+  //       // ready to archives
+  //       const payload = { conversation_id: message.conversation_id, message_id: res.id, role: 'assistant', content };
+  //       Object.assign(payload, { tokens, status: 0, parent_id: message_id });
+  //       await this.queue.add('archives', payload);
 
-        resolve({});
-      } catch (err) {
-        console.warn(`[agent]Error`, err.message);
-        resolve({});
-        return;
-      }
-    });
-  }
+  //       resolve({});
+  //     } catch (err) {
+  //       console.warn(`[agent]Error`, err.message);
+  //       resolve({});
+  //       return;
+  //     }
+  //   });
+  // }
 
   /**
    * Archives
@@ -158,12 +158,12 @@ export class SupplierOpenAIProcessor {
   @Process('archives')
   async archives(job: Job<CreateMessageDto>) {
     // console.log(`[archives]job:`, job.data);
-    const { conversation_id, role, content, message_id }: CreateMessageDto = job.data; // 必备
-    const { attachments = [], parent_conversation_id, parent_id, status }: any = job.data; // 可选
+    const { conversation_id, role, parts, message_id }: CreateMessageDto = job.data; // 必备
+    const { parent_conversation_id, parent_id, status }: any = job.data; // 可选
     return new Promise(async (resolve) => {
       // 储存信息, system 和 user 在第一时间入库，以便于api发送消息时能够查询到最新消息列表。
       if (role === 'assistant') {
-        const d3 = { conversation_id, role, content, attachments, message_id, parent_id, status };
+        const d3 = { conversation_id, role, parts, message_id, parent_id, status };
         await this.message.save(d3);
       }
 

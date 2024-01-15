@@ -13,10 +13,10 @@ export class ChatConversation extends Base {
   parent_conversation_id: string;
 
   @Column({ type: 'int', comment: 'user_id', default: 0 })
-  user_id: string;
+  user_id: number;
 
   @Column({ type: 'int', comment: 'key_id', default: 0 })
-  user_key_id: string;
+  user_key_id: number;
 
   @Column({ type: 'varchar', length: 40, comment: 'Model', default: '' })
   model: string;

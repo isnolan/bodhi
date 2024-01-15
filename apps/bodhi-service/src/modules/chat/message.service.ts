@@ -12,15 +12,16 @@ export class ChatMessageService {
     private readonly repository: Repository<ChatMessage>,
   ) {}
 
-  async save(opts: CreateMessageDto): Promise<ChatMessage> {
+  async save(opts: Partial<ChatMessage>): Promise<ChatMessage> {
     // const { conversation_id, role, content } = opts; // 必备参数
-    const { user_id = '', parent_id } = opts; // 可选参数
+    const { user_id, parent_id, parts } = opts; // 可选参数
     let { tokens } = opts;
-    if (!opts.tokens) {
-      tokens = this.getTokenCount(opts.content);
-    }
+    // if (!opts.tokens) {
+    //   tokens = this.getTokenCount(opts.content);
+    // }
+    console.log(`[message]parts`, parts);
 
-    const d = this.repository.create({ ...opts, tokens, user_id, parent_id });
+    const d = this.repository.create({ ...opts, user_id, parent_id });
     return await this.repository.save(d);
   }
 
@@ -37,7 +38,7 @@ export class ChatMessageService {
   async getLastMessage(conversation_id: number): Promise<ChatMessage | null> {
     // 获取最近消息
     return await this.repository.findOne({
-      select: { id: true, message_id: true, role: true, content: true },
+      select: ['id', 'message_id', 'role', 'parts'],
       where: [{ conversation_id, role: 'assistant', status: 1 }],
       order: { id: 'DESC' },
     });

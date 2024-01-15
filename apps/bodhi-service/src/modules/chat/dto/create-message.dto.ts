@@ -1,3 +1,4 @@
+import { chat } from '@isnolan/bodhi-adapter';
 import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateMessageDto {
@@ -11,17 +12,13 @@ export class CreateMessageDto {
 
   @IsOptional()
   @IsNumber()
-  user_id?: string;
+  user_id?: number;
 
   @IsString()
   role: string;
 
-  @IsString()
-  content: string;
-
-  @IsOptional()
   @IsArray()
-  attachments?: string[];
+  parts: chat.Part[];
 
   @IsOptional()
   @IsNumber()
