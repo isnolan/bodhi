@@ -14,23 +14,21 @@ export class ChatConversationService {
     private readonly repository: Repository<ChatConversation>,
   ) {}
 
-  async createOne(opts: CreateConversationDto): Promise<ChatConversation> {
-    const res = this.repository.create(opts);
-    return await this.repository.save(res);
-  }
+  // async createOne(opts: Partial<ChatConversation>): Promise<ChatConversation> {
+  //   const res = this.repository.create(opts);
+  //   return await this.repository.save(res);
+  // }
 
-  async findOne(id: number): Promise<ChatConversation | null> {
+  async findOne(id: number): Promise<ChatConversation> {
     return await this.repository.findOne({ where: { id } });
   }
 
-  async findOneByConversationId(conversation_id: string): Promise<ChatConversation | null> {
+  async findOneByConversationId(conversation_id: string): Promise<ChatConversation> {
     return await this.repository.findOne({ where: { conversation_id } });
   }
 
-  async findAndCreateOne(opts: CreateConversationDto) {
-    const { conversation_id, user_id } = opts;
-    const { model, context_limit, n, temperature, presence_penalty, frequency_penalty } = opts;
-    // get
+  async findAndCreateOne(conversation_id, opts: Partial<ChatConversation>) {
+    // find
     if (conversation_id) {
       const res = await this.findOneByConversationId(conversation_id);
       if (res) {
@@ -39,8 +37,10 @@ export class ChatConversationService {
     }
 
     // create
-    const d = { user_id, model, context_limit, n, temperature, presence_penalty, frequency_penalty };
-    return await this.createOne({ ...d, conversation_id: conversation_id || uuidv4() });
+    const { user_id, user_key_id } = opts;
+    const { model, temperature = 0.8, top_p = 0, top_k = 0, n = 1 } = opts;
+    const d = { user_id, user_key_id, model, temperature, top_p, top_k, n };
+    return await this.repository.save(this.repository.create({ conversation_id, ...opts }));
   }
 
   async updateSupplier(id: number, supplier_id: number) {

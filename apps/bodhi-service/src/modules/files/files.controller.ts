@@ -6,18 +6,18 @@ import { UseInterceptors, UploadedFile } from '@nestjs/common';
 import { Controller, Get, Query, Post, HttpException, HttpStatus } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiBody, ApiConsumes, ApiTags, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 
-import { FileService } from './file.service';
+import { FilesService } from './files.service';
 import { UploadFileReq, FileDto, FileListDto } from './dto/upload.dto';
 import { File } from './entity/file.entity';
 
-@ApiTags('file')
+@ApiTags('files')
 @ApiBearerAuth()
-@Controller('file')
-export class FileController {
+@Controller('files')
+export class FilesController {
   constructor(
     @InjectRedis()
     private readonly redis: Redis,
-    private readonly service: FileService,
+    private readonly service: FilesService,
   ) {}
 
   @Get()

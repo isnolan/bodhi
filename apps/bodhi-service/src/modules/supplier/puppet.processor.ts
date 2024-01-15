@@ -7,16 +7,15 @@ import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 
 import { SupplierService } from './supplier.service';
-import { UploadAttachmentDto } from '../chat/dto/upload-attachment.dto';
 import { ChatConversationService } from '../chat/conversation.service';
 import { ChatMessageService } from '../chat/message.service';
 import { ChatService } from '../chat/chat.service';
 import { QueueMessageDto } from '../chat/dto/queue-message.dto';
-import { FileService } from '../file/file.service';
-import { FileDto } from '../file/dto/upload.dto';
-import { FilePuppetDto } from '../file/dto/queue-file.dto';
+import { FilesService } from '../files/files.service';
 import { ChatConversation } from '../chat/entity/conversation.entity';
 import { Supplier } from './entity/supplier.entity';
+import { FileDto } from '../files/dto/upload.dto';
+import { FilePuppetDto } from '../files/dto/queue-file.dto';
 
 const importDynamic = new Function('modulePath', 'return import(modulePath)');
 
@@ -32,7 +31,7 @@ export class SupplierPuppetProcessor implements OnModuleInit {
     private readonly queue: Queue,
     @InjectRedis()
     private readonly redis: Redis,
-    private readonly file: FileService,
+    private readonly file: FilesService,
     private readonly supplier: SupplierService,
     private readonly service: ChatService,
     private readonly message: ChatMessageService,

@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Entity, Column } from 'typeorm';
 import { Base } from '@/modules/common/base.entity';
 
-@Entity('bodhi_auth_users')
+@Entity('bodhi_users')
 export class Users extends Base {
   @ApiProperty()
   @Column({ type: 'varchar', length: 10, comment: 'user_id', nullable: true })

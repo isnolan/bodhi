@@ -15,7 +15,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { FilePuppetDto } from './dto/queue-file.dto';
 @Injectable()
-export class FileService {
+export class FilesService {
   private readonly hashids: Hashids;
 
   constructor(
@@ -41,7 +41,7 @@ export class FileService {
     await this.repository.update(id, { ...opts });
   }
 
-  async get(id: number): Promise<File | null> {
+  async get(id: number): Promise<File> {
     return await this.repository.findOne({ where: { id } });
   }
 

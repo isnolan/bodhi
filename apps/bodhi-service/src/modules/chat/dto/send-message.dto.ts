@@ -1,25 +1,14 @@
-import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { chat } from '@isnolan/bodhi-adapter';
 
 export class SendMessageDto {
   @IsNotEmpty()
   @IsString()
-  prompt: string;
+  messages: chat.Message[];
 
   @IsOptional()
   @IsString()
-  system_prompt?: string;
-
-  @IsOptional()
-  @IsNumber()
-  n?: number;
-
-  @IsOptional()
-  @IsArray()
-  attachments?: string[];
-
-  @IsOptional()
-  @IsString()
-  message_id?: string;
+  message_id: string;
 
   @IsOptional()
   @IsString()

@@ -63,22 +63,22 @@ export class ChatService {
    */
   async send(conversation: ChatConversation, options: SendMessageDto, channel: string) {
     const { id: conversation_id, user_id, model } = conversation;
-    const { prompt, system_prompt, attachments, n, message_id = '' } = options;
+    const { messages, message_id } = options;
     let { parent_id } = options;
 
-    // 存储消息:系统
-    if (conversation.supplier_id === 0 && system_prompt) {
-      parent_id = uuidv4();
-      const a1: CreateMessageDto = { conversation_id, message_id: parent_id, role: 'system', content: system_prompt };
-      const { tokens } = await this.message.save({ ...a1, parent_id: '' });
-      console.log(`[chat]send:system`, a1, tokens);
-      await this.queue.add('archives', { ...a1, tokens });
+    // 存储消息
+    if (conversation.supplier_id === 0) {
+      // parent_id = uuidv4();
+      // const a1: CreateMessageDto = { conversation_id, message_id: parent_id, role: 'system', content: system_prompt };
+      // const { tokens } = await this.message.save({ ...a1, parent_id: '' });
+      // console.log(`[chat]send:system`, a1, tokens);
+      // await this.queue.add('archives', { ...a1, tokens });
     }
 
     // 存储消息:用户
-    const a2: CreateMessageDto = { conversation_id, message_id, user_id, role: 'user', content: prompt, attachments };
-    const { tokens } = await this.message.save({ ...a2, parent_id });
-    await this.queue.add('archives', { ...a2, tokens }, { delay: 200 });
+    // const a2: CreateMessageDto = { conversation_id, message_id, user_id, role: 'user', content: prompt, attachments };
+    // const { tokens } = await this.message.save({ ...a2, parent_id });
+    // await this.queue.add('archives', { ...a2, tokens }, { delay: 200 });
 
     // 获取是否已分配节点
     let supplier: Supplier;
@@ -115,16 +115,16 @@ export class ChatService {
     }
 
     // 加入消息发送队列
-    const supplier_id = supplier.id;
-    const s1: QueueMessageDto = { channel, supplier_id, conversation_id, content: prompt, parent_id: message_id };
-    Object.assign(s1, { attachments });
-    if (supplier.instance === 'puppet') {
-      // 发布订阅
-      await this.redis.publish('puppet', JSON.stringify(s1));
-    } else {
-      // 消息队列
-      await this.queue.add('openapi', s1, { priority: 1, delay: 10 });
-    }
+    // const supplier_id = supplier.id;
+    // const s1: QueueMessageDto = { channel, supplier_id, conversation_id, content: prompt, parent_id: message_id };
+    // // Object.assign(s1, { attachments });
+    // if (supplier.instance === 'puppet') {
+    //   // 发布订阅
+    //   await this.redis.publish('puppet', JSON.stringify(s1));
+    // } else {
+    //   // 消息队列
+    //   await this.queue.add('openapi', s1, { priority: 1, delay: 10 });
+    // }
   }
 
   /**

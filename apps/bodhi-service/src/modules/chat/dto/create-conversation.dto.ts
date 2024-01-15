@@ -3,11 +3,15 @@ import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 export class CreateConversationDto {
   @IsOptional()
   @IsString()
-  user_id?: string;
+  user_id: number;
 
   @IsOptional()
   @IsString()
-  conversation_id?: string;
+  user_key_id: number;
+
+  @IsOptional()
+  @IsString()
+  conversation_id: string;
 
   @IsNotEmpty()
   @IsString()
@@ -15,21 +19,17 @@ export class CreateConversationDto {
 
   @IsOptional()
   @IsNumber()
-  context_limit?: number;
+  temperature: number;
 
   @IsOptional()
   @IsNumber()
-  n?: number;
+  top_p: 0;
 
   @IsOptional()
   @IsNumber()
-  temperature?: number;
+  top_k: 0;
 
   @IsOptional()
   @IsNumber()
-  presence_penalty?: 0;
-
-  @IsOptional()
-  @IsNumber()
-  frequency_penalty?: 0;
+  n: number;
 }

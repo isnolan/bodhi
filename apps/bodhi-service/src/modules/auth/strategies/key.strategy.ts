@@ -1,5 +1,5 @@
 import { UsersKeysService } from '@/modules/users/keys.service';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, HttpException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { HeaderAPIKeyStrategy } from 'passport-headerapikey';
 
@@ -14,7 +14,12 @@ export class ApiKeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy, 'api-
   public async validate(apiKey: string, done: (error: Error, data) => {}) {
     const key = await this.keys.validateKey(apiKey);
     if (key) {
-      done(null, { user_id: key.user_id, keys_id: key.id });
+      if (key.quota < 1) {
+        done(new HttpException('You exceeded your current quota, please check your plan.', 402), null);
+        return;
+      }
+      done(null, { user_id: key.user_id, user_key_id: key.id });
+      return;
     }
     done(new UnauthorizedException(), null);
   }

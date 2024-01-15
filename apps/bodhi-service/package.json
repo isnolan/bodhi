@@ -20,6 +20,7 @@
     "precommit": "lint-staged && npm run lint && npm run test"
   },
   "dependencies": {
+    "@isnolan/bodhi-adapter": "workspace:^",
     "@liaoliaots/nestjs-redis": "^9.0.5",
     "@nestjs-modules/mailer": "^1.10.3",
     "@nestjs/bull": "^0.6.3",
@@ -40,7 +41,6 @@
     "ali-oss": "^6.18.0",
     "bull": "^4.10.3",
     "crypto": "^1.0.1",
-    "delay": "^6.0.0",
     "dotenv": "^16.3.1",
     "hashids": "^2.3.0",
     "https-proxy-agent": "^7.0.2",

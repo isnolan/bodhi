@@ -8,16 +8,16 @@ import { ConfigService } from '@nestjs/config';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { Process, Processor } from '@nestjs/bull';
 
-import { FileService } from './file.service';
+import { FilesService } from './files.service';
 import { FileQuqueDto } from './dto/queue-file.dto';
 import { FileState } from './entity/file.entity';
 import { putStream } from '@/common/utils/aliyun';
 
 @Processor('chatbot')
-export class FileProcessor {
+export class FilesProcessor {
   private readonly proxy: any;
 
-  constructor(private readonly config: ConfigService, private readonly service: FileService) {
+  constructor(private readonly config: ConfigService, private readonly service: FilesService) {
     this.proxy = config.get('proxy');
   }
 

@@ -9,7 +9,7 @@ import { Supplier } from './entity/supplier.entity';
 import { SupplierOpenAIProcessor } from './openai.processor';
 import { SupplierPuppetProcessor } from './puppet.processor';
 import { ChatModule } from '../chat/chat.module';
-import { FileModule } from '../file/file.module';
+import { FilesModule } from '../files/files.module';
 
 @Module({
   imports: [
@@ -27,7 +27,7 @@ import { FileModule } from '../file/file.module';
     }),
 
     forwardRef(() => ChatModule),
-    forwardRef(() => FileModule),
+    forwardRef(() => FilesModule),
   ],
   controllers: [],
   providers: [SupplierService, SupplierOpenAIProcessor, SupplierPuppetProcessor],

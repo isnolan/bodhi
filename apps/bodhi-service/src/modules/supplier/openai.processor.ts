@@ -74,8 +74,8 @@ export class SupplierOpenAIProcessor {
           model,
           n: Number(conversation.n),
           temperature: Number(conversation.temperature),
-          presence_penalty: Number(conversation.presence_penalty),
-          frequency_penalty: Number(conversation.frequency_penalty),
+          // presence_penalty: Number(conversation.presence_penalty),
+          // frequency_penalty: Number(conversation.frequency_penalty),
         };
         const messages = await this.message.getLastMessages(conversation_id, conversation.context_limit);
         const api = await this.initAPI(supplier);

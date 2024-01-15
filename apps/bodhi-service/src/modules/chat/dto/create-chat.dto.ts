@@ -1,17 +1,44 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { chat } from '@isnolan/bodhi-adapter';
 
-export class CreateChatDto {
+export class CreateCompletionDto {
+  /* 基本内容 */
   @ApiProperty({ default: 'gpt-3.5-turbo' })
   @IsNotEmpty()
   @IsString()
   model: string;
 
-  @ApiProperty({ default: 'hi' })
+  @ApiProperty({ default: [{ role: 'user', parts: [{ type: 'text', text: 'Hi' }] }] })
   @IsNotEmpty()
-  @IsString()
-  prompt: string;
+  @IsArray()
+  messages: chat.Message[];
 
+  @ApiPropertyOptional({ default: [] })
+  tools: chat.Tools[];
+
+  /* 会话参数 */
+  @ApiProperty({ default: 0.8 })
+  @IsOptional()
+  @IsNumber()
+  temperature?: number;
+
+  @ApiProperty({ default: 0 })
+  @IsOptional()
+  @IsNumber()
+  top_p?: 0;
+
+  @ApiProperty({ default: 0 })
+  @IsOptional()
+  @IsNumber()
+  top_k?: 0;
+
+  @ApiProperty({ default: 1 })
+  @IsOptional()
+  @IsNumber()
+  n?: 1;
+
+  /* 会话保持 */
   @ApiProperty({ default: undefined })
   @IsOptional()
   @IsString()
@@ -26,46 +53,6 @@ export class CreateChatDto {
   @IsOptional()
   @IsString()
   parent_id?: string;
-
-  @ApiPropertyOptional({ default: '1' })
-  @IsOptional()
-  @IsString()
-  user_id?: string;
-
-  @ApiProperty({ default: [] })
-  @IsOptional()
-  @IsNumber()
-  attachments?: string[];
-
-  @ApiProperty({ default: 5 })
-  @IsOptional()
-  @IsNumber()
-  context_limit?: number;
-
-  @ApiProperty({ default: 0.8 })
-  @IsOptional()
-  @IsNumber()
-  temperature?: number;
-
-  @ApiProperty({ default: 0 })
-  @IsOptional()
-  @IsNumber()
-  presence_penalty?: 0;
-
-  @ApiProperty({ default: 0 })
-  @IsOptional()
-  @IsNumber()
-  frequency_penalty?: 0;
-
-  @ApiProperty({ default: 1 })
-  @IsOptional()
-  @IsNumber()
-  n?: 1;
-
-  @ApiPropertyOptional({ default: '' })
-  @IsOptional()
-  @IsString()
-  system_prompt?: string;
 }
 
 export interface Message {

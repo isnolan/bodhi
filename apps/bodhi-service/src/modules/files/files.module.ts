@@ -3,10 +3,10 @@ import { BullModule } from '@nestjs/bull';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
-import { FileService } from './file.service';
-import { FileController } from './file.controller';
+import { FilesService } from './files.service';
+import { FilesController } from './files.controller';
 import { File } from './entity/file.entity';
-import { FileProcessor } from './file.processor';
+import { FilesProcessor } from './files.processor';
 
 @Module({
   imports: [
@@ -23,8 +23,8 @@ import { FileProcessor } from './file.processor';
       }),
     }),
   ],
-  controllers: [FileController],
-  providers: [FileService, FileProcessor],
-  exports: [FileService],
+  controllers: [FilesController],
+  providers: [FilesService, FilesProcessor],
+  exports: [FilesService],
 })
-export class FileModule {}
+export class FilesModule {}
