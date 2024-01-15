@@ -12,6 +12,7 @@ import { captchaDto, loginDto } from './dto/auth.dto';
 import { ErrorDto } from '../common/base.dto';
 import { AuthVerificationsService } from './service';
 import { UsersService } from '../users/users.service';
+import { RequestWithUser } from '../common/request.interface';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -91,8 +92,8 @@ export class AuthController {
   @ApiOperation({ summary: '获取用户会话状态', description: '获取会话状态' })
   @ApiResponse({ status: 200, description: 'success', type: AuthResponse })
   @ApiResponse({ status: 401, description: 'session is expired!' })
-  async getSessionStatus(@Request() req): Promise<AuthResponse> {
-    const { session_id } = req.user;
-    return await this.auth.validateSession(session_id);
+  async getSessionStatus(@Request() req: RequestWithUser): Promise<AuthResponse> {
+    const { user_session_id } = req.user;
+    return await this.auth.validateSession(user_session_id);
   }
 }

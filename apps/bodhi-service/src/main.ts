@@ -30,6 +30,10 @@ async function bootstrap() {
     .setVersion('1.0')
     .addServer('http://127.0.0.1:3200', 'Stage')
     .addBearerAuth()
+    .addApiKey(
+      { type: 'apiKey', name: 'x-api-key', in: 'header' },
+      'api-key', // This name will be used to refer to the scheme
+    )
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document, swaggerCustomOptions);

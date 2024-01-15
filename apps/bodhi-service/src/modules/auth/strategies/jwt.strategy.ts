@@ -19,7 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     // 验证session是否有效
     const session = await this.session.validateSession(session_id);
     if (session) {
-      return { user_id, session_id, iat };
+      return { user_id, user_session_id: session_id, iat };
     }
     throw new UnauthorizedException();
   }
