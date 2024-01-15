@@ -4,7 +4,7 @@ export default defineConfig([
   {
     entry: ['src/index.ts'],
     outDir: 'dist',
-    target: 'node16',
+    target: 'node19',
     platform: 'node',
     format: ['esm'],
     splitting: false,

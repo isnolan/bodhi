@@ -6,14 +6,14 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 describe('chat', () => {
   beforeEach(() => {
-    if (!process.env.PROXY_URL || !process.env.GEMINI) {
+    if (!process.env.PROXY_URL || !process.env.GOOGLE_GEMINI) {
       console.log('Skipping test due to missing environment variables');
-      pending();
+      return;
     }
   });
 
   const api = new ChatAPI(Provider.GOOGLE_GEMINI, {
-    apiKey: process.env?.GEMINI as string,
+    apiKey: process.env?.GOOGLE_GEMINI as string,
     agent: process.env.PROXY_URL as string,
   });
 
@@ -33,7 +33,7 @@ describe('chat', () => {
     });
     console.log(`[gemini]result:`, JSON.stringify(res));
     expect(res).toBeInstanceOf(Object);
-  }, 30000);
+  }, 10000);
 
   // vision: image part, from inline data
   it('vision:image from inline data', async () => {
@@ -58,7 +58,7 @@ describe('chat', () => {
     });
     console.log(`[gemini]result:`, JSON.stringify(res, null, 2));
     expect(res).toBeInstanceOf(Object);
-  }, 30000);
+  }, 10000);
 
   // function call
   it('function call', async () => {
@@ -98,5 +98,5 @@ describe('chat', () => {
     });
     console.log(`[gemini]result:`, JSON.stringify(result));
     expect(result).toBeInstanceOf(Object);
-  }, 30000);
+  }, 10000);
 });
