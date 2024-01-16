@@ -36,7 +36,7 @@ export class AnthropicClaudeAPI extends ChatBaseAPI {
 
       if (!res.ok) {
         const reason = await res.json();
-        throw new types.chat.ChatError(reason[0].error?.message || 'request error', res.status);
+        reject(new types.chat.ChatError(reason[0].error?.message || 'request error', res.status));
       }
 
       // only get content from node-fetch

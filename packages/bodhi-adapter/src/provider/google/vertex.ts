@@ -56,7 +56,7 @@ export class GoogleVertexAPI extends GoogleGeminiAPI {
 
       if (!res.ok) {
         const reason = await res.json();
-        throw new types.chat.ChatError(reason.error?.message || 'request error', res.status);
+        reject(new types.chat.ChatError(reason.error?.message || 'request error', res.status));
       }
 
       // only get content from node-fetch
