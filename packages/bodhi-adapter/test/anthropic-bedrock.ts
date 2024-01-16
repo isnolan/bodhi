@@ -8,7 +8,7 @@ describe('chat', () => {
   beforeEach(() => {
     if (!process.env.PROXY_URL || !process.env.AWS_BEDROCK_ACCESS || !process.env.AWS_BEDROCK_SECRET) {
       console.log('Skipping test due to missing environment variables');
-      pending();
+      return;
     }
   });
 

@@ -40,15 +40,19 @@ export namespace chat {
   /* Message */
   export type Message = { role: string; parts: Part[] };
 
-  export type Part = TextPart | FilePart | FunctionPart;
+  export type Part = TextPart | FilePart | ToolPart;
   export type TextPart = { type: 'text'; text: string };
   export type FilePart = { type: 'image' | 'video' | 'file'; url: string };
-  export type FunctionPart =
-    | { type: 'function_call'; name: string; args: any }
-    | { type: 'function'; function: Function };
+  export type ToolPart = FunctionCallTool | FunctionTool;
 
-  /* Function  */
-  export type Tools = { type: 'function'; function: Function };
+  /* Tools  */
+  export type Tools = FunctionTool;
+  export type FunctionCallTool = {
+    type: 'function_call';
+    function_call: { name: string; args: any };
+    id?: string | undefined;
+  };
+  export type FunctionTool = { type: 'function'; function: Function };
 
   export type Function = {
     name: string;

@@ -58,6 +58,16 @@ export class ChatBaseAPI {
             } else {
               existingItem.parts.push(part);
             }
+          } else if (part.type === 'function_call') {
+            const existingPart = existingItem.parts.find((p: types.chat.Part) => p.type === 'function_call');
+            if (existingPart) {
+              (existingPart as types.chat.FunctionCallTool).function_call.name +=
+                (part as types.chat.FunctionCallTool).function_call.name || '';
+              (existingPart as types.chat.FunctionCallTool).function_call.args +=
+                (part as types.chat.FunctionCallTool).function_call.args || '';
+            } else {
+              existingItem.parts.push(part);
+            }
           } else {
             const existingPart = existingItem.parts.find(
               (p: types.chat.Part) => JSON.stringify(p) === JSON.stringify(part),

@@ -7,7 +7,7 @@ describe('chat', () => {
   beforeEach(() => {
     if (!process.env.PROXY_URL || !process.env.GEMINI) {
       console.log('Skipping test due to missing environment variables');
-      pending();
+      return;
     }
   });
 

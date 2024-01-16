@@ -116,7 +116,8 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
               parts.push({ inline_data });
             }
             if (part.type === 'function_call') {
-              parts.push({ functionCall: { name: part.name, args: part.args } });
+              const { name, args } = part.function_call;
+              parts.push({ functionCall: { name, args } });
             }
           }),
         );
@@ -149,11 +150,8 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
             parts.push({ type: 'text', text: part.text });
           }
           if ('functionCall' in part) {
-            parts.push({ type: 'function', function: part.functionCall });
+            parts.push({ type: 'function_call', function_call: part.functionCall });
           }
-          // if (part.inline_data) {
-          //   parts.push({ type: 'image', url: part.inline_data.data });
-          // }
         });
         choices.push({ index, role: 'assistant', parts, finish_reason: 'stop' });
       });

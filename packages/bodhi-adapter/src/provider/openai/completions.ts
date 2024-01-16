@@ -1,9 +1,11 @@
 import fetchSSE from 'node-fetch';
+import { v4 as uuidv4 } from 'uuid';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { createParser, type ParseEvent, type ReconnectInterval } from 'eventsource-parser';
 
 import * as types from '@/types';
 import { ChatBaseAPI } from '../base';
+import { openai } from './types';
 
 export class OpenAICompletionsAPI extends ChatBaseAPI {
   protected provider: string = 'openai';
@@ -18,9 +20,11 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
 
     return new Promise(async (resolove, reject) => {
       const url = `${this.baseURL}/chat/completions`;
+      const params: openai.Request = await this.convertParams(options);
+      console.log(`[fetch]params`, JSON.stringify(params, null, 2));
       const res = await fetchSSE(url, {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.apiKey}` },
-        body: JSON.stringify(this.convertParams(options)),
+        body: JSON.stringify(params),
         agent: this.agent ? new HttpsProxyAgent(this.agent) : undefined,
         method: 'POST',
       });
@@ -30,39 +34,47 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
         reject(new types.chat.ChatError(reason.error?.message || 'request error', res.status));
       }
 
-      // only get content from node-fetch
-      let response: any;
-      const body: NodeJS.ReadableStream = res.body;
-      body.on('error', (err) => reject(new types.chat.ChatError(err.message, 500)));
-      const parser = createParser((event: ParseEvent | ReconnectInterval) => {
-        if (event.type === 'event') {
-          if (event.data === '[DONE]') {
-            resolove(response);
-          } else {
-            try {
-              response = JSON.parse(event.data);
-              onProgress?.(response);
-            } catch (e) {
-              // ignore
+      // not stream
+      if (params.stream === false) {
+        const result = await res.json();
+        const choices = this.convertChoices(result.choices);
+        const useage = result?.usage;
+        resolove({ id: uuidv4(), model: opts.model, choices, useage });
+      } else {
+        // streaming
+        const body: NodeJS.ReadableStream = res.body;
+        body.on('error', (err) => reject(new types.chat.ChatError(err.message, 500)));
+
+        const choicesList: types.chat.Choice[] = [];
+        const parser = createParser((event: ParseEvent | ReconnectInterval) => {
+          if (event.type === 'event') {
+            if (event.data !== '[DONE]') {
+              try {
+                const res = JSON.parse(event.data);
+                const choices = this.convertChoices(res.choices);
+                onProgress?.(choices);
+                choicesList.push(...choices);
+              } catch (e) {
+                // ignore
+              }
             }
           }
+        });
+        body.on('readable', async () => {
+          let chunk: string | Buffer;
+          while ((chunk = body.read())) {
+            parser.feed(chunk.toString());
+          }
+        });
 
-          // 整理数据
-          // const choice: types.chat.Choice[] = [];
-          // response.candidates.map((item: any) => {
-          //   choice.push(item.content);
-          // });
-          // console.log(`[fetch]sse`, JSON.stringify(choice, null, 2));
-        }
-      });
-      body.on('readable', async () => {
-        let chunk: string | Buffer;
-        while ((chunk = body.read())) {
-          parser.feed(chunk.toString());
-        }
-      });
-
-      body.on('end', () => {});
+        console.log(`->`, choicesList);
+        body.on('end', async () => {
+          const choices: types.chat.Choice[] = this.combineChoices(choicesList);
+          // TODO: Google AI Gemini not found usageMetadata, but vertex founded.
+          const useage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+          resolove({ id: uuidv4(), model: opts.model, choices, useage });
+        });
+      }
     });
   }
 
@@ -71,34 +83,89 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
    * https://platform.openai.com/docs/api-reference/chat/create
    * @returns
    */
-  private convertParams(opts: types.chat.SendOptions) {
-    return {
+  private async convertParams(opts: types.chat.SendOptions): Promise<openai.Request> {
+    const params: openai.Request = {
       model: opts.model || 'gpt-3.5-turbo-1106',
-      messages: opts.messages || [],
-      // tools: opts?.tools,
-      // tools: [
-      //   {
-      //     type: 'function',
-      //     function: {
-      //       name: 'get_current_weather',
-      //       description: 'Get the current weather in a given location',
-      //       parameters: {
-      //         type: 'object',
-      //         properties: {
-      //           location: { type: 'string', description: 'The city and state, e.g. San Francisco, CA' },
-      //           unit: { type: 'string', enum: ['celsius', 'fahrenheit'] },
-      //         },
-      //         required: ['location'],
-      //       },
-      //     },
-      //   },
-      // ],
+      messages: await this.corvertContents(opts),
       temperature: opts?.temperature || 0.9,
       top_p: opts?.top_p || 1,
+      // frequency_penalty: 0,
+      // presence_penalty: 0,
+      max_tokens: opts?.max_tokens || 1000,
       n: opts.n || 1,
-      max_tokens: opts?.max_tokens || null,
-      stop: opts?.stop_sequences || null,
+      stop: opts?.stop_sequences || undefined,
       stream: true,
     };
+    // tools
+    if (opts.tools && opts.tools.length > 0) {
+      Object.assign(params, { tools: opts.tools, stream: false });
+    }
+    return params;
+  }
+
+  private async corvertContents(opts: types.chat.SendOptions): Promise<openai.Message[]> {
+    return Promise.all(
+      opts.messages.map(async (item) => {
+        const parts: openai.Part[] = [];
+        const tool_calls: openai.ToolCallPart[] = [];
+        await Promise.all(
+          item.parts.map(async (part: types.chat.Part) => {
+            if (part.type === 'text') {
+              parts.push({ type: 'text', text: part.text });
+            }
+            if (['image', 'video'].includes(part.type)) {
+              // TODO: fetch 下载图片并转化buffer为base64
+              parts.push({ type: 'image_url', image_url: (part as types.chat.FilePart).url });
+            }
+            if (part.type === 'function_call' && part.id) {
+              const { name, args } = part.function_call;
+              tool_calls.push({ id: part.id, type: 'function', function: { name, arguments: args } });
+            }
+          }),
+        );
+        // if (item.role === 'system') {
+        //   return { role: 'system', content: this.filterTextPartsToString(parts) } as openai.Message;
+        // }
+        if (item.role === 'assistant') {
+          return { role: 'assistant', content: parts, tool_calls: tool_calls } as openai.Message;
+        }
+        return { role: 'user', content: parts } as openai.Message;
+      }),
+    );
+  }
+
+  private filterTextPartsToString(parts: openai.Part[]): string {
+    return parts
+      .filter((p) => p.type === 'text')
+      .map((p) => (p as openai.TextPart).text)
+      .join('');
+  }
+
+  protected convertChoices(candidates: openai.Choice[]): types.chat.Choice[] {
+    const choices: types.chat.Choice[] = [];
+    try {
+      candidates.map(({ index, delta, message, finish_reason }: openai.Choice) => {
+        const parts: types.chat.Part[] = [];
+        let { content, tool_calls } = message;
+        if (delta) {
+          content = delta.content;
+          tool_calls = delta.tool_calls;
+        }
+        if (content) {
+          parts.push({ type: 'text', text: content });
+        }
+        if (tool_calls) {
+          tool_calls.map((call: any) => {
+            const { name, arguments: args } = call.function;
+            parts.push({ type: 'function_call', function_call: { name, args }, id: call.id });
+          });
+        }
+
+        choices.push({ index, role: 'assistant', parts, finish_reason });
+      });
+    } catch (err) {
+      console.warn(err);
+    }
+    return choices;
   }
 }

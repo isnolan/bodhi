@@ -5,7 +5,7 @@ export namespace gemini {
    * Request
    */
   export type Request = {
-    contents: any[];
+    contents: Content[];
     tools: Tools[];
     safety_settings: safetyRating[];
     generationConfig: {
