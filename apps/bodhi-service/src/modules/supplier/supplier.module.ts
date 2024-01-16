@@ -6,7 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SupplierService } from './supplier.service';
 import { Supplier } from './entity/supplier.entity';
 
-import { SupplierOpenAIProcessor } from './openai.processor';
+import { SupplierOpenAPIProcessor } from './openapi.processor';
 import { SupplierPuppetProcessor } from './puppet.processor';
 import { ChatModule } from '../chat/chat.module';
 import { FilesModule } from '../files/files.module';
@@ -30,7 +30,7 @@ import { FilesModule } from '../files/files.module';
     forwardRef(() => FilesModule),
   ],
   controllers: [],
-  providers: [SupplierService, SupplierOpenAIProcessor, SupplierPuppetProcessor],
+  providers: [SupplierService, SupplierOpenAPIProcessor, SupplierPuppetProcessor],
   exports: [SupplierService],
 })
 export class SupplierModule {}

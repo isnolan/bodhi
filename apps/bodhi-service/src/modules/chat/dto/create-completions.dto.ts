@@ -34,6 +34,11 @@ export class CreateCompletionDto {
   @IsNumber()
   top_k?: 0;
 
+  @ApiProperty({ default: 5 })
+  @IsOptional()
+  @IsNumber()
+  context_limit?: 5;
+
   @ApiProperty({ default: 1 })
   @IsOptional()
   @IsNumber()

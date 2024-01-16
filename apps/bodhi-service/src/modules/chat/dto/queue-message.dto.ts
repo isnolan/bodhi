@@ -1,3 +1,5 @@
+import { chat } from '@isnolan/bodhi-adapter';
+
 export class QueueMessageDto {
   channel: string;
 
@@ -7,7 +9,5 @@ export class QueueMessageDto {
 
   parent_id: string;
 
-  content: string;
-
-  attachments?: string[];
+  messages: chat.Message[];
 }

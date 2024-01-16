@@ -34,24 +34,32 @@ export class ChatController {
     // session
     const { conversation_id = uuidv4(), message_id = uuidv4(), parent_id } = payload;
     // model
-    const { messages = [], tools = [], model, temperature, top_p, top_k, n } = payload;
+    const { messages = [], tools = [], model, temperature, top_p, top_k, context_limit, n } = payload;
     console.log(`[chat]completions`, payload);
 
     // 设置响应头
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
+    // res.setHeader('Content-Type', 'text/event-stream');
+    // res.setHeader('Cache-Control', 'no-cache');
+    // res.setHeader('Connection', 'keep-alive');
 
     // 获取或创建会话
-    const d = { model, temperature, top_p, top_k, user_id, user_key_id, n };
+    const d = { model, temperature, top_p, top_k, user_id, user_key_id, context_limit, n };
     const conversation = await this.conversation.findAndCreateOne(conversation_id, d);
     const channel = `completions:${conversation.id}`;
     const listener = (chl: string, message: string) => {
-      if (chl !== channel) return;
-      res.write(`data: ${message}\n\n`);
-      if (JSON.parse(message)?.usage) {
-        res.write(`data: [DONE]\n\n`);
-        setTimeout(() => res.end(), 500);
+      if (chl === channel) {
+        const d = JSON.parse(message);
+        // process & result
+        if (typeof d === 'object') {
+          res.write(`data: ${message}\n\n`);
+        }
+        if (d.useage) {
+          res.write(`data: [DONE]\n\n`);
+          setTimeout(() => res.end(), 100);
+        }
+        if (d.error) {
+          res.status(400).json(d);
+        }
       }
     };
     this.service.subscribe(channel, listener);

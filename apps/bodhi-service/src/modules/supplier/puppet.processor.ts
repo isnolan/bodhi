@@ -165,7 +165,9 @@ export class SupplierPuppetProcessor implements OnModuleInit {
    * @param data
    */
   async sendMessage(data: QueueMessageDto) {
-    const { channel, supplier_id, conversation_id, parent_id, content, attachments = [] } = data;
+    console.log(`[puppet]job:`, data);
+    return;
+    const { channel, supplier_id, conversation_id, parent_id, messages } = data;
     const conversation = (await this.conversation.findOne(conversation_id)) as ChatConversation;
     const message = await this.message.getLastMessage(conversation_id);
     const supplier = (await this.supplier.get(supplier_id)) as Supplier;
@@ -177,10 +179,10 @@ export class SupplierPuppetProcessor implements OnModuleInit {
     }
 
     // transform local file to supplier file
-    if (attachments.length > 0) {
-      const files = await this.file.findFilesByIds(attachments);
-      opts['attachments'] = files.map((r) => ({ id: r.file_id, name: r.name, size: r.size, mimetype: r.mimetype }));
-    }
+    // if (attachments.length > 0) {
+    //   const files = await this.file.findFilesByIds(attachments);
+    //   opts['attachments'] = files.map((r) => ({ id: r.file_id, name: r.name, size: r.size, mimetype: r.mimetype }));
+    // }
     if (message?.message_id) {
       opts['parent_id'] = message.message_id;
     }
@@ -190,6 +192,7 @@ export class SupplierPuppetProcessor implements OnModuleInit {
     console.log(`[puppet]opts`, opts);
     try {
       this.files[conversation_id] = {};
+      const content = '';
       // console.log(`[chatgpt]`, supplierId, 2, typeof this.apis[supplierId]);
       const res = await this.apis[supplier_id].sendMessage(content, {
         model: supplier.model,

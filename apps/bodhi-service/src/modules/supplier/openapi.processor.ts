@@ -4,21 +4,17 @@ import { ConfigService } from '@nestjs/config';
 import { Process, Processor, OnGlobalQueueCompleted } from '@nestjs/bull';
 
 import { SupplierService } from './supplier.service';
-import { Supplier } from '../supplier/entity/supplier.entity';
 import { ChatConversationService } from '../chat/conversation.service';
 import { ChatMessageService } from '../chat/message.service';
 import { ChatService } from '../chat/chat.service';
 import { QueueMessageDto } from '../chat/dto/queue-message.dto';
 import { CreateMessageDto } from '../chat/dto/create-message.dto';
-import { QueueAgentDto } from '../chat/dto/queue-agent.dto';
-import { ChatConversation } from '../chat/entity/conversation.entity';
-import { ChatMessage } from '../chat/entity/message.entity';
 
 const importDynamic = new Function('modulePath', 'return import(modulePath)');
+// const { Provider, ChatAPI } = await importDynamic('@isnolan/bodhi-adapter');
 
 @Processor('chatbot')
-export class SupplierOpenAIProcessor {
-  private readonly proxy: any;
+export class SupplierOpenAPIProcessor {
   private apis: any;
 
   constructor(
@@ -31,73 +27,59 @@ export class SupplierOpenAIProcessor {
     private readonly message: ChatMessageService,
     private readonly conversation: ChatConversationService,
   ) {
-    this.proxy = config.get('proxy');
-    this.apis = {};
+    this.initAPI();
   }
 
   /**
    * 初始化 OpenAI 节点
    */
-  async initAPI(supplier: Supplier) {
-    if (this.apis[supplier.id]) {
-      return this.apis[supplier.id];
-    }
-
-    const { ChatGPTAPI, AzureChatGPTAPI } = await importDynamic('@yhostc/chatbot-puppet');
-    const { apiKey } = JSON.parse(supplier.authorisation);
-    if (supplier.provider === 'openai') {
-      this.apis[supplier.id] = new ChatGPTAPI({ apiKey, proxyAgent: process.env.PROXY_AGENT });
-    }
-    if (supplier.provider === 'azure') {
-      this.apis[supplier.id] = new AzureChatGPTAPI({ apiKey });
-    }
-
-    return this.apis[supplier.id];
+  async initAPI() {
+    this.apis = await importDynamic('@isnolan/bodhi-adapter');
   }
 
   /**
-   * OpenAPI Process
+   * Bodhi API Process
    */
   @Process('openapi')
   async openai(job: Job<QueueMessageDto>) {
     // console.log(`[api]job:`, job.data);
     // Get Local Conversation and Message ID
     const { channel, supplier_id, conversation_id, parent_id } = job.data;
-
     return new Promise(async (resolve) => {
       // 获取供应商信息
       try {
-        const supplier = (await this.supplier.get(supplier_id)) as Supplier;
-        const conversation = (await this.conversation.findOne(conversation_id)) as ChatConversation;
-        const { model } = supplier;
-        const completionParams = {
+        const supplier = await this.supplier.get(supplier_id);
+        const conversation = await this.conversation.findOne(conversation_id);
+        const { model, authorisation, provider } = supplier;
+        const params = {
           model,
-          n: Number(conversation.n),
           temperature: Number(conversation.temperature),
-          // presence_penalty: Number(conversation.presence_penalty),
-          // frequency_penalty: Number(conversation.frequency_penalty),
+          top_p: Number(conversation.top_p),
+          top_k: Number(conversation.top_k),
+          n: conversation.n,
         };
-        const messages = await this.message.getLastMessages(conversation_id, conversation.context_limit);
-        const api = await this.initAPI(supplier);
-        const res = await api.sendMessage(messages, {
-          onProgress: ({ choices }: any) => {
-            console.log(`[${supplier.provider}]progress`, supplier_id, model, new Date().toLocaleTimeString('zh-CN'));
+        const latest = await this.message.getLastMessages(conversation_id, conversation.context_limit);
+        const { Provider, ChatAPI } = this.apis;
+        const { apiKey } = JSON.parse(authorisation);
+        const api = new ChatAPI(Provider.GOOGLE_GEMINI, { apiKey, agent: process.env.HTTP_PROXY as string });
+        const res = await api.sendMessage({
+          messages: [...latest],
+          ...params,
+          onProgress: (choices) => {
+            console.log(`[${provider}]progress`, supplier_id, model, new Date().toLocaleTimeString('zh-CN'));
             // multiple choice
             choices.forEach((row: any, idx: number) => {
-              console.log(`->idx:`, idx, row.message.content);
+              console.log(`->idx:`, idx, row.parts);
             });
             this.service.reply(channel, choices);
           },
-          completionParams,
         });
 
         // 封存消息
         res.choices.forEach((row: any) => {
-          const { content } = row.message;
-          const payload = { conversation_id, role: 'assistant', content, message_id: res.id };
-          Object.assign(payload, { parent_id });
           // ready to archives
-          this.queue.add('archives', { ...payload });
+          const payload = { conversation_id, role: row.role, parts: row.parts, message_id: res.id };
+          this.queue.add('archives', { parent_id, ...payload });
         });
 
         // 回复会话
@@ -106,7 +88,7 @@ export class SupplierOpenAIProcessor {
         resolve({});
       } catch (err) {
         console.warn(`[api]`, err);
-        this.service.reply(channel, err.message);
+        this.service.reply(channel, { error: { message: err.message, code: err.code } });
         resolve({});
         return;
       }
@@ -170,11 +152,8 @@ export class SupplierOpenAIProcessor {
       // 更新会话
       const tokens = await this.message.getTokensByConversationId(conversation_id);
       const attr = { tokens };
-      if (parent_conversation_id) {
-        Object.assign(attr, { parent_conversation_id });
-      }
+      parent_conversation_id && Object.assign(attr, { parent_conversation_id });
       await this.conversation.updateAttribute(conversation_id, attr);
-
       resolve({});
     });
   }

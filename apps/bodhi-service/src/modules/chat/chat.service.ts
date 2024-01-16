@@ -66,27 +66,13 @@ export class ChatService {
     const { messages, message_id } = options;
     let { parent_id } = options;
 
-    // 存储消息
-    messages.map(async (m) => {
-      const { role, parts } = m;
-      // const message_id = uuidv4();
+    // archive send message
+    messages.map(async (message) => {
+      const { role, parts } = message;
       const a1: CreateMessageDto = { conversation_id, message_id, user_id, role, parts, parent_id };
       const { tokens } = await this.message.save({ ...a1, parent_id });
       await this.queue.add('archives', { ...a1, tokens });
     });
-
-    // if (conversation.supplier_id === 0) {
-    // parent_id = uuidv4();
-    // const a1: CreateMessageDto = { conversation_id, message_id: parent_id, role: 'system', content: system_prompt };
-    // const { tokens } = await this.message.save({ ...a1, parent_id: '' });
-    // console.log(`[chat]send:system`, a1, tokens);
-    // await this.queue.add('archives', { ...a1, tokens });
-    // }
-
-    // 存储消息:用户
-    // const a2: CreateMessageDto = { conversation_id, message_id, user_id, role: 'user', content: prompt, attachments };
-    // const { tokens } = await this.message.save({ ...a2, parent_id });
-    // await this.queue.add('archives', { ...a2, tokens }, { delay: 200 });
 
     // 获取是否已分配节点
     let supplier: Supplier;
@@ -123,15 +109,15 @@ export class ChatService {
     }
     console.log(`[chat]complete`);
     // 加入消息发送队列
-    // const supplier_id = supplier.id;
-    // const s1: QueueMessageDto = { channel, supplier_id, conversation_id, content: prompt, parent_id: message_id };
+    const supplier_id = supplier.id;
+    const s1: QueueMessageDto = { channel, supplier_id, conversation_id, messages, parent_id: message_id };
     // // Object.assign(s1, { attachments });
     // if (supplier.instance === 'puppet') {
     //   // 发布订阅
     //   await this.redis.publish('puppet', JSON.stringify(s1));
     // } else {
     //   // 消息队列
-    //   await this.queue.add('openapi', s1, { priority: 1, delay: 10 });
+    await this.queue.add('openapi', s1, { priority: 1, delay: 10 });
     // }
   }
 
@@ -143,7 +129,7 @@ export class ChatService {
    * @returns
    */
   async reply(channel: string, payload: any) {
-    console.log(`[chat]reply`, channel, payload);
+    // console.log(`[chat]reply`, channel, payload);
     await this.redis.publish(channel, JSON.stringify(payload));
   }
 
