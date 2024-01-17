@@ -5,7 +5,7 @@ import { Controller, Req, Ip, Post, Body, Get, Query, Request } from '@nestjs/co
 import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
-import { MailService } from '../notification/mail.service';
+import { MailService } from '../notice/mail.service';
 import { AuthResponse } from './interface/user.interface';
 import { VerificationState, VerificationType } from './entity';
 import { captchaDto, loginDto } from './dto/auth.dto';

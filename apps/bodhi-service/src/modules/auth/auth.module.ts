@@ -7,7 +7,7 @@ import Strategy from './strategies';
 import { AuthSession } from './entity';
 import { AuthVerification } from './entity/verification.entity';
 import { AuthController } from './auth.controller';
-import { NotificationModule } from '../notification/notification.module';
+import { NoticeModule } from '../notice/notice.module';
 import { AuthService } from './auth.service';
 import { AuthSessionService, AuthVerificationsService } from './service';
 import { UsersModule } from '../users/users.module';
@@ -24,7 +24,7 @@ import { UsersModule } from '../users/users.module';
     }),
 
     UsersModule,
-    NotificationModule,
+    NoticeModule,
   ],
 
   controllers: [AuthController],
