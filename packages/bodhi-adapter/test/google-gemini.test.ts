@@ -1,4 +1,4 @@
-import { describe, expect, test } from '@jest/globals';
+import { describe, expect } from '@jest/globals';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import { Provider, ChatAPI } from '../src/api';
@@ -22,17 +22,9 @@ describe('chat', () => {
     const res = await api.sendMessage({
       model: 'gemini-pro',
       messages: [
-        // { role: 'user', parts: [{ type: 'text', text: 'Hello, 我家有两只小狗，一只小迪，一只叫小瑞' }] },
-        // { role: 'assistant', parts: [{ type: 'text', text: 'Great to meet you. What would you like to know?' }] },
-        // { role: 'user', parts: [{ type: 'text', text: '请写一篇关于我家小狗子的故事，要求字数不少于100字' }] },
-        {
-          role: 'user',
-          parts: [{ type: 'text', text: 'Hi，我是Jack' }],
-        },
-        {
-          role: 'user',
-          parts: [{ type: 'text', text: '你可以讲个关于小王子的故事吗？' }],
-        },
+        { role: 'user', parts: [{ type: 'text', text: 'Hello, 我家有两只小狗，一只小迪，一只叫小瑞' }] },
+        { role: 'assistant', parts: [{ type: 'text', text: 'Great to meet you. What would you like to know?' }] },
+        { role: 'user', parts: [{ type: 'text', text: '请写一篇关于我家小狗子的故事，要求字数不少于100字' }] },
       ],
       onProgress: (choices) => {
         console.log(`[gemini]progress:`, JSON.stringify(choices));

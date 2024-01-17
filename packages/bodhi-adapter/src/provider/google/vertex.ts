@@ -24,7 +24,10 @@ export class GoogleVertexAPI extends GoogleGeminiAPI {
    * 根据服务账号获取 access token
    */
   private async getToken(): Promise<string> {
-    const auth: GoogleAuth = new GoogleAuth({ scopes: 'https://www.googleapis.com/auth/cloud-platform' });
+    const auth: GoogleAuth = new GoogleAuth({
+      credentials: { client_email: this.apiKey, private_key: this.apiSecret },
+      scopes: 'https://www.googleapis.com/auth/cloud-platform',
+    });
     return (await auth.getAccessToken()) as string;
   }
 

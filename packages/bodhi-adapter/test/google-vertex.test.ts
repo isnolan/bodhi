@@ -1,19 +1,22 @@
-import * as dotenv from 'dotenv';
+import fs from 'node:fs';
 import * as path from 'path';
 import { Provider, ChatAPI } from '../src/api';
-dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+
+const credential = JSON.parse(
+  fs.readFileSync(path.resolve(__dirname, '../../../.credentials/google-cloud.json'), 'utf8'),
+);
 
 describe('chat', () => {
   beforeEach(() => {
-    if (!process.env.PROXY_URL || !process.env.GEMINI) {
+    if (!process.env.PROXY_URL || !credential.client_email) {
       console.log('Skipping test due to missing environment variables');
       return;
     }
   });
 
   const api = new ChatAPI(Provider.GOOGLE_VERTEX, {
-    apiKey: process.env?.GEMINI as string,
-    agent: process.env.PROXY_URL as string,
+    apiKey: credential.client_email,
+    agent: credential.private_key,
   });
 
   // 发送聊天消息

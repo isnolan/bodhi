@@ -21,7 +21,7 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
     return new Promise(async (resolove, reject) => {
       const url = `${this.baseURL}/chat/completions`;
       const params: openai.Request = await this.convertParams(options);
-      console.log(`[fetch]params`, JSON.stringify(params, null, 2));
+      // console.log(`[fetch]params`, JSON.stringify(params, null, 2));
       const res = await fetchSSE(url, {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.apiKey}` },
         body: JSON.stringify(params),

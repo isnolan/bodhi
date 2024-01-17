@@ -17,47 +17,47 @@ describe('chat', () => {
   });
 
   // 发送聊天消息
-  // it('text: streaming', async () => {
-  //   const res = await api.sendMessage({
-  //     model: 'gpt-3.5-turbo-1106',
-  //     messages: [
-  //       { role: 'system', parts: [{ type: 'text', text: 'Hi，我是Jack' }] },
-  //       { role: 'user', parts: [{ type: 'text', text: '你可以讲个关于小王子的故事吗？' }] },
-  //     ],
-  //     onProgress: (choices) => {
-  //       console.log(`[openai]process`, JSON.stringify(choices));
-  //       expect(choices).toBeInstanceOf(Object);
-  //     },
-  //   });
-  //   console.log(`[openai]process`, JSON.stringify(res, null, 2));
-  //   expect(res).toBeInstanceOf(Object);
-  // }, 50000);
+  it('text: streaming', async () => {
+    const res = await api.sendMessage({
+      model: 'gpt-3.5-turbo-1106',
+      messages: [
+        { role: 'system', parts: [{ type: 'text', text: 'Hi，我是Jack' }] },
+        { role: 'user', parts: [{ type: 'text', text: '你可以讲个关于小王子的故事吗？' }] },
+      ],
+      onProgress: (choices) => {
+        console.log(`[openai]process`, JSON.stringify(choices));
+        expect(choices).toBeInstanceOf(Object);
+      },
+    });
+    console.log(`[openai]process`, JSON.stringify(res, null, 2));
+    expect(res).toBeInstanceOf(Object);
+  }, 50000);
 
   // vision: image part, from inline data
-  // it('vision:image from inline data', async () => {
-  //   const res = await api.sendMessage({
-  //     model: 'gpt-4-vision-preview',
-  //     max_tokens: 1000,
-  //     messages: [
-  //       {
-  //         role: 'user',
-  //         parts: [
-  //           { type: 'text', text: 'Describe this image' },
-  //           {
-  //             type: 'image',
-  //             url: 'https://miro.medium.com/v2/resize:fit:720/format:jpeg/1*YMJDp-kqus7i-ktWtksNjg.jpeg',
-  //           },
-  //         ],
-  //       },
-  //     ],
-  //     onProgress: (choices) => {
-  //       console.log(`[openai]progress:`, JSON.stringify(choices));
-  //       expect(choices).toBeInstanceOf(Object);
-  //     },
-  //   });
-  //   console.log(`[openai]result:`, JSON.stringify(res, null, 2));
-  //   expect(res).toBeInstanceOf(Object);
-  // }, 20000);
+  it('vision:image from inline data', async () => {
+    const res = await api.sendMessage({
+      model: 'gpt-4-vision-preview',
+      max_tokens: 1000,
+      messages: [
+        {
+          role: 'user',
+          parts: [
+            { type: 'text', text: 'Describe this image' },
+            {
+              type: 'image',
+              url: 'https://miro.medium.com/v2/resize:fit:720/format:jpeg/1*YMJDp-kqus7i-ktWtksNjg.jpeg',
+            },
+          ],
+        },
+      ],
+      onProgress: (choices) => {
+        console.log(`[openai]progress:`, JSON.stringify(choices));
+        expect(choices).toBeInstanceOf(Object);
+      },
+    });
+    console.log(`[openai]result:`, JSON.stringify(res, null, 2));
+    expect(res).toBeInstanceOf(Object);
+  }, 20000);
 
   // function call
   it('function call', async () => {
