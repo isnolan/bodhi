@@ -9,10 +9,10 @@ import { MailService } from '../notice/mail.service';
 import { AuthResponse } from './interface/user.interface';
 import { VerificationState, VerificationType } from './entity';
 import { captchaDto, loginDto } from './dto/auth.dto';
-import { ErrorDto } from '../common/base.dto';
+import { ErrorDto } from '../../core/common/base.dto';
 import { AuthVerificationsService } from './service';
 import { UsersService } from '../users/users.service';
-import { RequestWithUser } from '../common/request.interface';
+import { RequestWithUser } from '../../core/common/request.interface';
 
 @ApiTags('auth')
 @Controller('auth')

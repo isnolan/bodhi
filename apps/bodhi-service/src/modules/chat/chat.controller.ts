@@ -9,7 +9,7 @@ import { SendMessageDto } from './dto/send-message.dto';
 import { CreateAgentDto } from './dto/create-agent.dto';
 import { Request, Response } from 'express';
 import { JwtOrApiKeyGuard } from '../auth/guard/mixed.guard';
-import { RequestWithUser } from '../common/request.interface';
+import { RequestWithUser } from '../../core/common/request.interface';
 
 @ApiTags('chat')
 @ApiBearerAuth()

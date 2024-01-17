@@ -1,5 +1,5 @@
 import { Entity, Column } from 'typeorm';
-import { Base } from '@/modules/common/base.entity';
+import { Base } from '@/core/common/base.entity';
 
 @Entity('bodhi_auth_session')
 export class AuthSession extends Base {

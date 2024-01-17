@@ -1,13 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsInt } from 'class-validator';
 
-export class resultRes {
-  @ApiProperty()
-  message: string;
+// export class resultRes {
+//   @ApiProperty()
+//   message: string;
 
-  @ApiProperty()
-  status_code: number;
-}
+//   @ApiProperty()
+//   status_code: number;
+// }
 
 export class ErrorDto {
   @ApiProperty({ example: '400' })

@@ -1,4 +1,4 @@
-import { Base } from 'src/modules/common/base.entity';
+import { Base } from '@/core/common/base.entity';
 import { Entity, Column } from 'typeorm';
 
 export enum RoleEnum {
