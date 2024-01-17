@@ -5,7 +5,7 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder, SwaggerCustomOptions } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
-import { RedisIoAdapter } from './common/adapters/redis-io.adapter';
+import { RedisIoAdapter } from './core/adapters/redis-io.adapter';
 
 const swaggerCustomOptions: SwaggerCustomOptions = { swaggerOptions: { persistAuthorization: true } };
 async function bootstrap() {

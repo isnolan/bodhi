@@ -11,7 +11,7 @@ import { Process, Processor } from '@nestjs/bull';
 import { FilesService } from './files.service';
 import { FileQuqueDto } from './dto/queue-file.dto';
 import { FileState } from './entity/file.entity';
-import { putStream } from '@/common/utils/aliyun';
+import { putStream } from '@/core/utils/aliyun';
 
 @Processor('chatbot')
 export class FilesProcessor {

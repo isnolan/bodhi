@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 
 import { File, FileState } from './entity/file.entity';
-import { putStream } from '@/common/utils/aliyun';
+import { putStream } from '@/core/utils/aliyun';
 import { FileDto, FileListDto } from './dto/upload.dto';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
