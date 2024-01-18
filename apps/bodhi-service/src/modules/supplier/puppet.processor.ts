@@ -6,16 +6,15 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 
-import { SupplierService } from './supplier.service';
 import { ChatConversationService } from '../chat/conversation.service';
 import { ChatMessageService } from '../chat/message.service';
-import { ChatService } from '../chat/chat.service';
 import { QueueMessageDto } from '../chat/dto/queue-message.dto';
 import { FilesService } from '../files/files.service';
 import { ChatConversation } from '../chat/entity/conversation.entity';
-import { Supplier } from './entity/supplier.entity';
 import { FileDto } from '../files/dto/upload.dto';
 import { FilePuppetDto } from '../files/dto/queue-file.dto';
+import { SupplierModelsService } from './models.service';
+import { ChatService } from '@/modules/chat/chat.service';
 
 const importDynamic = new Function('modulePath', 'return import(modulePath)');
 
@@ -32,8 +31,8 @@ export class SupplierPuppetProcessor implements OnModuleInit {
     @InjectRedis()
     private readonly redis: Redis,
     private readonly file: FilesService,
-    private readonly supplier: SupplierService,
-    private readonly service: ChatService,
+    private readonly supplier: SupplierModelsService,
+    private readonly chat: ChatService,
     private readonly message: ChatMessageService,
     private readonly conversation: ChatConversationService,
   ) {
@@ -43,8 +42,7 @@ export class SupplierPuppetProcessor implements OnModuleInit {
 
     this.apis = {};
 
-    const serverId = Number(process.env.CHATBOT_EPID) || 0;
-    this.initPuppet(serverId);
+    this.initPuppet(process.env.CHATBOT_EPID);
   }
 
   async onModuleInit(): Promise<void> {
@@ -80,7 +78,7 @@ export class SupplierPuppetProcessor implements OnModuleInit {
   /**
    * 初始化 initPuppet 节点
    */
-  async initPuppet(serverId: number) {
+  async initPuppet(serverId: string) {
     // 获取该节点所有 Puppet 实例
     const services = await this.supplier.findSuppliersByNode(serverId);
     console.log(`[subscribe]puppet:`, serverId, services.length);
@@ -94,11 +92,12 @@ export class SupplierPuppetProcessor implements OnModuleInit {
     // 初始化Page
     for (const supplier of services) {
       // 解析账号授权信息
-      const { username, password, cookies } = JSON.parse(supplier.authorisation);
+      // const { username, password, cookies } = JSON.parse(supplier?.authorisation);
       // 创建ChatGPT实例
       let page;
-      const opts = { pageId: `chat${supplier.id}`, username, password, cookies };
-      switch (supplier.provider) {
+      // const opts = { pageId: `chat${supplier.id}`, username, password, cookies };
+      const opts = { pageId: `chat${supplier.id}` };
+      switch (supplier.instance_name) {
         case 'chatgpt':
           page = new ChatGPTPuppet(puppet, opts);
           break;
@@ -114,8 +113,8 @@ export class SupplierPuppetProcessor implements OnModuleInit {
       page.on('active', async ({ pageId, cookies }: any) => {
         console.log(`[puppet]active`, pageId);
         // 保存cookies
-        const newAuth = JSON.stringify({ username, password, cookies });
-        await this.supplier.updateAuthoriazations(supplier.id, newAuth);
+        // const newAuth = JSON.stringify({ username, password, cookies });
+        // await this.supplier.updateAuthoriazations(supplier.id, newAuth);
       });
 
       // 会话失效: 不允许流量接入
@@ -152,9 +151,9 @@ export class SupplierPuppetProcessor implements OnModuleInit {
       const supplier = await this.supplier.getInactive(conversation.model, conversation_id, true); // configuration.model
       await this.conversation.updateSupplier(conversation_id, supplier.id);
       // 消息队列
-      Object.assign(data, { supplier_id: supplier.id, model: supplier.model });
+      Object.assign(data, { supplier_id: supplier.id, model: supplier.name });
       const job = await this.queue.add('openapi', data, { priority: 1, delay: 10 });
-      console.log(`[puppet]downgrade`, supplier.provider, supplier.id, job.id);
+      console.log(`[puppet]downgrade`, supplier.instance_name, supplier.id, job.id);
     } catch (err) {
       console.warn(`[puppet]downgrade`, err);
     }
@@ -167,10 +166,10 @@ export class SupplierPuppetProcessor implements OnModuleInit {
   async sendMessage(data: QueueMessageDto) {
     console.log(`[puppet]job:`, data);
     return;
-    const { channel, supplier_id, conversation_id, parent_id, messages } = data;
+    const { channel, model_id, conversation_id, parent_id, messages } = data;
     const conversation = (await this.conversation.findOne(conversation_id)) as ChatConversation;
     const message = await this.message.getLastMessage(conversation_id);
-    const supplier = (await this.supplier.get(supplier_id)) as Supplier;
+    const supplier = await this.supplier.get(model_id);
 
     // 发送消息
     const opts: any = {};
@@ -194,13 +193,13 @@ export class SupplierPuppetProcessor implements OnModuleInit {
       this.files[conversation_id] = {};
       const content = '';
       // console.log(`[chatgpt]`, supplierId, 2, typeof this.apis[supplierId]);
-      const res = await this.apis[supplier_id].sendMessage(content, {
-        model: supplier.model,
+      const res = await this.apis[model_id].sendMessage(content, {
+        model: supplier.name,
         ...opts,
         id: uuidv4(),
         timeoutMs: 120000,
         onProgress: ({ choices }: any) => {
-          console.log(`[puppet]progress`, supplier_id, supplier.model, new Date().toLocaleTimeString('zh-CN'));
+          console.log(`[puppet]progress`, model_id, supplier.name, new Date().toLocaleTimeString('zh-CN'));
           console.log(`->1`, JSON.stringify(choices));
           // try {
           // multiple choice
@@ -213,7 +212,7 @@ export class SupplierPuppetProcessor implements OnModuleInit {
             console.log(`->choice:`, row.message.content);
             return row;
           });
-          this.service.reply(channel, c);
+          this.chat.reply(channel, c);
           //   console.log(`->2`);
           // } catch (err) {
           //   console.warn(`->0`, err);
@@ -238,11 +237,11 @@ export class SupplierPuppetProcessor implements OnModuleInit {
       console.log(`[puppet]result`, JSON.stringify(res, null, 2));
 
       // delete this.files[conversation_id];
-      this.service.reply(channel, { ...res, conversation_id: conversation.conversation_id });
+      this.chat.reply(channel, { ...res, conversation_id: conversation.conversation_id });
     } catch (err) {
       // 尝试捕获消息发送异常，进行降级
       console.warn(`[puppet]catch`, err);
-      this.service.reply(channel, { choices: [{ message: { content: err.message } }] });
+      this.chat.reply(channel, { choices: [{ message: { content: err.message } }] });
       // 服务降级
       await this.downgrade(data);
       // expire the cache key
@@ -251,7 +250,7 @@ export class SupplierPuppetProcessor implements OnModuleInit {
     }
 
     // expire the cache key
-    await this.supplier.RenewalProvider(supplier_id, conversation_id, 60);
+    await this.supplier.RenewalProvider(model_id, conversation_id, 60);
   }
 
   /**
@@ -279,12 +278,12 @@ export class SupplierPuppetProcessor implements OnModuleInit {
   async uploadFile(data: FilePuppetDto) {
     console.log(`[puppet]upload`, data);
     const { model, id: file_id, url } = data;
-    const supplier = (await this.supplier.getSupplierBySlug(model)) as Supplier;
+    const supplier = await this.supplier.getSupplierBySlug(model);
     console.log(`[puppet]upload`, supplier.id, file_id, url);
-    if (supplier && supplier.instance === 'puppet') {
+    if (supplier && supplier.instance_type === 'puppet') {
       const file = await this.file.get(file_id);
 
-      if (['chatgpt'].includes(supplier.provider)) {
+      if (['chatgpt'].includes(supplier.instance_name)) {
         const { name, size, mimetype }: any = file;
         if (this.apis[supplier.id]) {
           const uploaded = await this.apis[supplier.id].uploadFile({ id: file_id, name, size, mimetype }, url);
@@ -294,7 +293,7 @@ export class SupplierPuppetProcessor implements OnModuleInit {
         console.log(`[puppet]upload:chatgpt`, `no supplier`, supplier.id, file_id);
       }
 
-      if (['claude'].includes(supplier.provider)) {
+      if (['claude'].includes(supplier.instance_name)) {
         console.log(`[puppet]upload:claude`, supplier.id, file_id);
       }
     }

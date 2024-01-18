@@ -16,7 +16,8 @@ describe('chat', () => {
 
   const api = new ChatAPI(Provider.GOOGLE_VERTEX, {
     apiKey: credential.client_email,
-    agent: credential.private_key,
+    apiSecret: credential.private_key,
+    agent: process.env.PROXY_URL as string,
   });
 
   // 发送聊天消息

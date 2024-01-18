@@ -1,6 +1,5 @@
 import Redis from 'ioredis';
 import { Queue } from 'bull';
-import { v4 as uuidv4 } from 'uuid';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -9,10 +8,8 @@ import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { SupplierService } from '../supplier/supplier.service';
 import { ChatConversationService } from './conversation.service';
 import { ChatMessageService } from './message.service';
-import { Supplier } from '../supplier/entity/supplier.entity';
 import { QueueMessageDto } from './dto/queue-message.dto';
 import { CreateMessageDto } from './dto/create-message.dto';
-import { QueueAgentDto } from './dto/queue-agent.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 import { ChatConversation } from './entity/conversation.entity';
 
@@ -74,51 +71,24 @@ export class ChatService {
       await this.queue.add('archives', { ...a1, tokens });
     });
 
-    // 获取是否已分配节点
-    let supplier: Supplier;
-    if (conversation.supplier_id !== 0) {
-      // 获取节点类型
-      supplier = (await this.supplier.get(conversation.supplier_id)) as Supplier;
-      // 若Puppet节点，则续期占用
-      if (supplier.instance === 'puppet') {
-        // 检查节点是否占用
-        const inServerConversationId = await this.supplier.CheckInService(supplier.id);
-        if (!inServerConversationId || inServerConversationId === conversation.id) {
-          // 续期
-          await this.supplier.RenewalProvider(supplier.id, conversation.id, 180);
-          console.log(`[chat]send:cache`, supplier.id);
-        } else {
-          // 降级
-          supplier = await this.supplier.getInactive(model, conversation.id, true); // Draft-LM-3L4K
-          await this.conversation.updateSupplier(conversation.id, supplier.id);
-          console.log(`[chat]send:downgrade`, supplier.id);
-        }
+    try {
+      const models = await this.supplier.getActiveModel(model, conversation_id, conversation.model_id);
+      if (models.id !== conversation.model_id) {
+        await this.conversation.updateSupplier(conversation.id, models.id);
       }
-    } else {
-      // 分配节点
-      try {
-        supplier = await this.supplier.getInactive(model, conversation.id); // Draft-LM-3L4K
-        console.log(`[chat]send:supplier`, supplier.id);
-      } catch (err) {
-        console.warn(err);
-        this.reply(channel, { role: 'assistant', content: 'No available suppliers yet' });
-        return;
-      }
-      await this.conversation.updateSupplier(conversation.id, supplier.id);
-      console.log(`[socket]conversation:inactive`, supplier.id);
+
+      const model_id = models.id;
+      const s1: QueueMessageDto = { channel, model_id, conversation_id, messages, parent_id: message_id };
+      // if (supplier.instance === 'puppet') {
+      //   // 发布订阅
+      //   await this.redis.publish('puppet', JSON.stringify(s1));
+      // } else {
+      //   // 消息队列
+      await this.queue.add('openapi', s1, { priority: 1, delay: 10 });
+      // }
+    } catch (err) {
+      this.reply(channel, { error: { message: err.message, code: 400 } });
     }
-    console.log(`[chat]complete`);
-    // 加入消息发送队列
-    const supplier_id = supplier.id;
-    const s1: QueueMessageDto = { channel, supplier_id, conversation_id, messages, parent_id: message_id };
-    // // Object.assign(s1, { attachments });
-    // if (supplier.instance === 'puppet') {
-    //   // 发布订阅
-    //   await this.redis.publish('puppet', JSON.stringify(s1));
-    // } else {
-    //   // 消息队列
-    await this.queue.add('openapi', s1, { priority: 1, delay: 10 });
-    // }
   }
 
   /**

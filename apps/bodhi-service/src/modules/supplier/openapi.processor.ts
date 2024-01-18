@@ -1,30 +1,26 @@
 import { Job, Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
-import { ConfigService } from '@nestjs/config';
 import { Process, Processor, OnGlobalQueueCompleted } from '@nestjs/bull';
 
-import { SupplierService } from './supplier.service';
 import { ChatConversationService } from '../chat/conversation.service';
 import { ChatMessageService } from '../chat/message.service';
-import { ChatService } from '../chat/chat.service';
 import { QueueMessageDto } from '../chat/dto/queue-message.dto';
 import { CreateMessageDto } from '../chat/dto/create-message.dto';
+import { SupplierModelsService } from './models.service';
+import { ChatService } from '@/modules/chat/chat.service';
 
 const importDynamic = new Function('modulePath', 'return import(modulePath)');
-// const { Provider, ChatAPI } = await importDynamic('@isnolan/bodhi-adapter');
 
 @Processor('chatbot')
 export class SupplierOpenAPIProcessor {
   private apis: any;
 
   constructor(
-    private readonly config: ConfigService,
     @InjectQueue('chatbot')
     private readonly queue: Queue,
-    private readonly supplier: SupplierService,
-
     private readonly service: ChatService,
     private readonly message: ChatMessageService,
+    private readonly supplier: SupplierModelsService,
     private readonly conversation: ChatConversationService,
   ) {
     this.initAPI();
@@ -44,13 +40,13 @@ export class SupplierOpenAPIProcessor {
   async openai(job: Job<QueueMessageDto>) {
     // console.log(`[api]job:`, job.data);
     // Get Local Conversation and Message ID
-    const { channel, supplier_id, conversation_id, parent_id } = job.data;
+    const { channel, model_id, conversation_id, parent_id } = job.data;
     return new Promise(async (resolve) => {
       // 获取供应商信息
       try {
-        const supplier = await this.supplier.get(supplier_id);
+        const supplier = await this.supplier.get(model_id);
         const conversation = await this.conversation.findOne(conversation_id);
-        const { model, authorisation, provider } = supplier;
+        const { name: model, api_key, api_secret, instance_name } = supplier;
         const params = {
           model,
           temperature: Number(conversation.temperature),
@@ -60,18 +56,21 @@ export class SupplierOpenAPIProcessor {
         };
         const latest = await this.message.getLastMessages(conversation_id, conversation.context_limit);
         const { Provider, ChatAPI } = this.apis;
-        const { apiKey } = JSON.parse(authorisation);
-        const api = new ChatAPI(Provider.GOOGLE_GEMINI, { apiKey, agent: process.env.HTTP_PROXY as string });
+        const api = new ChatAPI(instance_name, {
+          apiKey: api_key,
+          apiSecret: api_secret,
+          agent: process.env.HTTP_PROXY as string,
+        });
         const res = await api.sendMessage({
           messages: [...latest],
           ...params,
           onProgress: (choices) => {
-            console.log(`[${provider}]progress`, supplier_id, model, new Date().toLocaleTimeString('zh-CN'));
+            console.log(`[${instance_name}]progress`, model_id, model, new Date().toLocaleTimeString('zh-CN'));
             // multiple choice
             choices.forEach((row: any, idx: number) => {
               console.log(`->idx:`, idx, row.parts);
             });
-            this.service.reply(channel, choices);
+            // this.service.reply(channel, choices);
           },
         });
 
@@ -83,12 +82,12 @@ export class SupplierOpenAPIProcessor {
         });
 
         // 回复会话
-        this.service.reply(channel, { conversation_id: conversation.conversation_id, ...res });
+        // this.service.reply(channel, { conversation_id: conversation.conversation_id, ...res });
 
         resolve({});
       } catch (err) {
         console.warn(`[api]`, err);
-        this.service.reply(channel, { error: { message: err.message, code: err.code } });
+        // this.service.reply(channel, { error: { message: err.message, code: err.code } });
         resolve({});
         return;
       }

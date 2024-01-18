@@ -12,6 +12,9 @@ import { ChatConversation } from './entity/conversation.entity';
 import { ChatMessage } from './entity/message.entity';
 @Module({
   imports: [
+    // MySQL
+    TypeOrmModule.forFeature([ChatConversation, ChatMessage]),
+
     // Redis Queue
     BullModule.registerQueueAsync({
       name: 'chatbot',
@@ -22,9 +25,6 @@ import { ChatMessage } from './entity/message.entity';
         defaultJobOptions: { attempts: 2, removeOnComplete: true, removeOnFail: true },
       }),
     }),
-
-    // MySQL
-    TypeOrmModule.forFeature([ChatConversation, ChatMessage]),
 
     forwardRef(() => SupplierModule),
   ],

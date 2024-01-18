@@ -14,7 +14,6 @@ export namespace openai {
     presence_penalty?: number | null;
     max_tokens?: number | null;
     n?: number | null;
-    // response_format?: 'json_object' | 'text';
     stop?: string | string[] | null;
     stream: boolean;
   };
