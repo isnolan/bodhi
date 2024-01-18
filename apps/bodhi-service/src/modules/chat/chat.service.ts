@@ -8,10 +8,10 @@ import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { SupplierService } from '../supplier/supplier.service';
 import { ChatConversationService } from './conversation.service';
 import { ChatMessageService } from './message.service';
-import { QueueMessageDto } from './dto/queue-message.dto';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 import { ChatConversation } from './entity/conversation.entity';
+import { QueueMessageDto } from '../supplier/dto/queue-message.dto';
 
 @Injectable()
 export class ChatService {
