@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Controller, Res, Post, Req, Body, HttpException, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Res, Post, Req, Body, Get, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiBody, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 
 import { CreateCompletionDto } from './dto/create-completions.dto';
@@ -10,6 +10,7 @@ import { CreateAgentDto } from './dto/create-agent.dto';
 import { Request, Response } from 'express';
 import { JwtOrApiKeyGuard } from '../auth/guard/mixed.guard';
 import { RequestWithUser } from '../../core/common/request.interface';
+import { SupplierService } from '../supplier/supplier.service';
 
 @ApiTags('chat')
 @ApiBearerAuth()
@@ -17,7 +18,18 @@ import { RequestWithUser } from '../../core/common/request.interface';
 @UseGuards(JwtOrApiKeyGuard)
 @ApiSecurity('api-key', [])
 export class ChatController {
-  constructor(private readonly service: ChatService, private readonly conversation: ChatConversationService) {}
+  constructor(
+    private readonly service: ChatService,
+    private readonly supplier: SupplierService,
+    private readonly conversation: ChatConversationService,
+  ) {}
+
+  @Get('models')
+  @ApiOperation({ description: 'Chat Models' })
+  @ApiResponse({ status: 201, description: 'success' })
+  async models() {
+    return await this.supplier.getModels();
+  }
 
   /**
    * 创建聊天会话
@@ -49,6 +61,11 @@ export class ChatController {
     const listener = (chl: string, message: string) => {
       if (chl === channel) {
         const d = JSON.parse(message);
+        if (d.error) {
+          res.status(400).json(d);
+          return;
+        }
+
         // process & result
         if (typeof d === 'object') {
           res.write(`data: ${message}\n\n`);
@@ -56,9 +73,6 @@ export class ChatController {
         if (d.useage) {
           res.write(`data: [DONE]\n\n`);
           setTimeout(() => res.end(), 100);
-        }
-        if (d.error) {
-          res.status(400).json(d);
         }
       }
     };

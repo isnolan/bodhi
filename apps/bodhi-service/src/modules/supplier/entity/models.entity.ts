@@ -7,7 +7,7 @@ export enum InstanceEnum {
   UNOFFICIAL = 'unofficial',
 }
 
-export enum ModelStateEnum {
+export enum SupplierModelState {
   ACTIVE = 1,
   INACTIVE = 0,
   FORBIDDEN = -1,
@@ -19,9 +19,6 @@ export enum ModelStateEnum {
  */
 @Entity('bodhi_supplier_models')
 export class SupplierModels extends Base {
-  @Column({ type: 'int', comment: 'user id', default: 0 })
-  user_id: number;
-
   @Column({ type: 'varchar', length: 40, comment: 'name', default: '' })
   name: string;
 
@@ -62,6 +59,6 @@ export class SupplierModels extends Base {
   @Column({ type: 'decimal', precision: 2, scale: 1, comment: 'weight', default: 0 })
   weight: number;
 
-  @Column({ type: 'tinyint', comment: '状态', default: ModelStateEnum.ACTIVE })
-  status: ModelStateEnum;
+  @Column({ type: 'tinyint', comment: '状态', default: SupplierModelState.ACTIVE })
+  status: SupplierModelState;
 }

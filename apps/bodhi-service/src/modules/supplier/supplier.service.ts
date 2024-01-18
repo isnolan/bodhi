@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { Supplier } from './entity/supplier.entity';
+import { Supplier, SupplierState } from './entity/supplier.entity';
 import { SupplierModelsService } from './service/models.service';
 import { SupplierModels } from './entity/models.entity';
 
@@ -14,19 +14,32 @@ export class SupplierService {
     private readonly models: SupplierModelsService,
   ) {}
 
+  async getModels(): Promise<Supplier[]> {
+    return await this.repository.find({
+      select: ['id', 'slug', 'icon', 'desciption', 'capabilities'],
+      where: { status: SupplierState.ACTIVE },
+    });
+  }
+
+  async get(id: number): Promise<Supplier> {
+    return await this.repository.findOne({ where: { id } });
+  }
+
   /**
-   * 分配供应模型
+   * Distribute supplier model
    * @param model 、
    * @param conversation_id
-   * @param last_supplier_id
+   * @param last_model_id
    * @returns
    */
-  async getActiveModel(model: string, conversation_id: number, last_supplier_id: number): Promise<SupplierModels> {
+  async getActiveModel(conversation_id: number, slug: string, last_model_id: number): Promise<SupplierModels> {
+    const { model } = await this.repository.findOne({ where: { slug } });
+    console.log(`[supplier]getActiveModel`, model, conversation_id, last_model_id);
     // Renew
-    if (last_supplier_id !== 0) {
-      console.log(`[supplier]renewal`, last_supplier_id);
+    if (last_model_id !== 0) {
+      console.log(`[supplier]renewal`, last_model_id);
       // 获取节点类型
-      let supplier = await this.models.get(last_supplier_id);
+      let supplier = await this.models.get(last_model_id);
       // 若Puppet节点，则续期占用
       if (supplier.instance_type === 'puppet') {
         // 检查节点是否占用
@@ -37,7 +50,7 @@ export class SupplierService {
           await this.models.RenewalProvider(supplier.id, conversation_id, 180);
         } else {
           // 降级
-          supplier = await this.models.getInactive(model, conversation_id, true); // Draft-LM-3L4K
+          supplier = await this.models.getInactive(model, conversation_id, true);
           console.log(`[supplier]renew: downgrade`, supplier.id);
         }
       }
@@ -45,7 +58,7 @@ export class SupplierService {
     }
 
     // Distribute
-    const supplier = await this.models.getInactive(model, conversation_id); // Draft-LM-3L4K
+    const supplier = await this.models.getInactive(model, conversation_id);
     console.log(`[supplier]distribute`, supplier.id);
     return supplier;
   }

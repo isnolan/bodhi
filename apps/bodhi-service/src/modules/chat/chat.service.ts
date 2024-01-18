@@ -59,7 +59,7 @@ export class ChatService {
    * @returns
    */
   async send(conversation: ChatConversation, options: SendMessageDto, channel: string) {
-    const { id: conversation_id, user_id, model } = conversation;
+    const { id: conversation_id, user_id, model: slug } = conversation;
     const { messages, message_id } = options;
     let { parent_id } = options;
 
@@ -72,7 +72,7 @@ export class ChatService {
     });
 
     try {
-      const models = await this.supplier.getActiveModel(model, conversation_id, conversation.model_id);
+      const models = await this.supplier.getActiveModel(conversation_id, slug, conversation.model_id);
       if (models.id !== conversation.model_id) {
         await this.conversation.updateSupplier(conversation.id, models.id);
       }

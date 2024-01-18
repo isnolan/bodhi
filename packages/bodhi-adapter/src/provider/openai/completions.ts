@@ -127,7 +127,11 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
         //   return { role: 'system', content: this.filterTextPartsToString(parts) } as openai.Message;
         // }
         if (item.role === 'assistant') {
-          return { role: 'assistant', content: parts, tool_calls: tool_calls } as openai.Message;
+          return {
+            role: 'assistant',
+            content: parts,
+            tool_calls: tool_calls.length > 0 ? tool_calls : undefined,
+          } as openai.Message;
         }
         return { role: 'user', content: parts } as openai.Message;
       }),
@@ -146,7 +150,7 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
     try {
       candidates.map(({ index, delta, message, finish_reason }: openai.Choice) => {
         const parts: types.chat.Part[] = [];
-        let { content, tool_calls } = message;
+        let { content, tool_calls } = message || delta;
         if (delta) {
           content = delta.content;
           tool_calls = delta.tool_calls;

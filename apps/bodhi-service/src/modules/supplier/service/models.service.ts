@@ -39,7 +39,7 @@ export class SupplierModelsService {
    * @param isDowngrade
    * @returns
    */
-  async getInactive(name = 'gpt-3.5', conversationId: number, isDowngrade = false): Promise<SupplierModels> {
+  async getInactive(name = 'gemini-pro', conversationId: number, isDowngrade = false): Promise<SupplierModels> {
     // 获取可用节点
     const services = await this.repository.find({
       select: ['id', 'name', 'instance_type', 'weight', 'status'],

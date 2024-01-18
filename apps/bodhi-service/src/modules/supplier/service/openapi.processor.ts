@@ -61,6 +61,7 @@ export class SupplierOpenAPIProcessor {
           apiSecret: api_secret,
           agent: process.env.HTTP_PROXY as string,
         });
+        console.log(`->latest`, JSON.stringify(latest));
         const res = await api.sendMessage({
           messages: [...latest],
           ...params,
@@ -70,7 +71,7 @@ export class SupplierOpenAPIProcessor {
             choices.forEach((row: any, idx: number) => {
               console.log(`->idx:`, idx, row.parts);
             });
-            // this.service.reply(channel, choices);
+            this.service.reply(channel, choices);
           },
         });
 
@@ -82,12 +83,12 @@ export class SupplierOpenAPIProcessor {
         });
 
         // 回复会话
-        // this.service.reply(channel, { conversation_id: conversation.conversation_id, ...res });
+        this.service.reply(channel, { conversation_id: conversation.conversation_id, ...res });
 
         resolve({});
       } catch (err) {
         console.warn(`[api]`, err);
-        // this.service.reply(channel, { error: { message: err.message, code: err.code } });
+        this.service.reply(channel, { error: { message: err.message, code: err.code } });
         resolve({});
         return;
       }
