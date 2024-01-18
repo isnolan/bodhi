@@ -4,7 +4,7 @@ import { Process, Processor, OnGlobalQueueCompleted } from '@nestjs/bull';
 
 import { ChatConversationService } from '../chat/conversation.service';
 import { ChatMessageService } from '../chat/message.service';
-import { QueueMessageDto } from '../chat/dto/queue-message.dto';
+import { QueueMessageDto } from './dto/queue-message.dto';
 import { CreateMessageDto } from '../chat/dto/create-message.dto';
 import { SupplierModelsService } from './models.service';
 import { ChatService } from '@/modules/chat/chat.service';

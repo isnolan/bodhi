@@ -8,7 +8,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 
 import { ChatConversationService } from '../chat/conversation.service';
 import { ChatMessageService } from '../chat/message.service';
-import { QueueMessageDto } from '../chat/dto/queue-message.dto';
+import { QueueMessageDto } from './dto/queue-message.dto';
 import { FilesService } from '../files/files.service';
 import { ChatConversation } from '../chat/entity/conversation.entity';
 import { FileDto } from '../files/dto/upload.dto';
