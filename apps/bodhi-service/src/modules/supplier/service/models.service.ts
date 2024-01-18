@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { Repository, MoreThan, In } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
-import { InstanceEnum, SupplierModels } from './entity/models.entity';
+import { InstanceEnum, SupplierModels } from '../entity/models.entity';
 
 @Injectable()
 export class SupplierModelsService {

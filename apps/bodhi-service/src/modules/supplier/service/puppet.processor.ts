@@ -6,13 +6,13 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 
-import { ChatConversationService } from '../chat/conversation.service';
-import { ChatMessageService } from '../chat/message.service';
-import { QueueMessageDto } from './dto/queue-message.dto';
-import { FilesService } from '../files/files.service';
-import { ChatConversation } from '../chat/entity/conversation.entity';
-import { FileDto } from '../files/dto/upload.dto';
-import { FilePuppetDto } from '../files/dto/queue-file.dto';
+import { ChatConversationService } from '@/modules/chat/conversation.service';
+import { ChatMessageService } from '@/modules/chat/message.service';
+import { QueueMessageDto } from '../dto/queue-message.dto';
+import { FilesService } from '@/modules/files/files.service';
+import { ChatConversation } from '@/modules/chat/entity/conversation.entity';
+import { FileDto } from '@/modules/files/dto/upload.dto';
+import { FilePuppetDto } from '@/modules/files/dto/queue-file.dto';
 import { SupplierModelsService } from './models.service';
 import { ChatService } from '@/modules/chat/chat.service';
 

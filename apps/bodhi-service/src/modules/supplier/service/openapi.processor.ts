@@ -2,10 +2,10 @@ import { Job, Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { Process, Processor, OnGlobalQueueCompleted } from '@nestjs/bull';
 
-import { ChatConversationService } from '../chat/conversation.service';
-import { ChatMessageService } from '../chat/message.service';
-import { QueueMessageDto } from './dto/queue-message.dto';
-import { CreateMessageDto } from '../chat/dto/create-message.dto';
+import { ChatConversationService } from '@/modules/chat/conversation.service';
+import { ChatMessageService } from '@/modules/chat/message.service';
+import { QueueMessageDto } from '../dto/queue-message.dto';
+import { CreateMessageDto } from '@/modules/chat/dto/create-message.dto';
 import { SupplierModelsService } from './models.service';
 import { ChatService } from '@/modules/chat/chat.service';
 

@@ -9,9 +9,7 @@ import { Supplier } from './entity/supplier.entity';
 import { ChatModule } from '../chat/chat.module';
 import { FilesModule } from '../files/files.module';
 import { SupplierModels } from './entity/models.entity';
-import { SupplierPuppetProcessor } from './puppet.processor';
-import { SupplierModelsService } from './models.service';
-import { SupplierOpenAPIProcessor } from './openapi.processor';
+import Service, { SupplierModelsService } from './service/';
 
 @Module({
   imports: [
@@ -32,7 +30,7 @@ import { SupplierOpenAPIProcessor } from './openapi.processor';
     forwardRef(() => FilesModule),
   ],
   controllers: [],
-  providers: [SupplierService, SupplierModelsService, SupplierPuppetProcessor, SupplierOpenAPIProcessor],
+  providers: [SupplierService, ...Service],
   exports: [SupplierService, SupplierModelsService],
 })
 export class SupplierModule {}
