@@ -1,11 +1,6 @@
-import {
-  OpenAICompletionsAPI,
-  OpenAIAssistantsAPI,
-  GoogleVertexAPI,
-  GoogleGeminiAPI,
-  AnthropicClaudeAPI,
-  AnthropicBedrockAPI,
-} from '@/provider';
+import { OpenAICompletionsAPI, OpenAIAssistantsAPI } from '@/provider';
+import { GoogleVertexAPI, GoogleGeminiAPI } from '@/provider';
+import { AnthropicClaudeAPI, AnthropicBedrockAPI } from '@/provider';
 import { AliyunQwenAPI, AliyunWanxAPI } from '@/provider';
 import { ChatBaseAPI } from '@/provider/base';
 import { TencentHunyuanAPI } from '@/provider/tencent';
