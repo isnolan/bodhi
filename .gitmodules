@@ -1,0 +1,3 @@
+[submodule "packages/bodhi-unofficial"]
+	path = packages/bodhi-unofficial
+	url = git@github.com:isnolan/chatbot-puppet.git
