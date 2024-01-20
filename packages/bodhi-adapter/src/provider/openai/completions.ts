@@ -38,8 +38,8 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
       if (params.stream === false) {
         const result = await res.json();
         const choices = this.convertChoices(result.choices);
-        const useage = result?.usage;
-        resolove({ id: uuidv4(), model: opts.model, choices, useage });
+        const usage = result?.usage;
+        resolove({ id: uuidv4(), model: opts.model, choices, usage });
       } else {
         // streaming
         const body: NodeJS.ReadableStream = res.body;
@@ -71,8 +71,8 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
         body.on('end', async () => {
           const choices: types.chat.Choice[] = this.combineChoices(choicesList);
           // TODO: Google AI Gemini not found usageMetadata, but vertex founded.
-          const useage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
-          resolove({ id: uuidv4(), model: opts.model, choices, useage });
+          const usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+          resolove({ id: uuidv4(), model: opts.model, choices, usage });
         });
       }
     });

@@ -37,7 +37,7 @@ export namespace openai {
 
   export type Tools = { type: 'function'; function: types.chat.Function };
 
-  export type Useage = { prompt_tokens: number; completion_tokens: number; total_tokens: number };
+  export type Usage = { prompt_tokens: number; completion_tokens: number; total_tokens: number };
 
   /**
    * Response
@@ -49,7 +49,7 @@ export namespace openai {
     model: string;
     system_fingerprint?: string;
     choices: Choice[];
-    usage: Useage;
+    usage: Usage;
   };
 
   export type Choice = {

@@ -69,14 +69,14 @@ export class GoogleVertexAPI extends GoogleGeminiAPI {
 
       // streaming
       const choicesList: types.chat.Choice[] = [];
-      const useage: types.chat.Useage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+      const usage: types.chat.Usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
       const parser = createParser((event: ParseEvent | ReconnectInterval) => {
         // console.log(`->`, event.type, event?.data);
         if (event.type === 'event') {
           const res = JSON.parse(event.data);
           const choices = this.convertChoices(res.candidates);
           if (res.usageMetadata) {
-            Object.assign(useage, {
+            Object.assign(usage, {
               prompt_tokens: res.usageMetadata.promptTokenCount,
               completion_tokens: res.usageMetadata.candidatesTokenCount,
               total_tokens: res.usageMetadata.totalTokenCount,
@@ -97,7 +97,7 @@ export class GoogleVertexAPI extends GoogleGeminiAPI {
       body.on('end', () => {
         const choices: types.chat.Choice[] = this.combineChoices(choicesList);
         // TODO: Google AI Gemini not found usageMetadata, but vertex founded.
-        resolove({ id: uuidv4(), model: opts.model, choices, useage });
+        resolove({ id: uuidv4(), model: opts.model, choices, usage });
       });
     });
   }

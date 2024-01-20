@@ -67,7 +67,7 @@ export class AliyunQwenAPI extends ChatBaseAPI {
 
       // streaming
       const choicesList: types.chat.Choice[] = [];
-      const useage: types.chat.Useage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+      const usage: types.chat.Usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
       const parser = createParser((event: ParseEvent | ReconnectInterval) => {
         if (event.type === 'event') {
           const res = JSON.parse(event.data);
@@ -77,7 +77,7 @@ export class AliyunQwenAPI extends ChatBaseAPI {
 
           if (res.usage) {
             const u = res.usage;
-            Object.assign(useage, {
+            Object.assign(usage, {
               prompt_tokens: u.input_tokens,
               completion_tokens: u.output_tokens,
               total_tokens: u.total_tokens ? u.total_tokens : u.input_tokens + u.output_tokens,
@@ -95,7 +95,7 @@ export class AliyunQwenAPI extends ChatBaseAPI {
 
       body.on('end', () => {
         const choices: types.chat.Choice[] = this.combineChoices(choicesList);
-        resolove({ id: uuidv4(), model: opts.model, choices, useage });
+        resolove({ id: uuidv4(), model: opts.model, choices, usage });
       });
     });
   }

@@ -48,13 +48,13 @@ export class TencentHunyuanAPI extends ChatBaseAPI {
       // streaming
       let id = uuidv4();
       const choicesList: types.chat.Choice[] = [];
-      const useage: types.chat.Useage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+      const usage: types.chat.Usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
       for await (let message of response) {
         const res = JSON.parse(message.data);
         id = res.Id;
         const choices = this.convertChoices(res.Choices);
         if (res.Usage) {
-          Object.assign(useage, {
+          Object.assign(usage, {
             prompt_tokens: res.Usage.PromptTokens,
             completion_tokens: res.Usage.CompletionTokens,
             total_tokens: res.Usage.TotalTokens,
@@ -66,7 +66,7 @@ export class TencentHunyuanAPI extends ChatBaseAPI {
 
       // finished
       const choices: types.chat.Choice[] = this.combineChoices(choicesList);
-      resolove({ id, model: opts.model, choices, useage });
+      resolove({ id, model: opts.model, choices, usage });
     });
   }
 

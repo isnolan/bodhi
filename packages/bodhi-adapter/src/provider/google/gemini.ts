@@ -72,8 +72,8 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
       body.on('end', () => {
         const choices: types.chat.Choice[] = this.combineChoices(choicesList);
         // TODO: Google AI Gemini not found usageMetadata, but vertex founded.
-        const useage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
-        resolove({ id: uuidv4(), model: opts.model, choices, useage });
+        const usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+        resolove({ id: uuidv4(), model: opts.model, choices, usage });
       });
     });
   }

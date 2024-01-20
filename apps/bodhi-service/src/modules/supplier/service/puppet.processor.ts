@@ -21,15 +21,13 @@ const importDynamic = new Function('modulePath', 'return import(modulePath)');
 @Injectable()
 export class SupplierPuppetProcessor implements OnModuleInit {
   private readonly subscriber;
-  private readonly apis: any;
+  private readonly apis: { [key: string]: any } = {};
   private readonly files: { [key: string]: { [key: string]: FileDto } } = {};
 
   constructor(
     private readonly configService: ConfigService,
     @InjectQueue('chatbot')
     private readonly queue: Queue,
-    @InjectRedis()
-    private readonly redis: Redis,
     private readonly file: FilesService,
     private readonly supplier: SupplierModelsService,
     private readonly chat: ChatService,
@@ -40,25 +38,22 @@ export class SupplierPuppetProcessor implements OnModuleInit {
     const option = this.configService.get('redis');
     this.subscriber = new Redis(option);
 
-    this.apis = {};
-
-    this.initPuppet(process.env.CHATBOT_EPID);
+    // init puppet node
+    process.env.PUPPET_ID && this.initPuppet(process.env.PUPPET_ID);
   }
 
   async onModuleInit(): Promise<void> {
     // 订阅 Redis
-    this.subscriber.subscribe('puppet', (error, count) => {
+    this.subscriber.subscribe('puppet', (error) => {
       if (error) {
         throw new Error(`Failed to subscribe: ${error.message}`);
       }
-      console.log(`[redis]subscribed to puppet channel.`, count);
     });
 
-    this.subscriber.subscribe('attachment', (error, count) => {
+    this.subscriber.subscribe('attachment', (error) => {
       if (error) {
         throw new Error(`Failed to subscribe: ${error.message}`);
       }
-      console.log(`[redis]subscribed to attachment channel.`, count);
     });
 
     this.subscriber.on('message', (channel, json) => {
@@ -86,27 +81,16 @@ export class SupplierPuppetProcessor implements OnModuleInit {
       return;
     }
     // 初始化Puppet
-    const { Puppet, ChatGPTPuppet, ChatClaudePuppet } = await importDynamic('@yhostc/chatbot-puppet');
-    const puppet = new Puppet({ proxyAgent: process.env.PROXY_AGENT });
+    const { Puppet, Provider, ChatAPI } = await importDynamic('@isnolan/bodhi-puppet');
+    const puppet = new Puppet({ agent: process.env.PROXY_AGENT });
     await puppet.start();
     // 初始化Page
     for (const supplier of services) {
       // 解析账号授权信息
       // const { username, password, cookies } = JSON.parse(supplier?.authorisation);
-      // 创建ChatGPT实例
-      let page;
-      // const opts = { pageId: `chat${supplier.id}`, username, password, cookies };
-      const opts = { pageId: `chat${supplier.id}` };
-      switch (supplier.instance_name) {
-        case 'chatgpt':
-          page = new ChatGPTPuppet(puppet, opts);
-          break;
-        case 'claude':
-          page = new ChatClaudePuppet(puppet, opts);
-          break;
-        default:
-          continue;
-      }
+      const opts = { pageId: `chat${supplier.id}`, sessionToken: '', accessToken: '' };
+      // const opts = { pageId: `chat${supplier.id}` };
+      const page = new ChatAPI(supplier.instance_name, puppet, opts);
       this.apis[supplier.id] = page;
 
       // 准备就绪:允许流量接入
@@ -165,7 +149,6 @@ export class SupplierPuppetProcessor implements OnModuleInit {
    */
   async sendMessage(data: QueueMessageDto) {
     console.log(`[puppet]job:`, data);
-    return;
     const { channel, model_id, conversation_id, parent_id, messages } = data;
     const conversation = (await this.conversation.findOne(conversation_id)) as ChatConversation;
     const message = await this.message.getLastMessage(conversation_id);
