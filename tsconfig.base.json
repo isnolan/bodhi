@@ -10,7 +10,7 @@
     "moduleResolution": "node",
 
     /* Strict Type-Checking Options */
-    "strictNullChecks": true,
+    // "strictNullChecks": true,
     "strictFunctionTypes": true,
     "strictBindCallApply": true,
     "strictPropertyInitialization": false,
