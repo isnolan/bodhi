@@ -330,6 +330,9 @@ importers:
       https-proxy-agent:
         specifier: ^7.0.0
         version: 7.0.2
+      mime-types:
+        specifier: ^2.1.35
+        version: 2.1.35
       node-fetch:
         specifier: ^2.7.0
         version: 2.7.0
