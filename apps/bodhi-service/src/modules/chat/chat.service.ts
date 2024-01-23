@@ -76,16 +76,17 @@ export class ChatService {
       if (models.id !== conversation.model_id) {
         await this.conversation.updateSupplier(conversation.id, models.id);
       }
+      console.log(`->models`, models);
 
       const model_id = models.id;
       const s1: QueueMessageDto = { channel, model_id, conversation_id, parent_id: message_id };
-      // if (supplier.instance === 'puppet') {
-      //   // 发布订阅
-      //   await this.redis.publish('puppet', JSON.stringify(s1));
-      // } else {
-      //   // 消息队列
-      await this.queue.add('openapi', s1, { priority: 1, delay: 10 });
-      // }
+      if (models.instance_type === 'puppet') {
+        // 发布订阅
+        await this.redis.publish('puppet', JSON.stringify(s1));
+      } else {
+        // 消息队列
+        await this.queue.add('openapi', s1, { priority: 1, delay: 10 });
+      }
     } catch (err) {
       this.reply(channel, { error: { message: err.message, code: 400 } });
     }
