@@ -78,7 +78,7 @@ export class ChatService {
       }
 
       const model_id = models.id;
-      const s1: QueueMessageDto = { channel, model_id, conversation_id, messages, parent_id: message_id };
+      const s1: QueueMessageDto = { channel, model_id, conversation_id, parent_id: message_id };
       // if (supplier.instance === 'puppet') {
       //   // 发布订阅
       //   await this.redis.publish('puppet', JSON.stringify(s1));

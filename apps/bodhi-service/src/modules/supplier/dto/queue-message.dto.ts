@@ -8,6 +8,4 @@ export class QueueMessageDto {
   conversation_id: number;
 
   parent_id: string;
-
-  messages: chat.Message[];
 }
