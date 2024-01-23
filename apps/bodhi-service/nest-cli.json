@@ -16,7 +16,7 @@
         "watchAssets": true
       },
       {
-        "include": "modules/notification/templates/**/*"
+        "include": "modules/notice/templates/**/*"
       }
     ]
   }

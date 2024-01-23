@@ -6,7 +6,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 describe('chat', () => {
   beforeEach(() => {
-    if (!process.env.PROXY_URL || !process.env.AWS_BEDROCK_ACCESS || !process.env.AWS_BEDROCK_SECRET) {
+    if (!process.env.HTTP_PROXY || !process.env.AWS_BEDROCK_ACCESS || !process.env.AWS_BEDROCK_SECRET) {
       console.log('Skipping test due to missing environment variables');
       return;
     }
@@ -15,7 +15,7 @@ describe('chat', () => {
   const api = new ChatAPI(Provider.ANTHROPIC_BEDROCK, {
     apiKey: process.env?.AWS_BEDROCK_ACCESS as string,
     apiSecret: process.env?.AWS_BEDROCK_SECRET as string,
-    agent: process.env.PROXY_URL as string,
+    agent: process.env.HTTP_PROXY as string,
   });
 
   // text: streaming

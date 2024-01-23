@@ -6,7 +6,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 describe('chat', () => {
   beforeEach(() => {
-    if (!process.env.PROXY_URL || !process.env.ALIYUN) {
+    if (!process.env.HTTP_PROXY || !process.env.ALIYUN) {
       console.log('Skipping test due to missing environment variables');
       return;
     }
@@ -14,7 +14,7 @@ describe('chat', () => {
 
   const api = new ChatAPI(Provider.ALIYUN_QWEN, {
     apiKey: process.env?.ALIYUN as string,
-    agent: process.env.PROXY_URL as string,
+    agent: process.env.HTTP_PROXY as string,
   });
 
   it('text: streaming', async () => {

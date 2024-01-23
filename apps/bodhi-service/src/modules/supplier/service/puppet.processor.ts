@@ -3,7 +3,6 @@ import { Queue } from 'bull';
 import { v4 as uuidv4 } from 'uuid';
 import { InjectQueue } from '@nestjs/bull';
 import { ConfigService } from '@nestjs/config';
-import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 
 import { ChatConversationService } from '@/modules/chat/conversation.service';
@@ -81,16 +80,21 @@ export class SupplierPuppetProcessor implements OnModuleInit {
       return;
     }
     // 初始化Puppet
-    const { Puppet, Provider, ChatAPI } = await importDynamic('@isnolan/bodhi-puppet');
+    const { Puppet, ChatAPI } = await importDynamic('@isnolan/bodhi-puppet');
     const puppet = new Puppet({ agent: process.env.PROXY_AGENT });
     await puppet.start();
+
     // 初始化Page
     for (const supplier of services) {
       // 解析账号授权信息
       // const { username, password, cookies } = JSON.parse(supplier?.authorisation);
       const opts = { pageId: `chat${supplier.id}`, sessionToken: '', accessToken: '' };
       // const opts = { pageId: `chat${supplier.id}` };
-      const page = new ChatAPI(supplier.instance_name, puppet, opts);
+      const page = new ChatAPI(puppet, supplier.instance_name, {
+        pageId: supplier.id,
+        sessionToken: supplier.api_secret,
+        fileServer: process.env.NODE_HOST as string,
+      });
       this.apis[supplier.id] = page;
 
       // 准备就绪:允许流量接入
@@ -149,7 +153,7 @@ export class SupplierPuppetProcessor implements OnModuleInit {
    */
   async sendMessage(data: QueueMessageDto) {
     console.log(`[puppet]job:`, data);
-    const { channel, model_id, conversation_id, parent_id, messages } = data;
+    const { channel, model_id, conversation_id, parent_id } = data;
     const conversation = (await this.conversation.findOne(conversation_id)) as ChatConversation;
     const message = await this.message.getLastMessage(conversation_id);
     const supplier = await this.supplier.get(model_id);

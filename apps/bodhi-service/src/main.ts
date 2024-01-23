@@ -28,7 +28,7 @@ async function bootstrap() {
   const options = new DocumentBuilder()
     .setTitle('Bodhi API')
     .setVersion('1.0')
-    .addServer('http://127.0.0.1:3200', 'Stage')
+    .addServer('http://127.0.0.1:3100', 'Stage')
     .addBearerAuth()
     .addApiKey(
       { type: 'apiKey', name: 'x-api-key', in: 'header' },

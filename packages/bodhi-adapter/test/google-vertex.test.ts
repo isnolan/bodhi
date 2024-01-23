@@ -8,7 +8,7 @@ const credential = JSON.parse(
 
 describe('chat', () => {
   beforeEach(() => {
-    if (!process.env.PROXY_URL || !credential.client_email) {
+    if (!process.env.HTTP_PROXY || !credential.client_email) {
       console.log('Skipping test due to missing environment variables');
       return;
     }
@@ -17,7 +17,7 @@ describe('chat', () => {
   const api = new ChatAPI(Provider.GOOGLE_VERTEX, {
     apiKey: credential.client_email,
     apiSecret: credential.private_key,
-    agent: process.env.PROXY_URL as string,
+    agent: process.env.HTTP_PROXY as string,
   });
 
   // 发送聊天消息

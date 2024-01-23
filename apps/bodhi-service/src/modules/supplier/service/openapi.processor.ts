@@ -46,27 +46,20 @@ export class SupplierOpenAPIProcessor {
       try {
         const supplier = await this.supplier.get(model_id);
         const conversation = await this.conversation.findOne(conversation_id);
-        const { name: model, api_key, api_secret, instance_name } = supplier;
-        const params = {
+        const { name: model, api_key, api_secret, instance_name: instance } = supplier;
+
+        const { ChatAPI } = this.apis;
+        const api = new ChatAPI(instance, { apiKey: api_key, apiSecret: api_secret, agent: process.env.HTTP_PROXY });
+        const messages = await this.message.getLastMessages(conversation_id, conversation.context_limit);
+        const res = await api.sendMessage({
+          messages: [...messages],
           model,
           temperature: Number(conversation.temperature),
           top_p: Number(conversation.top_p),
           top_k: Number(conversation.top_k),
           n: conversation.n,
-        };
-        const latest = await this.message.getLastMessages(conversation_id, conversation.context_limit);
-        const { Provider, ChatAPI } = this.apis;
-        const api = new ChatAPI(instance_name, {
-          apiKey: api_key,
-          apiSecret: api_secret,
-          agent: process.env.HTTP_PROXY as string,
-        });
-        console.log(`->latest`, JSON.stringify(latest));
-        const res = await api.sendMessage({
-          messages: [...latest],
-          ...params,
           onProgress: (choices) => {
-            console.log(`[${instance_name}]progress`, model_id, model, new Date().toLocaleTimeString('zh-CN'));
+            console.log(`[${instance}]progress`, model_id, model, new Date().toLocaleTimeString('zh-CN'));
             // multiple choice
             choices.forEach((row: any, idx: number) => {
               console.log(`->idx:`, idx, row.parts);
@@ -87,7 +80,7 @@ export class SupplierOpenAPIProcessor {
 
         resolve({});
       } catch (err) {
-        console.warn(`[api]`, err);
+        console.warn(`[api]`, err.code, err.message);
         this.service.reply(channel, { error: { message: err.message, code: err.code } });
         resolve({});
         return;

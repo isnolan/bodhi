@@ -5,7 +5,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 describe('chat', () => {
   beforeEach(() => {
-    if (!process.env.PROXY_URL || !process.env.QCLOUD_SECRET_ID) {
+    if (!process.env.HTTP_PROXY || !process.env.QCLOUD_SECRET_ID) {
       console.log('Skipping test due to missing environment variables');
       pending();
     }
@@ -14,7 +14,7 @@ describe('chat', () => {
   const api = new ChatAPI(Provider.TENCENT_HUNYUAN, {
     apiKey: process.env?.QCLOUD_SECRET_ID as string,
     apiSecret: process.env?.QCLOUD_SECRET_KEY as string,
-    agent: process.env.PROXY_URL as string,
+    agent: process.env.HTTP_PROXY as string,
   });
 
   // 发送聊天消息

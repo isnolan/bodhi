@@ -13,16 +13,16 @@ export class ChatMessageService {
   ) {}
 
   async save(opts: Partial<ChatMessage>): Promise<ChatMessage> {
-    // const { conversation_id, role, content } = opts; // 必备参数
     const { user_id, parent_id, parts } = opts; // 可选参数
     let { tokens } = opts;
-    // if (!opts.tokens) {
-    //   tokens = this.getTokenCount(opts.content);
-    // }
-    console.log(`[message]parts`, parts);
-
-    const d = this.repository.create({ ...opts, user_id, parent_id });
-    return await this.repository.save(d);
+    if (!opts.tokens) {
+      const content = parts
+        .filter((item) => item.type === 'text')
+        .map((item) => item.text)
+        .join('');
+      tokens = this.getTokenCount(content);
+    }
+    return await this.repository.save(this.repository.create({ ...opts, user_id, parent_id, tokens }));
   }
 
   async findMyMessageId(message_id: string): Promise<ChatMessage | null> {

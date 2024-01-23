@@ -5,7 +5,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 describe('chat', () => {
   beforeEach(() => {
-    if (!process.env.PROXY_URL || !process.env.OPENAI_API_KEY) {
+    if (!process.env.HTTP_PROXY || !process.env.OPENAI_API_KEY) {
       console.log('Skipping test due to missing environment variables');
       return;
     }
@@ -13,7 +13,7 @@ describe('chat', () => {
 
   const api = new OpenAICompletionsAPI({
     apiKey: process.env?.OPENAI_API_KEY as string, // 使用你的 API 密钥
-    agent: process.env.PROXY_URL as string,
+    agent: process.env.HTTP_PROXY as string,
   });
 
   // 发送聊天消息

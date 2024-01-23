@@ -6,7 +6,7 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 describe('chat', () => {
   beforeEach(() => {
-    if (!process.env.PROXY_URL || !process.env.GOOGLE_GEMINI) {
+    if (!process.env.HTTP_PROXY || !process.env.GOOGLE_GEMINI) {
       console.log('Skipping test due to missing environment variables');
       return;
     }
@@ -14,7 +14,7 @@ describe('chat', () => {
 
   const api = new ChatAPI(Provider.GOOGLE_GEMINI, {
     apiKey: process.env?.GOOGLE_GEMINI as string,
-    agent: process.env.PROXY_URL as string,
+    agent: process.env.HTTP_PROXY as string,
   });
 
   // 发送聊天消息
