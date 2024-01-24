@@ -12,6 +12,7 @@ import { CreateMessageDto } from './dto/create-message.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 import { ChatConversation } from './entity/conversation.entity';
 import { QueueMessageDto } from '../supplier/dto/queue-message.dto';
+import { SupplierCredentialsService } from '../supplier/service';
 
 @Injectable()
 export class ChatService {
@@ -23,6 +24,7 @@ export class ChatService {
     @InjectRedis()
     private readonly redis: Redis,
     private readonly supplier: SupplierService,
+    private readonly credentials: SupplierCredentialsService,
     private readonly message: ChatMessageService,
     private readonly configService: ConfigService,
     private readonly conversation: ChatConversationService,
@@ -59,8 +61,8 @@ export class ChatService {
    * @returns
    */
   async send(conversation: ChatConversation, options: SendMessageDto, channel: string) {
-    const { id: conversation_id, user_id, model: slug } = conversation;
-    const { messages, message_id } = options;
+    const { id: conversation_id, user_id } = conversation;
+    const { credential_ids, messages, message_id } = options;
     let { parent_id } = options;
 
     // archive send message
@@ -72,19 +74,24 @@ export class ChatService {
     });
 
     try {
-      const models = await this.supplier.getActiveModel(conversation_id, slug, conversation.model_id);
-      if (models.id !== conversation.model_id) {
-        await this.conversation.updateSupplier(conversation.id, models.id);
+      // Assign valid provisioning credentials
+      const { credential_id } = conversation;
+      const credential = await this.supplier.distributeCredential(credential_ids, conversation_id, credential_id);
+      if (credential.id !== credential_id) {
+        await this.conversation.updateAttribute(conversation.id, {
+          credential_id: credential.id,
+        });
       }
-      console.log(`->models`, models);
 
-      const model_id = models.id;
-      const s1: QueueMessageDto = { channel, model_id, conversation_id, parent_id: message_id };
+      const s1: QueueMessageDto = { channel, model_id: models.id, conversation_id, parent_id: message_id };
+      console.log(`[chat]send`, models, s1);
+      // 发布订阅
       if (models.instance_type === 'puppet') {
-        // 发布订阅
         await this.redis.publish('puppet', JSON.stringify(s1));
-      } else {
-        // 消息队列
+      }
+
+      // 消息队列
+      if (models.instance_type === 'api') {
         await this.queue.add('openapi', s1, { priority: 1, delay: 10 });
       }
     } catch (err) {

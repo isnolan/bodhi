@@ -27,28 +27,25 @@ export class ChatConversationService {
     return await this.repository.findOne({ where: { conversation_id } });
   }
 
-  async findAndCreateOne(conversation_id, opts: Partial<ChatConversation>) {
+  async findAndCreateOne(conversation_id, opts: Partial<ChatConversation>): Promise<ChatConversation> {
     // find
     if (conversation_id) {
-      const res = await this.findOneByConversationId(conversation_id);
-      if (res) {
-        return res;
+      const conversation = await this.findOneByConversationId(conversation_id);
+      if (conversation) {
+        return conversation;
       }
     }
-
-    // create
-    const { user_id, user_key_id } = opts;
-    const { model, temperature = 0.8, top_p = 0, top_k = 0, n = 1 } = opts;
-    const d = { user_id, user_key_id, model, temperature, top_p, top_k, n };
+    // create new one
+    Object.assign({ temperature: 0.8, top_p: 0, top_k: 0, n: 1 }, opts);
     return await this.repository.save(this.repository.create({ conversation_id, ...opts }));
   }
 
-  async updateSupplier(id: number, supplier_id: number) {
-    await this.repository.save(plainToClass(ChatConversation, { id, supplier_id }));
+  async updateCredential(id: number, credential_id: number) {
+    return this.repository.update(id, { credential_id });
   }
 
   async updateAttribute(id: number, attribute: object) {
-    await this.repository.save(plainToClass(ChatConversation, { id, ...attribute }));
+    return this.repository.update(id, attribute);
   }
 
   // async setTokenInc(id: number, tokens: number) {

@@ -39,10 +39,8 @@ export class SupplierOpenAPIProcessor {
   @Process('openapi')
   async openai(job: Job<QueueMessageDto>) {
     // console.log(`[api]job:`, job.data);
-    // Get Local Conversation and Message ID
     const { channel, model_id, conversation_id, parent_id } = job.data;
     return new Promise(async (resolve) => {
-      // 获取供应商信息
       try {
         const supplier = await this.supplier.get(model_id);
         const conversation = await this.conversation.findOne(conversation_id);
@@ -60,7 +58,6 @@ export class SupplierOpenAPIProcessor {
           n: conversation.n,
           onProgress: (choices) => {
             console.log(`[${instance}]progress`, model_id, model, new Date().toLocaleTimeString('zh-CN'));
-            // multiple choice
             choices.forEach((row: any, idx: number) => {
               console.log(`->idx:`, idx, row.parts);
             });
@@ -68,9 +65,8 @@ export class SupplierOpenAPIProcessor {
           },
         });
 
-        // 封存消息
-        res.choices.forEach((row: any) => {
-          // ready to archives
+        // archive
+        res.choices.map((row: any) => {
           const payload = { conversation_id, role: row.role, parts: row.parts, message_id: res.id };
           this.queue.add('archives', { parent_id, ...payload });
         });

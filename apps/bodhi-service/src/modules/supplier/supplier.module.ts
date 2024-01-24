@@ -4,16 +4,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { SupplierService } from './supplier.service';
-import { Supplier } from './entity/supplier.entity';
 
 import { ChatModule } from '../chat/chat.module';
 import { FilesModule } from '../files/files.module';
 import { SupplierModels } from './entity/models.entity';
-import Service, { SupplierModelsService } from './service/';
+import Service, { SupplierPurchasedService } from './service/';
+import { SupplierPurchased } from './entity/purchased.entity';
+import { SupplierCredentials } from './entity/credentials.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Supplier, SupplierModels]),
+    TypeOrmModule.forFeature([SupplierModels, SupplierPurchased, SupplierCredentials]),
 
     // Redis Queue
     BullModule.registerQueueAsync({
@@ -31,6 +32,6 @@ import Service, { SupplierModelsService } from './service/';
   ],
   controllers: [],
   providers: [SupplierService, ...Service],
-  exports: [SupplierService, SupplierModelsService],
+  exports: [SupplierService, SupplierPurchasedService],
 })
 export class SupplierModule {}

@@ -3,14 +3,11 @@ import { Entity, Column } from 'typeorm';
 
 @Entity('bodhi_chat_conversation')
 export class ChatConversation extends Base {
-  @Column({ type: 'varchar', length: 40, comment: '会话ID', default: '' })
+  @Column({ type: 'varchar', length: 40, comment: 'conversation id', default: '' })
   conversation_id: string;
 
-  @Column({ type: 'varchar', length: 40, comment: 'Model', default: '' })
+  @Column({ type: 'varchar', length: 40, comment: 'model slug', default: '' })
   model: string;
-
-  @Column({ type: 'int', comment: 'model_id', default: 0 })
-  model_id: number;
 
   @Column({ type: 'decimal', precision: 2, scale: 1, comment: 'temperature', default: 0.8 })
   temperature: number;

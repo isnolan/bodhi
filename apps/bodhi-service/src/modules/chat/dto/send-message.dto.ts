@@ -4,6 +4,10 @@ import { chat } from '@isnolan/bodhi-adapter';
 export class SendMessageDto {
   @IsNotEmpty()
   @IsArray()
+  credential_ids: number[];
+
+  @IsNotEmpty()
+  @IsArray()
   messages: chat.Message[];
 
   @IsOptional()
