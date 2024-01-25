@@ -88,7 +88,7 @@ export class ChatController {
 
       // 发送消息
       const options: SendMessageDto = { messages, message_id, parent_id };
-      await this.service.send(conversation, options, channel);
+      await this.service.send(channel, conversation, options);
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.FORBIDDEN);
     }

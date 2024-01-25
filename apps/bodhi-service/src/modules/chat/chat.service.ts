@@ -60,12 +60,12 @@ export class ChatService {
    * @param content
    * @returns
    */
-  async send(conversation: ChatConversation, options: SendMessageDto, channel: string) {
+  async send(channel: string, conversation: ChatConversation, options: SendMessageDto) {
     const { id: conversation_id, user_id } = conversation;
-    const { credential_ids, messages, message_id } = options;
+    const { messages, message_id } = options;
     let { parent_id } = options;
 
-    // archive send message
+    // archive message
     messages.map(async (message) => {
       const { role, parts } = message;
       const a1: CreateMessageDto = { conversation_id, message_id, user_id, role, parts, parent_id };
@@ -75,23 +75,20 @@ export class ChatService {
 
     try {
       // Assign valid provisioning credentials
-      const { credential_id } = conversation;
-      const credential = await this.supplier.distributeCredential(credential_ids, conversation_id, credential_id);
-      if (credential.id !== credential_id) {
-        await this.conversation.updateAttribute(conversation.id, {
-          credential_id: credential.id,
-        });
+      const credential = await this.supplier.distributeCredential(conversation_id, conversation.credential_id);
+      if (credential.id !== conversation.credential_id) {
+        await this.conversation.updateAttribute(conversation.id, { credential_id: credential.id });
       }
 
-      const s1: QueueMessageDto = { channel, model_id: models.id, conversation_id, parent_id: message_id };
-      console.log(`[chat]send`, models, s1);
+      const s1: QueueMessageDto = { channel, model_id: credential.id, conversation_id, parent_id: message_id };
+      console.log(`[chat]send`, credential, s1);
       // 发布订阅
-      if (models.instance_type === 'puppet') {
+      if (credential.ins_type === 'puppet') {
         await this.redis.publish('puppet', JSON.stringify(s1));
       }
 
       // 消息队列
-      if (models.instance_type === 'api') {
+      if (credential.ins_type === 'api') {
         await this.queue.add('openapi', s1, { priority: 1, delay: 10 });
       }
     } catch (err) {
