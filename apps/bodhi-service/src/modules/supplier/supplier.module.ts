@@ -7,18 +7,15 @@ import { SupplierService } from './supplier.service';
 
 import { ChatModule } from '../chat/chat.module';
 import { FilesModule } from '../files/files.module';
-import { SupplierModels } from './entity/models.entity';
+import Entity from './entity';
 import Service, { SupplierCredentialsService, SupplierPurchasedService } from './service/';
-import { SupplierPurchased } from './entity/purchased.entity';
-import { SupplierCredentials } from './entity/credentials.entity';
-
 @Module({
   imports: [
-    TypeOrmModule.forFeature([SupplierModels, SupplierPurchased, SupplierCredentials]),
+    TypeOrmModule.forFeature([...Entity]),
 
     // Redis Queue
     BullModule.registerQueueAsync({
-      name: 'chatbot',
+      name: 'bodhi',
       inject: [ConfigService],
       imports: [ConfigModule],
       useFactory: async (config: ConfigService) => ({

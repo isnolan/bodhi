@@ -12,12 +12,12 @@ import { Inject, forwardRef } from '@nestjs/common';
 
 const importDynamic = new Function('modulePath', 'return import(modulePath)');
 
-@Processor('chatbot')
+@Processor('bodhi')
 export class SupplierOpenAPIProcessor {
   private apis: any;
 
   constructor(
-    @InjectQueue('chatbot')
+    @InjectQueue('bodhi')
     private readonly queue: Queue,
     private readonly supplier: SupplierModelsService,
     @Inject(forwardRef(() => ChatService))

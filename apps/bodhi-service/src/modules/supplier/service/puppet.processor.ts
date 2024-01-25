@@ -24,7 +24,7 @@ export class SupplierPuppetProcessor implements OnModuleInit {
 
   constructor(
     private readonly configService: ConfigService,
-    @InjectQueue('chatbot')
+    @InjectQueue('bodhi')
     private readonly queue: Queue,
     private readonly file: FilesService,
     private readonly supplier: SupplierModelsService,
