@@ -1,11 +1,8 @@
-import { v4 as uuidv4 } from 'uuid';
 import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { plainToClass } from 'class-transformer';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { ChatConversation } from './entity/conversation.entity';
-import { CreateConversationDto } from './dto/create-conversation.dto';
+import { ChatConversation } from '../entity/conversation.entity';
 
 @Injectable()
 export class ChatConversationService {
@@ -13,11 +10,6 @@ export class ChatConversationService {
     @InjectRepository(ChatConversation)
     private readonly repository: Repository<ChatConversation>,
   ) {}
-
-  // async createOne(opts: Partial<ChatConversation>): Promise<ChatConversation> {
-  //   const res = this.repository.create(opts);
-  //   return await this.repository.save(res);
-  // }
 
   async findOne(id: number): Promise<ChatConversation> {
     return await this.repository.findOne({ where: { id } });
@@ -27,7 +19,7 @@ export class ChatConversationService {
     return await this.repository.findOne({ where: { conversation_id } });
   }
 
-  async findAndCreateOne(conversation_id, opts: Partial<ChatConversation>): Promise<ChatConversation> {
+  async findAndCreateOne(conversation_id: string, opts: Partial<ChatConversation>): Promise<ChatConversation> {
     // find
     if (conversation_id) {
       const conversation = await this.findOneByConversationId(conversation_id);
@@ -40,11 +32,11 @@ export class ChatConversationService {
     return await this.repository.save(this.repository.create({ conversation_id, ...opts }));
   }
 
-  async updateCredential(id: number, credential_id: number) {
-    return this.repository.update(id, { credential_id });
-  }
+  // async updateCredential(id: number, credential_id: number) {
+  //   return this.repository.update(id, { credential_id });
+  // }
 
-  async updateAttribute(id: number, attribute: object) {
+  async updateAttribute(id: number, attribute: Partial<ChatConversation>) {
     return this.repository.update(id, attribute);
   }
 

@@ -3,6 +3,12 @@ import { Entity, Column } from 'typeorm';
 
 @Entity('bodhi_chat_conversation')
 export class ChatConversation extends Base {
+  @Column({ type: 'int', comment: 'purchase', default: 0 })
+  purchase_id: number;
+
+  @Column({ type: 'int', comment: 'credential', default: 0 })
+  credential_id: number;
+
   @Column({ type: 'varchar', length: 40, comment: 'conversation id', default: '' })
   conversation_id: string;
 

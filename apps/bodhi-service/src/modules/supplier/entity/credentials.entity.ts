@@ -28,7 +28,7 @@ export type Authorisation =
 @Entity('bodhi_supplier_credentials')
 export class SupplierCredentials extends Base {
   @Column({ type: 'int', comment: 'model', default: 0 })
-  model_id: string;
+  model_id: number;
 
   /* Instance */
   @Column({ type: 'enum', enum: InstanceEnum, comment: 'instance type', default: InstanceEnum.API })
@@ -41,10 +41,10 @@ export class SupplierCredentials extends Base {
   ins_id: string;
 
   /* Credentials */
-  @Column({ type: 'simple-json', comment: 'Authorisation', default: {} })
+  @Column({ type: 'simple-json', comment: 'Authorisation', default: null })
   authorisation: Authorisation;
 
-  @Column({ precision: 3, comment: '创建时间', default: () => 'CURRENT_TIMESTAMP(3)' })
+  @Column({ precision: 3, comment: '过期时间', default: null })
   expires_at: Date;
 
   /* Capabilities */

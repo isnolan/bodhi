@@ -8,7 +8,7 @@ import { SupplierService } from './supplier.service';
 import { ChatModule } from '../chat/chat.module';
 import { FilesModule } from '../files/files.module';
 import { SupplierModels } from './entity/models.entity';
-import Service, { SupplierPurchasedService } from './service/';
+import Service, { SupplierCredentialsService, SupplierPurchasedService } from './service/';
 import { SupplierPurchased } from './entity/purchased.entity';
 import { SupplierCredentials } from './entity/credentials.entity';
 
@@ -32,6 +32,6 @@ import { SupplierCredentials } from './entity/credentials.entity';
   ],
   controllers: [],
   providers: [SupplierService, ...Service],
-  exports: [SupplierService, SupplierPurchasedService],
+  exports: [SupplierService, SupplierPurchasedService, SupplierCredentialsService],
 })
 export class SupplierModule {}

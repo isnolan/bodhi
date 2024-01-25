@@ -2,8 +2,8 @@ import { Repository, Not, MoreThanOrEqual } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { get_encoding } from 'tiktoken';
-import { ChatMessage } from './entity/message.entity';
-import { CreateMessageDto } from './dto/create-message.dto';
+import { ChatMessage } from '../entity/message.entity';
+// import { CreateMessageDto } from '../dto/create-message.dto';
 
 @Injectable()
 export class ChatMessageService {
@@ -13,7 +13,7 @@ export class ChatMessageService {
   ) {}
 
   async save(opts: Partial<ChatMessage>): Promise<ChatMessage> {
-    const { user_id, parent_id, parts } = opts; // 可选参数
+    const { parent_id, parts } = opts; // 可选参数
     let { tokens } = opts;
     if (!opts.tokens) {
       const content = parts
@@ -22,7 +22,7 @@ export class ChatMessageService {
         .join('');
       tokens = this.getTokenCount(content);
     }
-    return await this.repository.save(this.repository.create({ ...opts, user_id, parent_id, tokens }));
+    return await this.repository.save(this.repository.create({ ...opts, parent_id, tokens }));
   }
 
   async findMyMessageId(message_id: string): Promise<ChatMessage | null> {

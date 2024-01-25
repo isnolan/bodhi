@@ -19,7 +19,7 @@ export class SupplierPurchased extends Base {
   model_id: number;
 
   @Column({ type: 'int', comment: 'model', default: 0 })
-  model_credential_id: number;
+  credential_id: number;
 
   @Column({ type: 'varchar', length: 40, comment: 'slug', default: '' })
   slug: string;
@@ -37,7 +37,7 @@ export class SupplierPurchased extends Base {
   @Column({ type: 'int', comment: 'tokens used', default: 0 })
   tokens_used: number;
 
-  @Column({ precision: 3, comment: 'expires', default: null })
+  @Column({ precision: 3, comment: 'expires', default: () => 'CURRENT_TIMESTAMP(3)' })
   expires_at: Date;
 
   @Column({ type: 'int', comment: 'status', default: PurchasedState.ACTIVE })

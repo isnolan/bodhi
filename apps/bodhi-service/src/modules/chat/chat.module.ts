@@ -6,10 +6,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ChatService } from './chat.service';
 import { ChatController } from './chat.controller';
 import { SupplierModule } from '../supplier/supplier.module';
-import { ChatConversationService } from './conversation.service';
-import { ChatMessageService } from './message.service';
 import { ChatConversation } from './entity/conversation.entity';
 import { ChatMessage } from './entity/message.entity';
+import Service from './service';
+
 @Module({
   imports: [
     // MySQL
@@ -30,7 +30,7 @@ import { ChatMessage } from './entity/message.entity';
   ],
 
   controllers: [ChatController],
-  providers: [ChatService, ChatConversationService, ChatMessageService],
-  exports: [ChatService, ChatConversationService, ChatMessageService],
+  providers: [ChatService, ...Service],
+  exports: [ChatService, ...Service],
 })
 export class ChatModule {}

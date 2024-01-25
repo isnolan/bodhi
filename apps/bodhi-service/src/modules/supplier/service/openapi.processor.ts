@@ -2,12 +2,13 @@ import { Job, Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { Process, Processor, OnGlobalQueueCompleted } from '@nestjs/bull';
 
-import { ChatConversationService } from '@/modules/chat/conversation.service';
-import { ChatMessageService } from '@/modules/chat/message.service';
 import { QueueMessageDto } from '../dto/queue-message.dto';
-import { CreateMessageDto } from '@/modules/chat/dto/create-message.dto';
+// import { CreateMessageDto } from '@/modules/chat/dto/create-message.dto';
 import { SupplierModelsService } from './models.service';
+
 import { ChatService } from '@/modules/chat/chat.service';
+import { ChatConversationService, ChatMessageService } from '@/modules/chat/service';
+import { Inject, forwardRef } from '@nestjs/common';
 
 const importDynamic = new Function('modulePath', 'return import(modulePath)');
 
@@ -18,9 +19,12 @@ export class SupplierOpenAPIProcessor {
   constructor(
     @InjectQueue('chatbot')
     private readonly queue: Queue,
-    private readonly service: ChatService,
-    private readonly message: ChatMessageService,
     private readonly supplier: SupplierModelsService,
+    @Inject(forwardRef(() => ChatService))
+    private readonly service: ChatService,
+    @Inject(forwardRef(() => ChatMessageService))
+    private readonly message: ChatMessageService,
+    @Inject(forwardRef(() => ChatConversationService))
     private readonly conversation: ChatConversationService,
   ) {
     this.initAPI();
@@ -36,53 +40,53 @@ export class SupplierOpenAPIProcessor {
   /**
    * Bodhi API Process
    */
-  @Process('openapi')
-  async openai(job: Job<QueueMessageDto>) {
-    // console.log(`[api]job:`, job.data);
-    const { channel, model_id, conversation_id, parent_id } = job.data;
-    return new Promise(async (resolve) => {
-      try {
-        const supplier = await this.supplier.get(model_id);
-        const conversation = await this.conversation.findOne(conversation_id);
-        const { name: model, api_key, api_secret, instance_name: instance } = supplier;
+  // @Process('openapi')
+  // async openai(job: Job<QueueMessageDto>) {
+  //   // console.log(`[api]job:`, job.data);
+  //   const { channel, model_id, conversation_id, parent_id } = job.data;
+  //   return new Promise(async (resolve) => {
+  //     try {
+  //       const supplier = await this.supplier.get(model_id);
+  //       const conversation = await this.conversation.findOne(conversation_id);
+  //       const { name: model, api_key, api_secret, instance_name: instance } = supplier;
 
-        const { ChatAPI } = this.apis;
-        const api = new ChatAPI(instance, { apiKey: api_key, apiSecret: api_secret, agent: process.env.HTTP_PROXY });
-        const messages = await this.message.getLastMessages(conversation_id, conversation.context_limit);
-        const res = await api.sendMessage({
-          messages: [...messages],
-          model,
-          temperature: Number(conversation.temperature),
-          top_p: Number(conversation.top_p),
-          top_k: Number(conversation.top_k),
-          n: conversation.n,
-          onProgress: (choices) => {
-            console.log(`[${instance}]progress`, model_id, model, new Date().toLocaleTimeString('zh-CN'));
-            choices.forEach((row: any, idx: number) => {
-              console.log(`->idx:`, idx, row.parts);
-            });
-            this.service.reply(channel, choices);
-          },
-        });
+  //       const { ChatAPI } = this.apis;
+  //       const api = new ChatAPI(instance, { apiKey: api_key, apiSecret: api_secret, agent: process.env.HTTP_PROXY });
+  //       const messages = await this.message.getLastMessages(conversation_id, conversation.context_limit);
+  //       const res = await api.sendMessage({
+  //         messages: [...messages],
+  //         model,
+  //         temperature: Number(conversation.temperature),
+  //         top_p: Number(conversation.top_p),
+  //         top_k: Number(conversation.top_k),
+  //         n: conversation.n,
+  //         onProgress: (choices) => {
+  //           console.log(`[${instance}]progress`, model_id, model, new Date().toLocaleTimeString('zh-CN'));
+  //           choices.forEach((row: any, idx: number) => {
+  //             console.log(`->idx:`, idx, row.parts);
+  //           });
+  //           this.service.reply(channel, choices);
+  //         },
+  //       });
 
-        // archive
-        res.choices.map((row: any) => {
-          const payload = { conversation_id, role: row.role, parts: row.parts, message_id: res.id };
-          this.queue.add('archives', { parent_id, ...payload });
-        });
+  //       // archive
+  //       res.choices.map((row: any) => {
+  //         const payload = { conversation_id, role: row.role, parts: row.parts, message_id: res.id };
+  //         this.queue.add('archives', { parent_id, ...payload });
+  //       });
 
-        // 回复会话
-        this.service.reply(channel, { conversation_id: conversation.conversation_id, ...res });
+  //       // 回复会话
+  //       this.service.reply(channel, { conversation_id: conversation.conversation_id, ...res });
 
-        resolve({});
-      } catch (err) {
-        console.warn(`[api]`, err.code, err.message);
-        this.service.reply(channel, { error: { message: err.message, code: err.code } });
-        resolve({});
-        return;
-      }
-    });
-  }
+  //       resolve({});
+  //     } catch (err) {
+  //       console.warn(`[api]`, err.code, err.message);
+  //       this.service.reply(channel, { error: { message: err.message, code: err.code } });
+  //       resolve({});
+  //       return;
+  //     }
+  //   });
+  // }
 
   // @Process('agent')
   // async subject(job: Job<QueueAgentDto>) {
@@ -126,26 +130,26 @@ export class SupplierOpenAPIProcessor {
   /**
    * Archives
    */
-  @Process('archives')
-  async archives(job: Job<CreateMessageDto>) {
-    // console.log(`[archives]job:`, job.data);
-    const { conversation_id, role, parts, message_id }: CreateMessageDto = job.data; // 必备
-    const { parent_conversation_id, parent_id, status }: any = job.data; // 可选
-    return new Promise(async (resolve) => {
-      // 储存信息, system 和 user 在第一时间入库，以便于api发送消息时能够查询到最新消息列表。
-      if (role === 'assistant') {
-        const d3 = { conversation_id, role, parts, message_id, parent_id, status };
-        await this.message.save(d3);
-      }
+  // @Process('archives')
+  // async archives(job: Job<CreateMessageDto>) {
+  //   // console.log(`[archives]job:`, job.data);
+  //   const { conversation_id, role, parts, message_id }: CreateMessageDto = job.data; // 必备
+  //   const { parent_conversation_id, parent_id, status }: any = job.data; // 可选
+  //   return new Promise(async (resolve) => {
+  //     // 储存信息, system 和 user 在第一时间入库，以便于api发送消息时能够查询到最新消息列表。
+  //     if (role === 'assistant') {
+  //       const d3 = { conversation_id, role, parts, message_id, parent_id, status };
+  //       await this.message.save(d3);
+  //     }
 
-      // 更新会话
-      const tokens = await this.message.getTokensByConversationId(conversation_id);
-      const attr = { tokens };
-      parent_conversation_id && Object.assign(attr, { parent_conversation_id });
-      await this.conversation.updateAttribute(conversation_id, attr);
-      resolve({});
-    });
-  }
+  //     // 更新会话
+  //     const tokens = await this.message.getTokensByConversationId(conversation_id);
+  //     const attr = { tokens };
+  //     parent_conversation_id && Object.assign(attr, { parent_conversation_id });
+  //     await this.conversation.updateAttribute(conversation_id, attr);
+  //     resolve({});
+  //   });
+  // }
 
   /**
    * 任务完成

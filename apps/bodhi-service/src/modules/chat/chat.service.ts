@@ -1,18 +1,17 @@
 import Redis from 'ioredis';
 import { Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 
-import { SupplierService } from '../supplier/supplier.service';
-import { ChatConversationService } from './conversation.service';
-import { ChatMessageService } from './message.service';
-import { CreateMessageDto } from './dto/create-message.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 import { ChatConversation } from './entity/conversation.entity';
 import { QueueMessageDto } from '../supplier/dto/queue-message.dto';
 import { SupplierCredentialsService } from '../supplier/service';
+import { ChatConversationService, ChatMessageService } from './service';
+import { SupplierService } from '../supplier/supplier.service';
+import { CreateMessageDto } from './dto/create-message.dto';
 
 @Injectable()
 export class ChatService {
@@ -23,7 +22,9 @@ export class ChatService {
     private readonly queue: Queue,
     @InjectRedis()
     private readonly redis: Redis,
+    @Inject(forwardRef(() => SupplierService))
     private readonly supplier: SupplierService,
+    @Inject(forwardRef(() => SupplierCredentialsService))
     private readonly credentials: SupplierCredentialsService,
     private readonly message: ChatMessageService,
     private readonly configService: ConfigService,
@@ -62,7 +63,7 @@ export class ChatService {
    */
   async send(channel: string, conversation: ChatConversation, options: SendMessageDto) {
     const { id: conversation_id, user_id } = conversation;
-    const { messages, message_id } = options;
+    const { credential_ids, messages, message_id } = options;
     let { parent_id } = options;
 
     // archive message
@@ -74,8 +75,9 @@ export class ChatService {
     });
 
     try {
+      // 分配有效节点
       // Assign valid provisioning credentials
-      const credential = await this.supplier.distributeCredential(conversation_id, conversation.credential_id);
+      const credential = await this.supplier.distribute(credential_ids, conversation);
       if (credential.id !== conversation.credential_id) {
         await this.conversation.updateAttribute(conversation.id, { credential_id: credential.id });
       }

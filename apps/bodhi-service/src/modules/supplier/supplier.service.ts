@@ -17,39 +17,53 @@ export class SupplierService {
     private readonly purchased: SupplierPurchasedService,
   ) {}
 
-  async distributeCredential(
-    credential_ids: number[],
-    conversation_id: number,
-    last_credential_id: number,
-  ): Promise<SupplierCredentials> {
-    console.log(`[supplier]active:`, credential_ids, conversation_id, last_credential_id);
+  /**
+   * 分配可用节点
+   * @param credential_ids
+   * @param conversation_id
+   * @param last_credential_id
+   * @returns
+   */
+  async distribute(credential_ids, conversation): Promise<SupplierCredentials> {
+    const { id, model, credential_id } = conversation;
+    console.log(`[supplier]active:`, conversation);
 
-    // Renew
-    if (last_credential_id !== 0) {
-      console.log(`[supplier]renewal`, last_credential_id);
+    // 续约
+    if (credential_id !== 0) {
+      console.log(`[supplier]renewal`, credential_id);
       // Get credential instance
-      let credential = await this.credentials.getInstance(last_credential_id);
+      // 检查前述节点是否可用
+      let credential = await this.credentials.findActive([credential_id])[0];
       // check in service
-      if (credential.ins_type === InstanceEnum.PUPPET) {
+      if (credential && credential.ins_type === InstanceEnum.PUPPET) {
         // 检查节点是否占用
-        const inServerConversationId = await this.CheckInService(credential.id);
-        if (!inServerConversationId || inServerConversationId === conversation_id) {
-          console.log(`[supplier]renew: renewed`, credential.id);
+        const inServerConversationId = await this.CheckInService(id);
+        if (!inServerConversationId || inServerConversationId === id) {
+          console.log(`[supplier]renew: renewed`, id);
           // 续期
-          await this.credentials.RenewalProvider(supplier.id, conversation_id, 180);
+          await this.Renewal(credential.id, id, 180);
         } else {
           // 降级
-          credential = await this.credentials.getInactive(res.model, conversation_id, true);
-          console.log(`[supplier]renew: downgrade`, supplier.id);
+          credential = await this.findInactive(credential_ids, conversation, true);
+          console.log(`[supplier]renew: downgrade`, credential.id);
         }
       }
-      return supplier;
+      return credential;
     }
 
-    // Distribute
-    const supplier = await this.credentials.getInactive(res.model, conversation_id);
-    console.log(`[supplier]distribute`, supplier.id);
-    return supplier;
+    // 新分配
+    const credential = await this.findInactive(credential_ids, conversation);
+    console.log(`[supplier]distribute`, credential.id);
+    return credential;
+  }
+
+  private async Renewal(credential_id: number, conversation_id: number, ttl = 180) {
+    return this.redis.set(`credential:${credential_id}`, `${conversation_id}`, 'EX', ttl);
+  }
+
+  private async CheckInService(credential_id: number): Promise<number> {
+    const conversation_id = await this.redis.get(`credential:${credential_id}`);
+    return Number(conversation_id);
   }
 
   /**
@@ -58,23 +72,25 @@ export class SupplierService {
    * @param isDowngrade
    * @returns
    */
-  public async getInactive(name = 'gemini-pro', conversationId: number, isDowngrade = false): Promise<SupplierModels> {
+  private async findInactive(credential_ids, conversation, isDowngrade = false): Promise<SupplierCredentials> {
+    const { model_id } = conversation;
     // 获取可用节点
-    const services = await this.repository.find({
-      select: ['id', 'name', 'instance_type', 'weight', 'status'],
-      where: { status: MoreThan(-1) },
-    });
+    // const services = await this.repository.find({
+    //   select: ['id', 'name', 'instance_type', 'weight', 'status'],
+    //   where: { status: MoreThan(-1) },
+    // });
+    const services = await this.credentials.findActive(credential_ids);
 
     // 筛选可用Puppet(chatgpt、claude)节点
-    const chatGptServices = await this.filter(services, async (service: SupplierModels) => {
-      const isCache = await this.redis.exists(`supplier:${service.id}`);
-      return service.name === name && service.instance_type === InstanceEnum.PUPPET && service.status === 1 && !isCache;
+    const chatGptServices = await this.filter(services, async (s: SupplierCredentials) => {
+      const isCache = await this.redis.exists(`credential:${s.id}`);
+      return s.model_id === model_id && s.ins_type === InstanceEnum.PUPPET && s.status === 1 && !isCache;
     });
 
     let currentIndex = -1;
     if (chatGptServices.length > 0 && !isDowngrade) {
       const totalWeight = chatGptServices.reduce(
-        (sum: number, service: SupplierModels) => sum + Number(service.weight),
+        (sum: number, service: SupplierCredentials) => sum + Number(service.weight),
         0,
       );
       let randomValue = Math.random() * totalWeight;
@@ -83,25 +99,22 @@ export class SupplierService {
         randomValue -= Number(chatGptServices[currentIndex].weight);
         if (randomValue <= 0) {
           const supplier = chatGptServices[currentIndex];
-          await this.RenewalProvider(supplier.id, conversationId);
+          await this.Renewal(supplier.id, conversation.id);
           return supplier;
         }
       }
     }
 
-    // 从API (openai、azure）中选举节点
-    const azureAndOpenaiServices = services.filter(
-      (service) => service.name === name && service.instance_type === InstanceEnum.API && service.status === 1,
-    );
-
-    if (azureAndOpenaiServices.length > 0) {
-      const totalWeight = azureAndOpenaiServices.reduce((sum, service) => sum + Number(service.weight), 0);
+    // 从API中选举节点
+    const apiServices = services.filter((s) => s.model_id === model_id && s.ins_type === InstanceEnum.API);
+    if (apiServices.length > 0) {
+      const totalWeight = apiServices.reduce((sum, s) => sum + Number(s.weight), 0);
       let randomValue = Math.random() * totalWeight;
-      for (let i = 0; i < azureAndOpenaiServices.length; i++) {
-        currentIndex = (currentIndex + 1) % azureAndOpenaiServices.length;
-        randomValue -= Number(azureAndOpenaiServices[currentIndex].weight);
+      for (let i = 0; i < apiServices.length; i++) {
+        currentIndex = (currentIndex + 1) % apiServices.length;
+        randomValue -= Number(apiServices[currentIndex].weight);
         if (randomValue <= 0) {
-          return azureAndOpenaiServices[currentIndex];
+          return apiServices[currentIndex];
         }
       }
     }
@@ -109,15 +122,8 @@ export class SupplierService {
     throw new Error(`No available suppliers yet`);
   }
 
-  /**
-   * 续期 expire the cache key
-   */
-  private async RenewalProvider(supplier_id: number, conversation_id: number, ttl = 180): Promise<void> {
-    await this.redis.set(`supplier:${supplier_id}`, `${conversation_id}`, 'EX', ttl);
-  }
-
-  private async CheckInService(supplier_id: number): Promise<number> {
-    const conversation_id = await this.redis.get(`supplier:${supplier_id}`);
-    return Number(conversation_id);
+  private async filter(arr, predicate) {
+    const results = await Promise.all(arr.map(predicate));
+    return arr.filter((_v, index) => results[index]);
   }
 }
