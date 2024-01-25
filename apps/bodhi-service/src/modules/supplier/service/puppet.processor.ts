@@ -10,7 +10,6 @@ import { FilesService } from '@/modules/files/files.service';
 import { ChatConversation } from '@/modules/chat/entity/conversation.entity';
 import { FileDto } from '@/modules/files/dto/upload.dto';
 import { FilePuppetDto } from '@/modules/files/dto/queue-file.dto';
-import { SupplierModelsService } from './models.service';
 import { ChatService } from '@/modules/chat/chat.service';
 import { ChatConversationService, ChatMessageService } from '@/modules/chat/service';
 
@@ -27,7 +26,6 @@ export class SupplierPuppetProcessor implements OnModuleInit {
     @InjectQueue('bodhi')
     private readonly queue: Queue,
     private readonly file: FilesService,
-    private readonly supplier: SupplierModelsService,
     @Inject(forwardRef(() => ChatService))
     private readonly chat: ChatService,
     @Inject(forwardRef(() => ChatMessageService))
@@ -61,7 +59,7 @@ export class SupplierPuppetProcessor implements OnModuleInit {
       const message = JSON.parse(json);
       console.log(`[redis]subscriber`, channel, message);
       if (channel === 'puppet' && this.apis[message.supplier_id]) {
-        this.sendMessage(message);
+        // this.sendMessage(message);
         return;
       }
 
@@ -153,94 +151,94 @@ export class SupplierPuppetProcessor implements OnModuleInit {
    * 发送消息
    * @param data
    */
-  async sendMessage(data: QueueMessageDto) {
-    console.log(`[puppet]job:`, data);
-    const { channel, model_id, conversation_id, parent_id } = data;
-    const conversation = (await this.conversation.findOne(conversation_id)) as ChatConversation;
-    const message = await this.message.getLastMessage(conversation_id);
-    const supplier = await this.supplier.get(model_id);
+  // async sendMessage(data: QueueMessageDto) {
+  //   console.log(`[puppet]job:`, data);
+  //   const { channel, model_id, conversation_id, parent_id } = data;
+  //   const conversation = (await this.conversation.findOne(conversation_id)) as ChatConversation;
+  //   const message = await this.message.getLastMessage(conversation_id);
+  //   const supplier = await this.supplier.get(model_id);
 
-    // 发送消息
-    const opts: any = {};
-    if (conversation?.parent_conversation_id) {
-      opts['conversation_id'] = conversation.parent_conversation_id;
-    }
+  //   // 发送消息
+  //   const opts: any = {};
+  //   if (conversation?.parent_conversation_id) {
+  //     opts['conversation_id'] = conversation.parent_conversation_id;
+  //   }
 
-    // transform local file to supplier file
-    // if (attachments.length > 0) {
-    //   const files = await this.file.findFilesByIds(attachments);
-    //   opts['attachments'] = files.map((r) => ({ id: r.file_id, name: r.name, size: r.size, mimetype: r.mimetype }));
-    // }
-    if (message?.message_id) {
-      opts['parent_id'] = message.message_id;
-    }
-    // if (configuration?.system) {
-    //   content += `\n------\n# System Instructions:\n${configuration.system}\n------`;
-    // }
-    console.log(`[puppet]opts`, opts);
-    try {
-      this.files[conversation_id] = {};
-      const content = '';
-      // console.log(`[chatgpt]`, supplierId, 2, typeof this.apis[supplierId]);
-      const res = await this.apis[model_id].sendMessage(content, {
-        model: supplier.name,
-        ...opts,
-        id: uuidv4(),
-        timeoutMs: 120000,
-        onProgress: ({ choices }: any) => {
-          console.log(`[puppet]progress`, model_id, supplier.name, new Date().toLocaleTimeString('zh-CN'));
-          console.log(`->1`, JSON.stringify(choices));
-          // try {
-          // multiple choice
-          const c = choices.map((row: any) => {
-            const { attachments = [] } = row.message;
-            if (attachments && attachments.length > 0 && this.files[conversation_id]) {
-              attachments.map((file: any) => this.transformFile(conversation_id, file));
-            }
-            row.message.attachments = Object.values(this.files[conversation_id]);
-            console.log(`->choice:`, row.message.content);
-            return row;
-          });
-          this.chat.reply(channel, c);
-          //   console.log(`->2`);
-          // } catch (err) {
-          //   console.warn(`->0`, err);
-          // }
-        },
-      });
-      console.log(`[puppet]result`, res);
-      // 封存消息
-      res.choices = res.choices.map((row: any) => {
-        const { content, attachments = [] } = row.message;
-        const payload = { conversation_id, role: 'assistant', content, message_id: res.id, parent_id };
-        // 异步同步文件
-        if (attachments && attachments.length > 0) {
-          const atts = Object.values(this.files[conversation_id]);
-          Object.assign(payload, { attachments: atts.map((r) => r.id) });
-          row.message.attachments = atts;
-        }
-        this.queue.add('archives', { ...payload, parent_conversation_id: res.conversation_id });
-        return row;
-      });
+  //   // transform local file to supplier file
+  //   // if (attachments.length > 0) {
+  //   //   const files = await this.file.findFilesByIds(attachments);
+  //   //   opts['attachments'] = files.map((r) => ({ id: r.file_id, name: r.name, size: r.size, mimetype: r.mimetype }));
+  //   // }
+  //   if (message?.message_id) {
+  //     opts['parent_id'] = message.message_id;
+  //   }
+  //   // if (configuration?.system) {
+  //   //   content += `\n------\n# System Instructions:\n${configuration.system}\n------`;
+  //   // }
+  //   console.log(`[puppet]opts`, opts);
+  //   try {
+  //     this.files[conversation_id] = {};
+  //     const content = '';
+  //     // console.log(`[chatgpt]`, supplierId, 2, typeof this.apis[supplierId]);
+  //     const res = await this.apis[model_id].sendMessage(content, {
+  //       model: supplier.name,
+  //       ...opts,
+  //       id: uuidv4(),
+  //       timeoutMs: 120000,
+  //       onProgress: ({ choices }: any) => {
+  //         console.log(`[puppet]progress`, model_id, supplier.name, new Date().toLocaleTimeString('zh-CN'));
+  //         console.log(`->1`, JSON.stringify(choices));
+  //         // try {
+  //         // multiple choice
+  //         const c = choices.map((row: any) => {
+  //           const { attachments = [] } = row.message;
+  //           if (attachments && attachments.length > 0 && this.files[conversation_id]) {
+  //             attachments.map((file: any) => this.transformFile(conversation_id, file));
+  //           }
+  //           row.message.attachments = Object.values(this.files[conversation_id]);
+  //           console.log(`->choice:`, row.message.content);
+  //           return row;
+  //         });
+  //         this.chat.reply(channel, c);
+  //         //   console.log(`->2`);
+  //         // } catch (err) {
+  //         //   console.warn(`->0`, err);
+  //         // }
+  //       },
+  //     });
+  //     console.log(`[puppet]result`, res);
+  //     // 封存消息
+  //     res.choices = res.choices.map((row: any) => {
+  //       const { content, attachments = [] } = row.message;
+  //       const payload = { conversation_id, role: 'assistant', content, message_id: res.id, parent_id };
+  //       // 异步同步文件
+  //       if (attachments && attachments.length > 0) {
+  //         const atts = Object.values(this.files[conversation_id]);
+  //         Object.assign(payload, { attachments: atts.map((r) => r.id) });
+  //         row.message.attachments = atts;
+  //       }
+  //       this.queue.add('archives', { ...payload, parent_conversation_id: res.conversation_id });
+  //       return row;
+  //     });
 
-      console.log(`[puppet]result`, JSON.stringify(res, null, 2));
+  //     console.log(`[puppet]result`, JSON.stringify(res, null, 2));
 
-      // delete this.files[conversation_id];
-      this.chat.reply(channel, { ...res, conversation_id: conversation.conversation_id });
-    } catch (err) {
-      // 尝试捕获消息发送异常，进行降级
-      console.warn(`[puppet]catch`, err);
-      this.chat.reply(channel, { choices: [{ message: { content: err.message } }] });
-      // 服务降级
-      // await this.downgrade(data);
-      // expire the cache key
-      // await this.supplier.RenewalProvider(supplier_id, conversation_id, 30);
-      // return;
-    }
+  //     // delete this.files[conversation_id];
+  //     this.chat.reply(channel, { ...res, conversation_id: conversation.conversation_id });
+  //   } catch (err) {
+  //     // 尝试捕获消息发送异常，进行降级
+  //     console.warn(`[puppet]catch`, err);
+  //     this.chat.reply(channel, { choices: [{ message: { content: err.message } }] });
+  //     // 服务降级
+  //     // await this.downgrade(data);
+  //     // expire the cache key
+  //     // await this.supplier.RenewalProvider(supplier_id, conversation_id, 30);
+  //     // return;
+  //   }
 
-    // expire the cache key
-    // await this.supplier.RenewalProvider(model_id, conversation_id, 60);
-  }
+  //   // expire the cache key
+  //   // await this.supplier.RenewalProvider(model_id, conversation_id, 60);
+  // }
 
   /**
    * Transform supplier file to local file object

@@ -2,8 +2,6 @@ import Redis from 'ioredis';
 import { Injectable } from '@nestjs/common';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 
-import { SupplierModelsService } from './service/models.service';
-import { SupplierModels } from './entity/models.entity';
 import { SupplierCredentialsService, SupplierPurchasedService } from './service';
 import { InstanceEnum, SupplierCredentials } from './entity/credentials.entity';
 
@@ -12,7 +10,6 @@ export class SupplierService {
   constructor(
     @InjectRedis()
     private readonly redis: Redis,
-    private readonly models: SupplierModelsService,
     private readonly credentials: SupplierCredentialsService,
     private readonly purchased: SupplierPurchasedService,
   ) {}

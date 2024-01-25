@@ -4,7 +4,6 @@ import { Process, Processor, OnGlobalQueueCompleted } from '@nestjs/bull';
 
 import { QueueMessageDto } from '../dto/queue-message.dto';
 // import { CreateMessageDto } from '@/modules/chat/dto/create-message.dto';
-import { SupplierModelsService } from './models.service';
 
 import { ChatService } from '@/modules/chat/chat.service';
 import { ChatConversationService, ChatMessageService } from '@/modules/chat/service';
@@ -19,7 +18,6 @@ export class SupplierOpenAPIProcessor {
   constructor(
     @InjectQueue('bodhi')
     private readonly queue: Queue,
-    private readonly supplier: SupplierModelsService,
     @Inject(forwardRef(() => ChatService))
     private readonly service: ChatService,
     @Inject(forwardRef(() => ChatMessageService))

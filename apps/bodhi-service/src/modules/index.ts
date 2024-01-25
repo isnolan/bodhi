@@ -4,5 +4,6 @@ import { FilesModule } from './files/files.module';
 import { ToolsModule } from './tools/tools.module';
 import { GptsModule } from './gpts/gpts.module';
 import { SupplierModule } from './supplier/supplier.module';
+import { ProviderModule } from './provider/provider.module';
 
-export default [AuthModule, ChatModule, FilesModule, ToolsModule, GptsModule, SupplierModule];
+export default [AuthModule, ChatModule, FilesModule, ToolsModule, GptsModule, SupplierModule, ProviderModule];

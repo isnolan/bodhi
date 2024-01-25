@@ -9,6 +9,7 @@ import { ChatModule } from '../chat/chat.module';
 import { FilesModule } from '../files/files.module';
 import Entity from './entity';
 import Service, { SupplierCredentialsService, SupplierPurchasedService } from './service/';
+import { ProviderModule } from '../provider/provider.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([...Entity]),
@@ -26,6 +27,8 @@ import Service, { SupplierCredentialsService, SupplierPurchasedService } from '.
 
     forwardRef(() => ChatModule),
     forwardRef(() => FilesModule),
+
+    ProviderModule,
   ],
   controllers: [],
   providers: [SupplierService, ...Service],
