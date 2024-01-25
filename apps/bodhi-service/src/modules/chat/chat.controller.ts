@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Controller, Res, Post, Req, Body, Get, UseGuards } from '@nestjs/common';
+import { Controller, Res, Post, Req, Body, Get, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiBody, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 
 import { CreateCompletionDto } from './dto/create-completions.dto';
@@ -52,7 +52,7 @@ export class ChatController {
 
     try {
       // check valid purchased
-      const purchased = await this.purchased.findActiveBySlug(user_id, model);
+      const purchased = await this.purchased.hasActiveBySlug(user_id, model);
       console.log(`[supplier]purchased:`, purchased);
       if (!purchased) {
         throw new Error(`Invalid purchased model: ${model}`);
@@ -87,10 +87,11 @@ export class ChatController {
       });
 
       // 发送消息
-      const credential_ids: number[] = purchased.map((item) => item.model_credential_id);
-      const options: SendMessageDto = { credential_ids, messages, message_id, parent_id };
+      const options: SendMessageDto = { messages, message_id, parent_id };
       await this.service.send(conversation, options, channel);
-    } catch (err) {}
+    } catch (err) {
+      throw new HttpException(err.message, HttpStatus.FORBIDDEN);
+    }
   }
 
   // @Post('agent')
