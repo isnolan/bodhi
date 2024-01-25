@@ -63,7 +63,7 @@ export class ChatService {
    */
   async send(channel: string, conversation: ChatConversation, options: SendMessageDto) {
     const { id: conversation_id, user_id } = conversation;
-    const { credential_ids, messages, message_id } = options;
+    const { product_ids, messages, message_id } = options;
     let { parent_id } = options;
 
     // archive message
@@ -77,7 +77,7 @@ export class ChatService {
     try {
       // 分配有效节点
       // Assign valid provisioning credentials
-      const credential = await this.supplier.distribute(credential_ids, conversation);
+      const credential = await this.supplier.distribute(product_ids, conversation);
       if (credential.id !== conversation.credential_id) {
         await this.conversation.updateAttribute(conversation.id, { credential_id: credential.id });
       }

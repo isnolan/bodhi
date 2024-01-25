@@ -4,7 +4,7 @@ import { chat } from '@isnolan/bodhi-adapter';
 export class SendMessageDto {
   @IsNotEmpty()
   @IsArray()
-  credential_ids: number[];
+  product_ids: number[];
 
   @IsNotEmpty()
   @IsArray()

@@ -87,8 +87,8 @@ export class ChatController {
       });
 
       // 发送消息
-      const credential_ids: number[] = purchased.map((c) => c.credential_id);
-      const options: SendMessageDto = { credential_ids, messages, message_id, parent_id };
+      const product_ids: number[] = purchased.map((c) => c.product_id);
+      const options: SendMessageDto = { product_ids, messages, message_id, parent_id };
       await this.service.send(channel, conversation, options);
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.FORBIDDEN);

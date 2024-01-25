@@ -16,12 +16,8 @@ export class SupplierService {
 
   /**
    * 分配可用节点
-   * @param credential_ids
-   * @param conversation_id
-   * @param last_credential_id
-   * @returns
    */
-  async distribute(credential_ids, conversation): Promise<SupplierCredentials> {
+  async distribute(product_ids, conversation): Promise<SupplierCredentials> {
     const { id, model, credential_id } = conversation;
     console.log(`[supplier]active:`, conversation);
 
@@ -41,7 +37,7 @@ export class SupplierService {
           await this.Renewal(credential.id, id, 180);
         } else {
           // 降级
-          credential = await this.findInactive(credential_ids, conversation, true);
+          credential = await this.findInactive(product_ids, conversation, true);
           console.log(`[supplier]renew: downgrade`, credential.id);
         }
       }
@@ -49,7 +45,7 @@ export class SupplierService {
     }
 
     // 新分配
-    const credential = await this.findInactive(credential_ids, conversation);
+    const credential = await this.findInactive(product_ids, conversation);
     console.log(`[supplier]distribute`, credential.id);
     return credential;
   }
@@ -69,14 +65,14 @@ export class SupplierService {
    * @param isDowngrade
    * @returns
    */
-  private async findInactive(credential_ids, conversation, isDowngrade = false): Promise<SupplierCredentials> {
+  private async findInactive(product_ids, conversation, isDowngrade = false): Promise<SupplierCredentials> {
     const { model_id } = conversation;
     // 获取可用节点
     // const services = await this.repository.find({
     //   select: ['id', 'name', 'instance_type', 'weight', 'status'],
     //   where: { status: MoreThan(-1) },
     // });
-    const services = await this.credentials.findActive(credential_ids);
+    const services = await this.credentials.findActive(product_ids);
 
     // 筛选可用Puppet(chatgpt、claude)节点
     const chatGptServices = await this.filter(services, async (s: SupplierCredentials) => {

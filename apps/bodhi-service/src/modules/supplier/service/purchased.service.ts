@@ -16,10 +16,10 @@ export class SupplierPurchasedService {
    */
   async findActiveModels(user_id: number): Promise<SupplierPurchased[]> {
     return this.repository.find({
-      select: ['id', 'model_id', 'credential_id', 'slug', 'icon', 'desciption'],
+      select: ['id', 'product_id', 'slug', 'icon', 'desciption'],
       where: {
         user_id,
-        tokens_amount: MoreThan(Raw(`"tokens_used"`)),
+        // tokens_amount: MoreThan(Raw(`"tokens_used"`)),
         expires_at: MoreThan(new Date()),
         status: PurchasedState.ACTIVE,
       },
@@ -35,7 +35,7 @@ export class SupplierPurchasedService {
       where: {
         user_id,
         slug,
-        tokens_amount: MoreThan(Raw(`"tokens_used"`)),
+        // tokens_amount: MoreThan(Raw(`"tokens_used"`)),
         expires_at: MoreThan(new Date()),
         status: PurchasedState.ACTIVE,
       },
