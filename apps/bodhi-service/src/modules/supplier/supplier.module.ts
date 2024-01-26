@@ -8,7 +8,7 @@ import { SupplierService } from './supplier.service';
 import { ChatModule } from '../chat/chat.module';
 import { FilesModule } from '../files/files.module';
 import Entity from './entity';
-import Service, { SupplierCredentialsService, SupplierPurchasedService } from './service/';
+import Service, { SupplierPurchasedService } from './service/';
 import { ProviderModule } from '../provider/provider.module';
 @Module({
   imports: [
@@ -32,6 +32,6 @@ import { ProviderModule } from '../provider/provider.module';
   ],
   controllers: [],
   providers: [SupplierService, ...Service],
-  exports: [SupplierService, SupplierPurchasedService, SupplierCredentialsService],
+  exports: [SupplierService, SupplierPurchasedService],
 })
 export class SupplierModule {}

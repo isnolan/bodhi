@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Repository, MoreThan, In } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ProviderCredentials } from '../entity';
+import { CredentialsState, ProviderCredentials } from '../entity';
 
 @Injectable()
 export class ProviderCredentialsService {

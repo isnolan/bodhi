@@ -1,8 +1,8 @@
 import { Base } from '@/core/common/base.entity';
 import { Entity, Column } from 'typeorm';
-import { ProviderType } from './provider.entity';
+import { InstanceType } from './instance.entity';
 
-export enum ProviderCredentialsState {
+export enum CredentialsState {
   ACTIVE = 1,
   INACTIVE = 0,
   EXPIRED = -1,
@@ -26,8 +26,8 @@ export class ProviderCredentials extends Base {
   @Column({ type: 'int', comment: 'user', default: 0 })
   user_id: number;
 
-  @Column({ type: 'enum', enum: ProviderType, comment: 'type', default: ProviderType.API })
-  type: ProviderType;
+  @Column({ type: 'enum', enum: InstanceType, comment: 'type', default: InstanceType.API })
+  type: InstanceType;
 
   @Column({ type: 'varchar', length: 20, comment: 'label', default: '' })
   label: string;
@@ -40,6 +40,6 @@ export class ProviderCredentials extends Base {
   @Column({ precision: 3, comment: 'expires', default: null })
   auth_expires: Date;
 
-  @Column({ type: 'tinyint', comment: '状态', default: ProviderCredentialsState.ACTIVE })
+  @Column({ type: 'tinyint', comment: '状态', default: CredentialsState.ACTIVE })
   status: number;
 }

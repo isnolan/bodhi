@@ -16,7 +16,7 @@ export class SupplierPurchasedService {
    */
   async findActiveModels(user_id: number): Promise<SupplierPurchased[]> {
     return this.repository.find({
-      select: ['id', 'product_id', 'slug', 'icon', 'desciption'],
+      select: ['id', 'provider_id', 'slug', 'icon', 'desciption'],
       where: {
         user_id,
         // tokens_amount: MoreThan(Raw(`"tokens_used"`)),

@@ -7,13 +7,13 @@ export class ChatConversation extends Base {
   purchase_id: number;
 
   @Column({ type: 'int', comment: 'credential', default: 0 })
-  credential_id: number;
+  provider_id: number;
+
+  @Column({ type: 'varchar', length: 40, comment: 'slug', default: '' })
+  model: string;
 
   @Column({ type: 'varchar', length: 40, comment: 'conversation id', default: '' })
   conversation_id: string;
-
-  @Column({ type: 'varchar', length: 40, comment: 'model slug', default: '' })
-  model: string;
 
   @Column({ type: 'decimal', precision: 2, scale: 1, comment: 'temperature', default: 0.8 })
   temperature: number;

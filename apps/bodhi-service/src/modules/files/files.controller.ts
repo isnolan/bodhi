@@ -2,7 +2,7 @@ import Redis from 'ioredis';
 import { createHash } from 'crypto';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UseInterceptors, UploadedFile } from '@nestjs/common';
+import { UseInterceptors, UploadedFile, Put } from '@nestjs/common';
 import { Controller, Get, Query, Post, HttpException, HttpStatus } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiBody, ApiConsumes, ApiTags, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 
@@ -31,7 +31,7 @@ export class FilesController {
     return { id: this.service.encodeId(file_id), name, url, size, mimetype, hash };
   }
 
-  @Post('upload')
+  @Put('upload')
   @ApiOperation({ summary: 'Upload File', description: 'Upload File' })
   @ApiConsumes('multipart/form-data')
   @ApiQuery({ name: 'model', required: false, example: '' })

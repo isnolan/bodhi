@@ -8,10 +8,10 @@ import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { SendMessageDto } from './dto/send-message.dto';
 import { ChatConversation } from './entity/conversation.entity';
 import { QueueMessageDto } from '../supplier/dto/queue-message.dto';
-import { SupplierCredentialsService } from '../supplier/service';
 import { ChatConversationService, ChatMessageService } from './service';
 import { SupplierService } from '../supplier/supplier.service';
 import { CreateMessageDto } from './dto/create-message.dto';
+import { InstanceType } from '../provider/entity';
 
 @Injectable()
 export class ChatService {
@@ -24,8 +24,6 @@ export class ChatService {
     private readonly redis: Redis,
     @Inject(forwardRef(() => SupplierService))
     private readonly supplier: SupplierService,
-    @Inject(forwardRef(() => SupplierCredentialsService))
-    private readonly credentials: SupplierCredentialsService,
     private readonly message: ChatMessageService,
     private readonly configService: ConfigService,
     private readonly conversation: ChatConversationService,
@@ -63,7 +61,7 @@ export class ChatService {
    */
   async send(channel: string, conversation: ChatConversation, options: SendMessageDto) {
     const { id: conversation_id, user_id } = conversation;
-    const { product_ids, messages, message_id } = options;
+    const { provider_ids, messages, message_id } = options;
     let { parent_id } = options;
 
     // archive message
@@ -77,20 +75,20 @@ export class ChatService {
     try {
       // 分配有效节点
       // Assign valid provisioning credentials
-      const credential = await this.supplier.distribute(product_ids, conversation);
-      if (credential.id !== conversation.credential_id) {
-        await this.conversation.updateAttribute(conversation.id, { credential_id: credential.id });
+      const provider = await this.supplier.distribute(provider_ids, conversation);
+      if (provider.id !== conversation.provider_id) {
+        await this.conversation.updateAttribute(conversation.id, { provider_id: provider.id });
       }
 
-      const s1: QueueMessageDto = { channel, model_id: credential.id, conversation_id, parent_id: message_id };
-      console.log(`[chat]send`, credential, s1);
+      const s1: QueueMessageDto = { channel, model_id: provider.id, conversation_id, parent_id: message_id };
+      console.log(`[chat]send`, provider, s1);
       // 发布订阅
-      if (credential.ins_type === 'puppet') {
+      if (provider.instance.type === InstanceType.SESSION) {
         await this.redis.publish('puppet', JSON.stringify(s1));
       }
 
       // 消息队列
-      if (credential.ins_type === 'api') {
+      if (provider.instance.type === InstanceType.API) {
         await this.queue.add('openapi', s1, { priority: 1, delay: 10 });
       }
     } catch (err) {
