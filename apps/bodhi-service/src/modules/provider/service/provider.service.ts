@@ -14,6 +14,7 @@ export class ProviderService {
   public async find(user_id: number): Promise<Provider> {
     return await this.repository.findOne({
       where: { user_id, status: MoreThan(0) },
+      relations: ['model', 'instance', 'credential'],
     });
   }
 

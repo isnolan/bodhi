@@ -48,7 +48,7 @@ export class ProviderController {
   @ApiResponse({ status: 200, description: 'success' })
   async findCredentials(@Request() req) {
     const { user_id } = req.user;
-    return this.provider.find(user_id);
+    return;
   }
 
   @Post('credentials/create')
