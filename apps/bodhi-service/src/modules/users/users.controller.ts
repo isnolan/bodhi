@@ -1,7 +1,7 @@
 import validator from 'validator';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { Controller, Req, Ip, Post, Body, Get, Query, Request } from '@nestjs/common';
+import { Controller, Req, Ip, Post, Body, Get, Query, Request, Delete } from '@nestjs/common';
 import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
 
 import { UsersService } from './users.service';
@@ -40,18 +40,6 @@ export class UsersController {
     return { id, secret_key, quota, foreign_id, note, expire_at, create_time };
   }
 
-  @Post('keys/delete')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
-  @ApiOperation({ summary: 'Create API Keys', description: 'Create API Keys' })
-  @ApiResponse({ status: 201, description: 'success' })
-  @ApiResponse({ status: 401, description: 'session is expired!' })
-  async deleteKeys(@Request() req, @Body() payload: DeleteKeysDto) {
-    const { user_id } = req.user;
-    const { foreign_id } = payload;
-    return await this.keys.delete(user_id, foreign_id);
-  }
-
   @Post('keys/update')
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
@@ -62,5 +50,17 @@ export class UsersController {
     const { user_id } = req.user;
     const { foreign_id, quota, note } = payload;
     return await this.keys.update(user_id, foreign_id, { quota, note });
+  }
+
+  @Delete('keys/delete')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Create API Keys', description: 'Create API Keys' })
+  @ApiResponse({ status: 201, description: 'success' })
+  @ApiResponse({ status: 401, description: 'session is expired!' })
+  async deleteKeys(@Request() req, @Body() payload: DeleteKeysDto) {
+    const { user_id } = req.user;
+    const { foreign_id } = payload;
+    return await this.keys.delete(user_id, foreign_id);
   }
 }

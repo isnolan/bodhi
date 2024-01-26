@@ -1,7 +1,7 @@
 import validator from 'validator';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { Controller, Req, Ip, Post, Body, Get, Query, Request } from '@nestjs/common';
+import { Controller, Req, Ip, Post, Body, Get, Query, Request, Delete } from '@nestjs/common';
 import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
 import { ProviderProductService, ProviderService } from './service';
 import { ProviderCredentialsService } from './service/credentials.service';
@@ -33,7 +33,7 @@ export class ProviderController {
     return;
   }
 
-  @Post('product/delete')
+  @Delete('product/delete')
   @ApiOperation({ summary: 'Delete a product for model', description: 'Delete a product for model' })
   @ApiResponse({ status: 201, description: 'success' })
   async deleteProduct(@Request() req, @Body() payload) {
@@ -42,7 +42,7 @@ export class ProviderController {
   }
 
   @Get('credentials')
-  @ApiOperation({ summary: 'Get product list', description: 'Get product list' })
+  @ApiOperation({ summary: 'Get credential list', description: 'Get credential list' })
   @ApiResponse({ status: 200, description: 'success' })
   async findCredentials(@Request() req) {
     const { user_id } = req.user;
@@ -50,7 +50,7 @@ export class ProviderController {
   }
 
   @Post('credentials/create')
-  @ApiOperation({ summary: 'Create a product for model', description: 'Create a product for model' })
+  @ApiOperation({ summary: 'Create a credential', description: 'Create a credential' })
   @ApiResponse({ status: 201, description: 'success' })
   async createCredential(@Request() req, @Body() payload) {
     const { user_id } = req.user;
@@ -58,15 +58,15 @@ export class ProviderController {
   }
 
   @Post('credentials/update')
-  @ApiOperation({ summary: 'Create a product for model', description: 'Create a product for model' })
+  @ApiOperation({ summary: 'Update a credential', description: 'Update a credential' })
   @ApiResponse({ status: 201, description: 'success' })
   async updateCredential(@Request() req, @Body() payload) {
     const { user_id } = req.user;
     return;
   }
 
-  @Post('credentials/delete')
-  @ApiOperation({ summary: 'Delete a product for model', description: 'Delete a product for model' })
+  @Delete('credentials/delete')
+  @ApiOperation({ summary: 'Delete a credential', description: 'Delete a credential' })
   @ApiResponse({ status: 201, description: 'success' })
   async deleteCredential(@Request() req, @Body() payload) {
     const { user_id } = req.user;
