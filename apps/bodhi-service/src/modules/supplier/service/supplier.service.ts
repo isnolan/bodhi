@@ -2,9 +2,9 @@ import Redis from 'ioredis';
 import { Injectable } from '@nestjs/common';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 
-import { SupplierPurchasedService } from './service';
-import { ProviderService } from '../provider/service';
-import { InstanceType, Provider } from '../provider/entity';
+import { SupplierPurchasedService } from './';
+import { ProviderService } from '@/modules/provider/service';
+import { InstanceType } from '@/modules/provider/entity';
 
 @Injectable()
 export class SupplierService {
@@ -76,14 +76,17 @@ export class SupplierService {
     const services = await this.provider.findActive(product_ids);
 
     // 筛选可用Puppet(chatgpt、claude)节点
-    const chatGptServices = await this.filter(services, async (s: Provider) => {
+    const chatGptServices = await this.filter(services, async (s: ProviderWithRelations) => {
       const isCache = await this.redis.exists(`credential:${s.id}`);
-      return s.model_id === model_id && s.instance.type === InstanceType.SESSION && s.status === 1 && !isCache;
+      return s.model.id === model_id && s.instance.type === InstanceType.SESSION && !isCache;
     });
 
     let currentIndex = -1;
     if (chatGptServices.length > 0 && !isDowngrade) {
-      const totalWeight = chatGptServices.reduce((sum: number, service: Provider) => sum + Number(service.weight), 0);
+      const totalWeight = chatGptServices.reduce(
+        (sum: number, service: ProviderWithRelations) => sum + Number(service.weight),
+        0,
+      );
       let randomValue = Math.random() * totalWeight;
       for (let i = 0; i < chatGptServices.length; i++) {
         currentIndex = (currentIndex + 1) % chatGptServices.length;

@@ -9,9 +9,9 @@ import { SendMessageDto } from './dto/send-message.dto';
 import { ChatConversation } from './entity/conversation.entity';
 import { QueueMessageDto } from '../supplier/dto/queue-message.dto';
 import { ChatConversationService, ChatMessageService } from './service';
-import { SupplierService } from '../supplier/supplier.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { InstanceType } from '../provider/entity';
+import { SupplierService } from '../supplier/service';
 
 @Injectable()
 export class ChatService {

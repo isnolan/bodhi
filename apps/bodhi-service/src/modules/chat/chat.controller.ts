@@ -9,7 +9,6 @@ import { CreateAgentDto } from './dto/create-agent.dto';
 import { Request, Response } from 'express';
 import { JwtOrApiKeyGuard } from '../auth/guard/mixed.guard';
 import { RequestWithUser } from '../../core/common/request.interface';
-import { SupplierService } from '../supplier/supplier.service';
 import { SupplierPurchasedService } from '../supplier/service';
 import { ChatConversationService } from './service';
 
