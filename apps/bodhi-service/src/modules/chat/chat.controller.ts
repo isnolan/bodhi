@@ -47,13 +47,12 @@ export class ChatController {
     const { user_id, user_key_id = 0 } = req.user; // from jwt or apikey
     const { conversation_id = uuidv4(), message_id = uuidv4(), parent_id } = payload;
     const { messages = [], tools = [], model, temperature, top_p, top_k, context_limit, n } = payload;
-    console.log(`[chat]completions`, payload);
+    // console.log(`[chat]completions`, payload);
 
     try {
       // check valid purchased
       const purchased = await this.purchased.hasActiveBySlug(user_id, model);
-      console.log(`[supplier]purchased:`, purchased);
-      if (!purchased) {
+      if (purchased.length === 0) {
         throw new Error(`Invalid purchased model: ${model}`);
       }
 
@@ -88,6 +87,8 @@ export class ChatController {
       // 发送消息
       const provider_ids: number[] = purchased.map((c) => c.provider_id);
       const options: SendMessageDto = { provider_ids, messages, message_id, parent_id };
+
+      // console.log(`[chat]send`, channel, conversation, options);
       await this.service.send(channel, conversation, options);
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.FORBIDDEN);

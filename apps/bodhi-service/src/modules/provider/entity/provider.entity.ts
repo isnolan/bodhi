@@ -36,6 +36,9 @@ export class Provider extends Base {
   @Column({ type: 'decimal', precision: 2, scale: 1, comment: 'weight', default: 1 })
   weight: number;
 
+  @Column({ precision: 3, comment: 'expires', default: null })
+  expires_at: Date;
+
   @Column({ type: 'tinyint', comment: '状态', default: ProductState.ACTIVE })
   status: number;
 

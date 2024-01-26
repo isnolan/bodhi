@@ -76,6 +76,7 @@ export class ChatService {
       // 分配有效节点
       // Assign valid provisioning credentials
       const provider = await this.supplier.distribute(provider_ids, conversation);
+      console.log(`[chat]distribute`, provider);
       if (provider.id !== conversation.provider_id) {
         await this.conversation.updateAttribute(conversation.id, { provider_id: provider.id });
       }

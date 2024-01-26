@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export class CreateCompletionDto {
   /* 基本内容 */
-  @ApiProperty({ default: 'gpt-4' })
+  @ApiProperty({ default: 'gemini-pro' })
   @IsNotEmpty()
   @IsString()
   model: string;
