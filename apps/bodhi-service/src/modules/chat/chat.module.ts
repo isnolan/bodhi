@@ -17,7 +17,7 @@ import Service from './service';
 
     // Redis Queue
     BullModule.registerQueueAsync({
-      name: 'chatbot',
+      name: 'bodhi',
       inject: [ConfigService],
       imports: [ConfigModule],
       useFactory: async (config: ConfigService) => ({

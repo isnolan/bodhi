@@ -18,7 +18,7 @@ export class ChatService {
   private readonly subscriber;
 
   constructor(
-    @InjectQueue('chatbot')
+    @InjectQueue('bodhi')
     private readonly queue: Queue,
     @InjectRedis()
     private readonly redis: Redis,
