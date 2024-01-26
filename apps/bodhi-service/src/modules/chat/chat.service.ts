@@ -125,7 +125,7 @@ export class ChatService {
     // 存储消息:用户
     const message_id = uuidv4();
     const user_id = conversation.user_id;
-    const a2: CreateMessageDto = { conversation_id, message_id, user_id, role: 'user', parts: message, parent_id };
+    const a2: CreateMessageDto = { conversation_id, message_id, user_id, role: 'user', parts: [message], parent_id };
     Object.assign(a2, { status: 0 });
     const { tokens } = await this.message.save(a2);
     await this.queue.add('archives', { ...a2, tokens });

@@ -100,26 +100,28 @@ export class SupplierOpenAPIProcessor {
           agent: process.env.HTTP_PROXY,
         });
         const latest = await this.message.findMyMessageId(parent_id);
+        // console.log(`-->`, [...latest.parts, ...message.parts]);
         const res = await api.sendMessage({
-          messages: [latest.parts, message],
+          messages: [message],
           model: provider.model.name,
         });
 
-        const content = res.choices[0].message.content;
+        const parts = res.choices[0].parts;
         const tokens = res.usage?.completion_tokens;
         console.log(`[agent]`, channel, new Date().toLocaleTimeString('zh-CN'));
-        console.log(`->`, content);
+        console.log(`->`, parts);
 
         await this.service.reply(channel, res);
 
         // ready to archives
-        const payload = { conversation_id: latest.conversation_id, message_id: res.id, role: 'assistant', content };
+        const payload = { conversation_id: latest.conversation_id, message_id: res.id, role: 'assistant', parts };
         Object.assign(payload, { tokens, status: 0, parent_id: message_id });
         await this.queue.add('archives', payload);
 
         resolve({});
       } catch (err) {
-        console.warn(`[agent]Error`, err.message);
+        console.warn(`[api]`, err.code, err.message);
+        this.service.reply(channel, { error: { message: err.message, code: err.code } });
         resolve({});
         return;
       }
