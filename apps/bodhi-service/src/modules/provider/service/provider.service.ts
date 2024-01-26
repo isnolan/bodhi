@@ -18,16 +18,14 @@ export class ProviderService {
   }
 
   /**
-   * Find active providers
-   * @param ids
-   * @returns
+   * Find active providers, by purchased
    */
   async findActive(ids: number[]): Promise<ProviderWithRelations[]> {
     return this.repository.find({
       select: {
         id: true,
         weight: true,
-        model: { id: true, name: true, icon: true, is_function: true, is_vision: true },
+        model: { id: true, name: true, icon: true },
         instance: { id: true, type: true, name: true },
       },
       where: { id: In(ids), status: CredentialsState.ACTIVE }, // expires_at: MoreThan(new Date()),

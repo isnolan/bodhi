@@ -5,8 +5,6 @@ interface ProviderWithRelations {
     id: number;
     name: string;
     icon: string;
-    is_function: number; // Change this to number
-    is_vision: number;
   };
   instance: {
     id: number;
