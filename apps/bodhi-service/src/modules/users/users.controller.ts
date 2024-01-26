@@ -24,12 +24,10 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'success', type: [GetKeysDto] })
   async getKeys(@Request() req): Promise<GetKeysDto[]> {
     const { user_id } = req.user;
-    return await this.keys.getList(user_id);
+    return this.keys.getList(user_id);
   }
 
   @Post('keys/create')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
   @ApiOperation({ summary: 'Create API Keys', description: 'Create API Keys' })
   @ApiResponse({ status: 201, description: 'success', type: GetKeysDto })
   @ApiResponse({ status: 401, description: 'session is expired!' })
@@ -41,26 +39,22 @@ export class UsersController {
   }
 
   @Post('keys/update')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
   @ApiOperation({ summary: 'Create API Keys', description: 'Create API Keys' })
   @ApiResponse({ status: 201, description: 'success' })
   @ApiResponse({ status: 401, description: 'session is expired!' })
   async updateKeys(@Request() req, @Body() payload: CreateKeysDto) {
     const { user_id } = req.user;
     const { foreign_id, quota, note } = payload;
-    return await this.keys.update(user_id, foreign_id, { quota, note });
+    return this.keys.update(user_id, foreign_id, { quota, note });
   }
 
   @Delete('keys/delete')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
   @ApiOperation({ summary: 'Create API Keys', description: 'Create API Keys' })
   @ApiResponse({ status: 201, description: 'success' })
   @ApiResponse({ status: 401, description: 'session is expired!' })
   async deleteKeys(@Request() req, @Body() payload: DeleteKeysDto) {
     const { user_id } = req.user;
     const { foreign_id } = payload;
-    return await this.keys.delete(user_id, foreign_id);
+    return this.keys.delete(user_id, foreign_id);
   }
 }

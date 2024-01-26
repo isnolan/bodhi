@@ -38,7 +38,6 @@
     "@nestjs/typeorm": "^9.0.1",
     "@nestjs/websockets": "^9.3.8",
     "@socket.io/redis-adapter": "^8.1.0",
-    "@yhostc/chatbot-puppet": "^1.4.37",
     "ali-oss": "^6.18.0",
     "bull": "^4.10.3",
     "dotenv": "^16.3.1",

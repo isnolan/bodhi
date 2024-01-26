@@ -15,14 +15,13 @@ export class SupplierPurchasedService {
    * @returns
    */
   async findActiveModels(user_id: number): Promise<SupplierPurchased[]> {
+    const query = { user_id, status: PurchasedState.ACTIVE };
     return this.repository.find({
       select: ['id', 'provider_id', 'slug', 'icon', 'desciption'],
-      where: {
-        user_id,
-        // tokens_amount: MoreThan(Raw(`"tokens_used"`)),
-        expires_at: MoreThan(new Date()),
-        status: PurchasedState.ACTIVE,
-      },
+      where: [
+        { expires_at: MoreThan(new Date()), ...query },
+        { expires_at: IsNull(), ...query },
+      ],
     });
   }
 
