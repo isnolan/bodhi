@@ -44,10 +44,10 @@ export class SupplierOpenAPIProcessor {
   @Process('openapi')
   async openai(job: Job<QueueMessageDto>) {
     // console.log(`[api]job:`, job.data);
-    const { channel, model_id, conversation_id, parent_id } = job.data;
+    const { channel, provider_id, conversation_id, parent_id } = job.data;
     return new Promise(async (resolve) => {
       try {
-        const provider = await this.provider.find(model_id);
+        const provider = await this.provider.find(provider_id);
         const conversation = await this.conversation.findOne(conversation_id);
 
         const { ChatAPI } = this.apis;
@@ -66,7 +66,7 @@ export class SupplierOpenAPIProcessor {
           top_k: Number(conversation.top_k),
           n: conversation.n,
           onProgress: (choices) => {
-            console.log(`[api]progress`, model_id, provider.model.name, new Date().toLocaleTimeString('zh-CN'));
+            console.log(`[api]progress`, provider_id, provider.model.name, new Date().toLocaleTimeString('zh-CN'));
             choices.forEach((row: any, idx: number) => {
               console.log(`->idx:`, idx, row.parts);
             });

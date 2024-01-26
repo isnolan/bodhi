@@ -81,7 +81,7 @@ export class ChatService {
         await this.conversation.updateAttribute(conversation.id, { provider_id: provider.id });
       }
 
-      const s1: QueueMessageDto = { channel, model_id: provider.id, conversation_id, parent_id: message_id };
+      const s1: QueueMessageDto = { channel, provider_id: provider.id, conversation_id, parent_id: message_id };
       console.log(`[chat]send`, provider, s1);
       // 发布订阅
       if (provider.instance.type === InstanceType.SESSION) {
