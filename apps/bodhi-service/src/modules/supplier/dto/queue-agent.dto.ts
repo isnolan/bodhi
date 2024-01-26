@@ -1,11 +1,13 @@
+import { chat } from '@isnolan/bodhi-adapter';
+
 export class QueueAgentDto {
   channel: string;
 
-  supplier_id: number;
+  provider_id: number;
 
   parent_id: string;
 
   message_id: string;
 
-  prompt: string;
+  message: chat.Message;
 }

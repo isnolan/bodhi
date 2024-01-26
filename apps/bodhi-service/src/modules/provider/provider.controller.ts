@@ -1,8 +1,7 @@
-import validator from 'validator';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { Controller, Req, Ip, Post, Body, Get, Query, Request, Delete } from '@nestjs/common';
-import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, Request } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { ProviderCredentialsService } from './service/credentials.service';
 import { ProviderService } from './service';
 
@@ -12,12 +11,6 @@ import { ProviderService } from './service';
 @Controller('provider')
 export class ProviderController {
   constructor(private readonly provider: ProviderService, private readonly credential: ProviderCredentialsService) {}
-
-  @Get('test')
-  @ApiOperation({ summary: 'Get product list', description: 'Get product list' })
-  async test() {
-    return this.provider.findActive([1000]);
-  }
 
   @Get('product')
   @ApiOperation({ summary: 'Get product list', description: 'Get product list' })

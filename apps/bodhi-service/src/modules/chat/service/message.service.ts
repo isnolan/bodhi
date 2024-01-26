@@ -25,7 +25,7 @@ export class ChatMessageService {
     return await this.repository.save(this.repository.create({ ...opts, parent_id, tokens }));
   }
 
-  async findMyMessageId(message_id: string): Promise<ChatMessage | null> {
+  async findMyMessageId(message_id: string): Promise<ChatMessage> {
     // 获取最近消息
     return await this.repository.findOne({ where: [{ message_id }] });
   }
@@ -35,7 +35,7 @@ export class ChatMessageService {
    * @param conversation_id
    * @returns
    */
-  async getLastMessage(conversation_id: number): Promise<ChatMessage | null> {
+  async getLastMessage(conversation_id: number): Promise<ChatMessage> {
     // 获取最近消息
     return await this.repository.findOne({
       select: ['id', 'message_id', 'role', 'parts'],
@@ -76,7 +76,7 @@ export class ChatMessageService {
     return [...new Set(messages.map((item) => JSON.stringify(item)))].map((item) => JSON.parse(item));
   }
 
-  async checkExistByMessageId(message_id: string): Promise<ChatMessage | null> {
+  async checkExistByMessageId(message_id: string): Promise<ChatMessage> {
     return await this.repository.findOne({
       select: { id: true },
       where: { message_id },

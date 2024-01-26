@@ -5,12 +5,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { ChatModule } from '../chat/chat.module';
 import { FilesModule } from '../files/files.module';
-import Entity from './entity';
 import Service, { SupplierService, SupplierPurchasedService } from './service/';
 import { ProviderModule } from '../provider/provider.module';
+import { SupplierPurchased } from './entity/purchased.entity';
 @Module({
   imports: [
-    TypeOrmModule.forFeature([...Entity]),
+    TypeOrmModule.forFeature([SupplierPurchased]),
 
     // Redis Queue
     BullModule.registerQueueAsync({

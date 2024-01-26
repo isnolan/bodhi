@@ -64,11 +64,11 @@ export class SupplierService {
    * @param isDowngrade
    * @returns
    */
-  private async findInactive(product_ids, conversation, isDowngrade = false): Promise<ProviderWithRelations> {
+  public async findInactive(product_ids, conversation, isDowngrade = false): Promise<ProviderWithRelations> {
     const services = await this.provider.findActive(product_ids);
     // console.log(`[supplier]findInactive`, services);
 
-    // 筛选可用Puppet(chatgpt、claude)节点
+    // from session
     const chatGptServices = await this.filter(services, async (s: ProviderWithRelations) => {
       const isCache = await this.redis.exists(`credential:${s.id}`);
       return s.instance.type === InstanceType.SESSION && !isCache;
@@ -92,7 +92,7 @@ export class SupplierService {
       }
     }
 
-    // 从API中选举节点
+    // from api
     const apiServices = services.filter((s) => s.instance.type === InstanceType.API);
     if (apiServices.length > 0) {
       const totalWeight = apiServices.reduce((sum, s) => sum + Number(s.weight), 0);

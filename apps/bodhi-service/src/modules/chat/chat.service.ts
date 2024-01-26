@@ -1,5 +1,6 @@
 import Redis from 'ioredis';
 import { Queue } from 'bull';
+import { v4 as uuidv4 } from 'uuid';
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -12,6 +13,7 @@ import { ChatConversationService, ChatMessageService } from './service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { InstanceType } from '../provider/entity';
 import { SupplierService } from '../supplier/service';
+import { QueueAgentDto } from '../supplier/dto/queue-agent.dto';
 
 @Injectable()
 export class ChatService {
@@ -83,12 +85,10 @@ export class ChatService {
 
       const s1: QueueMessageDto = { channel, provider_id: provider.id, conversation_id, parent_id: message_id };
       console.log(`[chat]send`, provider, s1);
-      // 发布订阅
       if (provider.instance.type === InstanceType.SESSION) {
         await this.redis.publish('puppet', JSON.stringify(s1));
       }
 
-      // 消息队列
       if (provider.instance.type === InstanceType.API) {
         await this.queue.add('openapi', s1, { priority: 1, delay: 10 });
       }
@@ -115,27 +115,26 @@ export class ChatService {
    * @param content
    * @returns
    */
-  // async autoAgent(conversation: ChatConversation, channel: string, opts: any) {
-  //   const { parent_id, prompt } = opts;
-  //   const conversation_id = conversation.id;
+  async autoAgent(conversation: ChatConversation, channel: string, opts: any) {
+    const { parent_id, message } = opts;
+    const conversation_id = conversation.id;
 
-  //   // 获取供应商
-  //   const { id: supplierId } = await this.supplier.getInactive('gpt-3.5', 0, true); // configuration.model
-  //   const supplier = (await this.supplier.get(supplierId)) as Supplier;
+    // 获取供应商
+    const provider = await this.supplier.findInactive([1000], conversation); // configuration.model
 
-  //   // 存储消息:用户
-  //   const message_id = uuidv4();
-  //   const user_id = conversation.user_id;
-  //   const a2: CreateMessageDto = { conversation_id, message_id, user_id, role: 'user', content: prompt, parent_id };
-  //   Object.assign(a2, { status: 0 });
-  //   const { tokens } = await this.message.save(a2);
-  //   await this.queue.add('archives', { ...a2, tokens });
+    // 存储消息:用户
+    const message_id = uuidv4();
+    const user_id = conversation.user_id;
+    const a2: CreateMessageDto = { conversation_id, message_id, user_id, role: 'user', parts: message, parent_id };
+    Object.assign(a2, { status: 0 });
+    const { tokens } = await this.message.save(a2);
+    await this.queue.add('archives', { ...a2, tokens });
 
-  //   // 加入消息发送队列
-  //   const s2: QueueAgentDto = { channel, supplier_id: supplier.id, parent_id, message_id, prompt };
+    // 加入消息发送队列
+    const s2: QueueAgentDto = { channel, provider_id: provider.id, parent_id, message_id, message };
 
-  //   // 消息队列
-  //   const { id } = await this.queue.add('agent', s2);
-  //   console.log(`[chat]agent`, id, supplier.id, supplier.provider);
-  // }
+    // 消息队列
+    const { id } = await this.queue.add('agent', s2);
+    console.log(`[chat]agent`, id, provider.id);
+  }
 }

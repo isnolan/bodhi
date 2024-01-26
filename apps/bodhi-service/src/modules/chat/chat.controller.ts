@@ -87,45 +87,44 @@ export class ChatController {
       // 发送消息
       const provider_ids: number[] = purchased.map((c) => c.provider_id);
       const options: SendMessageDto = { provider_ids, messages, message_id, parent_id };
-
-      // console.log(`[chat]send`, channel, conversation, options);
       await this.service.send(channel, conversation, options);
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.FORBIDDEN);
     }
   }
 
-  // @Post('agent')
-  // @ApiBody({ type: CreateAgentDto })
-  // @ApiOperation({ description: 'Chat Agent' })
-  // @ApiResponse({ status: 201, description: 'success' })
-  // @ApiResponse({ status: 400, description: 'exception' })
-  // async agent(@Req() req: Request, @Body() payload: CreateAgentDto) {
-  //   const { conversation_id, parent_id = '', prompt } = payload;
-  //   const channel = `agent:${conversation_id}:${+new Date()}`;
-  //   console.log(`[chat]agent`, channel, payload);
-  //   // 获取或创建会话
-  //   const conversation = await this.conversation.findOneByConversationId(conversation_id);
-  //   if (!conversation) {
-  //     throw new HttpException('Invalid conversation', HttpStatus.BAD_REQUEST);
-  //   }
+  @Post('agent')
+  @ApiBody({ type: CreateAgentDto })
+  @ApiOperation({ description: 'Chat Agent' })
+  @ApiResponse({ status: 201, description: 'success' })
+  @ApiResponse({ status: 400, description: 'exception' })
+  async agent(@Req() req: Request, @Body() payload: CreateAgentDto) {
+    // const { user_id, user_key_id = 0 } = req.user; // from jwt or apikey
+    const { conversation_id, parent_id, message } = payload;
+    const channel = `agent:${conversation_id}:${+new Date()}`;
+    console.log(`[chat]agent`, channel, payload);
+    // 获取或创建会话
+    const conversation = await this.conversation.findOneByConversationId(conversation_id);
+    if (!conversation) {
+      throw new HttpException('Invalid conversation', HttpStatus.BAD_REQUEST);
+    }
 
-  //   // `What would be a less than 50 character short and relevant title for this chat? No other text are allowed.`;
-  //   // Please make 3 short inspiring tips on the content of the chat. No other text are allowed.
-  //   return new Promise(async (resolve) => {
-  //     const listener = (chl: string, message: string) => {
-  //       if (chl !== channel) return;
-  //       this.service.unsubscribe(channel, listener);
-  //       resolve(message);
-  //     };
-  //     this.service.subscribe(channel, listener);
+    // `What would be a less than 50 character short and relevant title for this chat? No other text are allowed.`;
+    // Please make 3 short inspiring tips on the content of the chat. No other text are allowed.
+    return new Promise(async (resolve) => {
+      const listener = (chl: string, message: string) => {
+        if (chl !== channel) return;
+        this.service.unsubscribe(channel, listener);
+        resolve(message);
+      };
+      this.service.subscribe(channel, listener);
 
-  //     req.on('close', () => {
-  //       this.service.unsubscribe(channel, listener);
-  //     });
+      req.on('close', () => {
+        this.service.unsubscribe(channel, listener);
+      });
 
-  //     // 发送消息
-  //     await this.service.autoAgent(conversation, channel, { parent_id, prompt });
-  //   });
-  // }
+      // 发送消息
+      await this.service.autoAgent(conversation, channel, { parent_id, message });
+    });
+  }
 }
