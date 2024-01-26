@@ -24,23 +24,7 @@ export class ProviderController {
   @ApiResponse({ status: 200, description: 'success' })
   async findProducts(@Request() req) {
     const { user_id } = req.user;
-    return this.provider.find(user_id);
-  }
-
-  @Post('product/create')
-  @ApiOperation({ summary: 'Create a product for model', description: 'Create a product for model' })
-  @ApiResponse({ status: 201, description: 'success' })
-  async createProduct(@Request() req, @Body() payload) {
-    const { user_id } = req.user;
-    return;
-  }
-
-  @Delete('product/delete')
-  @ApiOperation({ summary: 'Delete a product for model', description: 'Delete a product for model' })
-  @ApiResponse({ status: 201, description: 'success' })
-  async deleteProduct(@Request() req, @Body() payload) {
-    const { user_id } = req.user;
-    return;
+    return this.provider.findByUserId(user_id);
   }
 
   @Get('credentials')
@@ -48,30 +32,6 @@ export class ProviderController {
   @ApiResponse({ status: 200, description: 'success' })
   async findCredentials(@Request() req) {
     const { user_id } = req.user;
-    return;
-  }
-
-  @Post('credentials/create')
-  @ApiOperation({ summary: 'Create a credential', description: 'Create a credential' })
-  @ApiResponse({ status: 201, description: 'success' })
-  async createCredential(@Request() req, @Body() payload) {
-    const { user_id } = req.user;
-    return;
-  }
-
-  @Post('credentials/update')
-  @ApiOperation({ summary: 'Update a credential', description: 'Update a credential' })
-  @ApiResponse({ status: 201, description: 'success' })
-  async updateCredential(@Request() req, @Body() payload) {
-    const { user_id } = req.user;
-    return;
-  }
-
-  @Delete('credentials/delete')
-  @ApiOperation({ summary: 'Delete a credential', description: 'Delete a credential' })
-  @ApiResponse({ status: 201, description: 'success' })
-  async deleteCredential(@Request() req, @Body() payload) {
-    const { user_id } = req.user;
-    return;
+    return this.credential.findByUserId(user_id);
   }
 }

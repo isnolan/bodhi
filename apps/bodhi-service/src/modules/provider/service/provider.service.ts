@@ -11,10 +11,11 @@ export class ProviderService {
     private readonly repository: Repository<Provider>,
   ) {}
 
-  public async find(user_id: number): Promise<Provider> {
-    return await this.repository.findOne({
+  public async findByUserId(user_id: number, is_relation?: boolean): Promise<Provider[]> {
+    const relations = is_relation ? ['model', 'instance', 'credential'] : [];
+    return this.repository.find({
       where: { user_id, status: MoreThan(0) },
-      relations: ['model', 'instance', 'credential'],
+      relations,
     });
   }
 
