@@ -9,7 +9,7 @@ import { ChatService } from '@/modules/chat/chat.service';
 import { ChatConversationService, ChatMessageService } from '@/modules/chat/service';
 import { Inject, forwardRef } from '@nestjs/common';
 import { ProviderService } from '@/modules/provider/service';
-import { Authorisation, KeyAuthorisation } from '@/modules/provider/entity';
+import { KeyAuthorisation } from '@/modules/provider/entity';
 
 const importDynamic = new Function('modulePath', 'return import(modulePath)');
 
@@ -43,14 +43,14 @@ export class SupplierOpenAPIProcessor {
    */
   @Process('openapi')
   async openai(job: Job<QueueMessageDto>) {
-    // console.log(`[api]job:`, job.data);
+    console.log(`[api]job:`, job.data);
     const { channel, provider_id, conversation_id, parent_id } = job.data;
     return new Promise(async (resolve) => {
       try {
-        const provider = await this.provider.find(provider_id);
+        const provider = (await this.provider.findActive([provider_id]))[0];
         const conversation = await this.conversation.findOne(conversation_id);
 
-        const { ChatAPI } = this.apis;
+        const { ChatAPI } = await importDynamic('@isnolan/bodhi-adapter');
         const { authorisation } = provider.credential;
         const api = new ChatAPI(provider.instance.name, {
           apiKey: (authorisation as KeyAuthorisation).api_key,

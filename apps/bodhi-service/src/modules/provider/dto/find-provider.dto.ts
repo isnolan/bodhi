@@ -1,4 +1,4 @@
-interface ProviderWithRelations {
+export interface ProviderWithRelations {
   id: number;
   weight: number;
   model: {
@@ -10,5 +10,10 @@ interface ProviderWithRelations {
     id: number;
     type: string;
     name: string;
+  };
+  credential: {
+    type: string;
+    label: string;
+    authorisation: any;
   };
 }

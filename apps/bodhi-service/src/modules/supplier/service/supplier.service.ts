@@ -5,6 +5,7 @@ import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { SupplierPurchasedService } from './';
 import { ProviderService } from '@/modules/provider/service';
 import { InstanceType } from '@/modules/provider/entity';
+import { ProviderWithRelations } from '@/modules/provider/dto/find-provider.dto';
 
 @Injectable()
 export class SupplierService {

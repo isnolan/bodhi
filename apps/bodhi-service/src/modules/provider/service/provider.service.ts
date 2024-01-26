@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CredentialsState, Provider } from '../entity';
 import { In, IsNull, MoreThan, Repository } from 'typeorm';
+import { ProviderWithRelations } from '../dto/find-provider.dto';
 
 @Injectable()
 export class ProviderService {
@@ -26,7 +27,7 @@ export class ProviderService {
         { expires_at: MoreThan(new Date()), ...query },
         { expires_at: IsNull(), ...query },
       ],
-      relations: ['model', 'instance'],
+      relations: ['model', 'instance', 'credential'],
     });
   }
 }
