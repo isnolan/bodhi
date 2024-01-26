@@ -2,6 +2,7 @@ import { Base } from '@/core/common/base.entity';
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { ProviderModels } from './models.entity';
 import { ProviderInstance } from './instance.entity';
+import { ProviderCredentials } from './credentials.entity';
 
 export enum ProductState {
   ACTIVE = 1,
@@ -50,4 +51,8 @@ export class Provider extends Base {
   @ManyToOne(() => ProviderInstance)
   @JoinColumn({ name: 'instance_id' })
   instance: ProviderInstance;
+
+  @ManyToOne(() => ProviderCredentials)
+  @JoinColumn({ name: 'credential_id' })
+  credential: ProviderCredentials;
 }

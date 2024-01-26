@@ -9,17 +9,19 @@ export enum CredentialsState {
   FORBIDDEN = -2,
 }
 
-export type Authorisation =
-  | {
-      type: 'api';
-      api_key: string;
-      api_secret: string;
-    }
-  | {
-      type: 'session';
-      session_token: string;
-      access_token: string;
-    };
+export type KeyAuthorisation = {
+  type: 'api';
+  api_key: string;
+  api_secret: string;
+};
+
+export type SessionAuthorisation = {
+  type: 'session';
+  session_token: string;
+  access_token: string;
+};
+
+export type Authorisation = KeyAuthorisation | SessionAuthorisation;
 
 @Entity('bodhi_provider_credentials')
 export class ProviderCredentials extends Base {
@@ -34,11 +36,11 @@ export class ProviderCredentials extends Base {
 
   /* authorisation */
   @Column({ type: 'simple-json', comment: 'authorisation', default: null })
-  auth_credentials: Authorisation;
+  authorisation: Authorisation;
 
   /* Expires */
   @Column({ precision: 3, comment: 'expires', default: null })
-  auth_expires: Date;
+  expires_at: Date;
 
   @Column({ type: 'tinyint', comment: '状态', default: CredentialsState.ACTIVE })
   status: number;
