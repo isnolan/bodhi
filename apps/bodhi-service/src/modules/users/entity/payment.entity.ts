@@ -2,9 +2,9 @@ import { Entity, Column } from 'typeorm';
 import { Base } from '@/core/common/base.entity';
 
 export enum PaymentsState {
-  VALID = 1,
-  INVALID = 0,
-  DELETED = -1,
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
 }
 
 @Entity('bodhi_users_payments')
@@ -21,6 +21,6 @@ export class UsersPayments extends Base {
   @Column({ type: 'varchar', length: 40, comment: 'transaction id', default: '' })
   transaction_id: string;
 
-  @Column({ type: 'tinyint', comment: 'status', default: PaymentsState.VALID })
-  status: PaymentsState;
+  @Column({ type: 'tinyint', comment: 'status', default: PaymentsState.PENDING })
+  state: PaymentsState;
 }
