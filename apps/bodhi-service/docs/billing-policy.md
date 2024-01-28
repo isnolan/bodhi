@@ -105,6 +105,9 @@ export class SubscriptionPlanQuota {
 
   @Column('bigint', { nullable: true })
   token_limit: bigint; // Token消耗量限制，适用于基于tokens计费的场景
+
+  @Column()
+  period: string; // 配额时间周期，例如 "daily", "weekly", "monthly", "subscription"
 }
 ```
 
@@ -142,6 +145,40 @@ export class UserSubscription {
   // 可选：添加字段来表示订阅的周期性，例如月订阅、年订阅等
   @Column({ nullable: true })
   subscription_period: string; // 如 "monthly", "yearly"
+}
+```
+
+- UserQuotaUsage 实体设计
+
+```ts
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { User } from './User';
+import { SubscriptionPlanQuota } from './SubscriptionPlanQuota';
+
+@Entity()
+export class UserQuotaUsage {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn()
+  user: User;
+
+  @ManyToOne(() => SubscriptionPlanQuota, (quota) => quota.id)
+  @JoinColumn()
+  subscription_plan_quota: SubscriptionPlanQuota;
+
+  @Column()
+  period_start: Date; // 当前周期开始时间
+
+  @Column()
+  period_end: Date; // 当前周期结束时间
+
+  @Column('int')
+  calls_made: number; // 在当前周期内已使用的调用次数
+
+  @Column('bigint', { nullable: true, default: () => "'0'" })
+  tokens_consumed: bigint; // 在当前周期内已消耗的Token数量
 }
 ```
 

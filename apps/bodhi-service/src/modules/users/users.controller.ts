@@ -6,7 +6,7 @@ import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
 
 import { UsersService } from './users.service';
 import { CreateKeysDto } from './dto/create-keys.dto';
-import { UsersKeysService } from './keys.service';
+import { UsersKeysService } from './service/';
 import { GetKeysDto } from './dto/get-keys.dto';
 import { DeleteKeysDto } from './dto/delete-keys.dto';
 

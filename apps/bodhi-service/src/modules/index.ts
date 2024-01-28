@@ -5,5 +5,15 @@ import { ToolsModule } from './tools/tools.module';
 import { GptsModule } from './gpts/gpts.module';
 import { SupplierModule } from './supplier/supplier.module';
 import { ProviderModule } from './provider/provider.module';
+import { SubscriptionModule } from './subscription/subscription.module';
 
-export default [AuthModule, ChatModule, FilesModule, ToolsModule, GptsModule, SupplierModule, ProviderModule];
+export default [
+  AuthModule,
+  ChatModule,
+  FilesModule,
+  ToolsModule,
+  GptsModule,
+  SupplierModule,
+  ProviderModule,
+  SubscriptionModule,
+];

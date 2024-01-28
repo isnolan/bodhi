@@ -3,7 +3,7 @@ import { Repository } from 'typeorm';
 import * as moment from 'moment-timezone';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UsersKeys, UsersKeysState } from './entity/keys.entity';
+import { UsersKeys, UsersKeysState } from '../entity/keys.entity';
 
 @Injectable()
 export class UsersKeysService {

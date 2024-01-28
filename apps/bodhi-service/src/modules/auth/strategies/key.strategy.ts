@@ -1,4 +1,4 @@
-import { UsersKeysService } from '@/modules/users/keys.service';
+import { UsersKeysService } from '@/modules/users/service/keys.service';
 import { Injectable, UnauthorizedException, HttpException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { HeaderAPIKeyStrategy } from 'passport-headerapikey';
