@@ -1,6 +1,7 @@
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Base } from '@/core/common/base.entity';
 import { SubscriptionPlan } from './plan.entity';
+import { Users } from '@/modules/users/entity';
 
 export enum SubscribedState {
   PENDING = 'pending', // 初始状态，尚未分配
@@ -17,9 +18,6 @@ export class SubscriptionSubscribed extends Base {
 
   @Column({ type: 'int', comment: 'plan', default: 0 })
   plan_id: number;
-
-  @Column({ type: 'varchar', length: 40, comment: 'timezone', default: 'UTC' })
-  timezone: string;
 
   @Column({ type: 'datetime', precision: 0, comment: 'start', nullable: true })
   start_time: Date;
@@ -39,4 +37,8 @@ export class SubscriptionSubscribed extends Base {
   @ManyToOne(() => SubscriptionPlan)
   @JoinColumn({ name: 'plan_id', referencedColumnName: 'id' })
   plan: SubscriptionPlan;
+
+  @ManyToOne(() => Users)
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  user: Users;
 }

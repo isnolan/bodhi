@@ -25,9 +25,10 @@ export class SubscriptionService {
     // if not expired, allocate quotas, otherwise mark as expired
     const today = new Date();
     for (const subscription of activeSubscriptions) {
-      const { id, user_id, plan_id, start_time, expire_time, timezone } = subscription;
+      const { id, user_id, plan_id, start_time, expire_time } = subscription;
+      const timezone = subscription.user.timezone;
       // For a better user experience, midnight in the user's time zone is used as the allocation time point
-      const allocationStart = skipMidnightCheck ? this.getStartOfTodayInUserTimezone(subscription.timezone) : today;
+      const allocationStart = skipMidnightCheck ? this.getStartOfTodayInUserTimezone(timezone) : today;
       if (skipMidnightCheck || this.isMidnightInUserTimezone(allocationStart, timezone)) {
         if (expire_time < today) {
           // update state to expired
@@ -54,6 +55,7 @@ export class SubscriptionService {
    */
   isMidnightInUserTimezone(utcDate: Date, timezone: string): boolean {
     const userTime = moment(utcDate).tz(timezone);
+    console.log(`[midnight]`, userTime, userTime.hours());
     // TODO: 0:00:00 ~ 1:00:00 in user's timezone
     return userTime.hours() === 0;
   }

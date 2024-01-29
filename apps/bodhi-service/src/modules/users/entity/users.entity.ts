@@ -26,6 +26,9 @@ export class Users extends Base {
   @Column({ type: 'varchar', length: 10, comment: 'locale', default: 'en-US' })
   locale: string;
 
+  @Column({ type: 'varchar', length: 50, comment: 'timezone', default: 'Asia/Shanghai' })
+  timezone: string;
+
   @Column({ type: 'tinyint', comment: '状态', default: 0 })
   status: number;
 }

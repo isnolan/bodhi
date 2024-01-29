@@ -15,6 +15,7 @@ export class SubscriptionSubscribedService {
       where: {
         state: In([SubscribedState.ACTIVE, SubscribedState.PENDING]),
       },
+      relations: ['user'],
     });
   }
 
