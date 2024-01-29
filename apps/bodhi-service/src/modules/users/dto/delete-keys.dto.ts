@@ -5,5 +5,5 @@ export class DeleteKeysDto {
   @ApiProperty({ description: 'foreign id', example: '' })
   @IsString()
   @IsNotEmpty()
-  foreign_id: string;
+  foreign_user_id: string;
 }

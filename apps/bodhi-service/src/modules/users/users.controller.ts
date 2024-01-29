@@ -30,9 +30,9 @@ export class UsersController {
   @ApiResponse({ status: 201, description: 'success', type: GetKeysDto })
   async createKeys(@Request() req, @Body() payload: CreateKeysDto): Promise<GetKeysDto> {
     const { user_id } = req.user;
-    const { quota, foreign_id, note, expire_at } = payload;
-    const { id, secret_key, create_time } = await this.keys.create(user_id, { foreign_id, note, expire_at });
-    return { id, secret_key, quota, foreign_id, note, expire_at, create_time };
+    const { quota, foreign_user_id, note, expire_at } = payload;
+    const { id, secret_key, create_time } = await this.keys.create(user_id, { foreign_user_id, note, expire_at });
+    return { id, secret_key, foreign_user_id, note, expire_at, create_time };
   }
 
   @Post('keys/allocate')
@@ -40,8 +40,8 @@ export class UsersController {
   @ApiResponse({ status: 201, description: 'success' })
   async updateKeys(@Request() req, @Body() payload: CreateKeysDto) {
     const { user_id } = req.user;
-    const { foreign_id, quota, note } = payload;
-    return this.keys.update(user_id, foreign_id, { quota, note });
+    const { foreign_user_id, note } = payload;
+    return this.keys.update(user_id, foreign_user_id, { note });
   }
 
   @Delete('keys/delete')
@@ -49,7 +49,7 @@ export class UsersController {
   @ApiResponse({ status: 201, description: 'success' })
   async deleteKeys(@Request() req, @Body() payload: DeleteKeysDto) {
     const { user_id } = req.user;
-    const { foreign_id } = payload;
-    return this.keys.delete(user_id, foreign_id);
+    const { foreign_user_id } = payload;
+    return this.keys.delete(user_id, foreign_user_id);
   }
 }

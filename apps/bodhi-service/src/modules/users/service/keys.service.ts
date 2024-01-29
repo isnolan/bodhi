@@ -17,17 +17,17 @@ export class UsersKeysService {
    * @returns
    */
   async create(user_id: number, opts: Partial<UsersKeys>): Promise<UsersKeys> {
-    const { foreign_id, note = '' } = opts;
+    const { foreign_user_id, note = '' } = opts;
 
-    // check if foreign_id exists
-    const exist = await this.repository.findOne({ where: { user_id, foreign_id } });
+    // check if foreign_user_id exists
+    const exist = await this.repository.findOne({ where: { user_id, foreign_user_id } });
     if (exist) {
       return exist;
     }
 
     // create a new secret key
     const secret_key = `sk-` + uuidv4();
-    return this.repository.save(this.repository.create({ user_id, foreign_id, secret_key, note }));
+    return this.repository.save(this.repository.create({ user_id, foreign_user_id, secret_key, note }));
   }
 
   /**
@@ -47,17 +47,17 @@ export class UsersKeysService {
 
   async getList(user_id: number): Promise<UsersKeys[]> {
     return this.repository.find({
-      select: ['id', 'secret_key', 'quota', 'foreign_id', 'note', 'expire_at', 'create_time'],
+      select: ['id', 'secret_key', 'foreign_user_id', 'note', 'expire_at', 'create_time'],
       where: { user_id },
     });
   }
 
-  async delete(user_id: number, foreign_id: string) {
-    return this.repository.update({ user_id, foreign_id }, { state: UsersKeysState.DELETED });
+  async delete(user_id: number, foreign_user_id: string) {
+    return this.repository.update({ user_id, foreign_user_id }, { state: UsersKeysState.DELETED });
   }
 
-  async update(user_id: number, foreign_id: string, opts: Partial<UsersKeys>) {
-    const { quota, note, expire_at } = opts;
-    return this.repository.update({ user_id, foreign_id }, { quota, note, expire_at });
+  async update(user_id: number, foreign_user_id: string, opts: Partial<UsersKeys>) {
+    const { note, expire_at } = opts;
+    return this.repository.update({ user_id, foreign_user_id }, { note, expire_at });
   }
 }

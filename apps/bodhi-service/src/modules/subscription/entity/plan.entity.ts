@@ -10,6 +10,9 @@ export enum PlanState {
 
 @Entity('bodhi_subscription_plans')
 export class SubscriptionPlan extends Base {
+  @Column({ type: 'int', comment: 'user', default: 0 })
+  user_id: number;
+
   @Column({ type: 'varchar', length: 40, comment: 'ID', default: '' })
   product_id: string;
 

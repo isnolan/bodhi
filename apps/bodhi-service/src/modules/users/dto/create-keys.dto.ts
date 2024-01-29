@@ -5,7 +5,7 @@ export class CreateKeysDto {
   @ApiPropertyOptional({ description: 'foreign id', example: '' })
   @IsString()
   @IsNotEmpty()
-  foreign_id: string;
+  foreign_user_id: string;
 
   @ApiPropertyOptional({ description: 'Quota', example: 0 })
   @IsNumber()

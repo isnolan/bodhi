@@ -52,6 +52,7 @@ export class ChatController {
     try {
       // check valid purchased
       const purchased = await this.purchased.hasActiveBySlug(user_id, model);
+      console.log(`[purchased]`, purchased);
       if (purchased.length === 0) {
         throw new Error(`Invalid purchased model: ${model}`);
       }

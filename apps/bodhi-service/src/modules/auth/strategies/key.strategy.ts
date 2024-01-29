@@ -14,10 +14,10 @@ export class ApiKeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy, 'api-
   public async validate(apiKey: string, done: (error: Error, data) => {}) {
     const key = await this.keys.validateKey(apiKey);
     if (key) {
-      if (key.quota < 1) {
-        done(new HttpException('You exceeded your current quota, please check your plan.', 402), null);
-        return;
-      }
+      // if (key.quota < 1) {
+      //   done(new HttpException('You exceeded your current quota, please check your plan.', 402), null);
+      //   return;
+      // }
       done(null, { user_id: key.user_id, user_key_id: key.id });
       return;
     }

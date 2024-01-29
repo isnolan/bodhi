@@ -2,7 +2,6 @@ import Redis from 'ioredis';
 import { Injectable } from '@nestjs/common';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
 
-import { SupplierPurchasedService } from './';
 import { ProviderService } from '@/modules/provider/service';
 import { InstanceType } from '@/modules/provider/entity';
 import { ProviderWithRelations } from '@/modules/provider/dto/find-provider.dto';
@@ -13,7 +12,6 @@ export class SupplierService {
     @InjectRedis()
     private readonly redis: Redis,
     private readonly provider: ProviderService,
-    private readonly purchased: SupplierPurchasedService,
   ) {}
 
   /**
@@ -66,7 +64,7 @@ export class SupplierService {
    */
   public async findInactive(product_ids, conversation, isDowngrade = false): Promise<ProviderWithRelations> {
     const services = await this.provider.findActive(product_ids);
-    // console.log(`[supplier]findInactive`, services);
+    console.log(`[supplier]findInactive`, product_ids, services);
 
     // from session
     const chatGptServices = await this.filter(services, async (s: ProviderWithRelations) => {
