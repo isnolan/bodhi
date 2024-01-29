@@ -9,7 +9,6 @@ import { CreateAgentDto } from './dto/create-agent.dto';
 import { Request, Response } from 'express';
 import { JwtOrApiKeyGuard } from '../auth/guard/mixed.guard';
 import { RequestWithUser } from '../../core/common/request.interface';
-import { SupplierPurchasedService } from '../supplier/service';
 import { ChatConversationService } from './service';
 import { SubscriptionService } from '../subscription/service';
 import { ProviderService } from '../provider/service';
@@ -23,7 +22,6 @@ export class ChatController {
   constructor(
     private readonly service: ChatService,
     private readonly provider: ProviderService,
-    private readonly purchased: SupplierPurchasedService,
     private readonly conversation: ChatConversationService,
     private readonly subscription: SubscriptionService,
   ) {}
@@ -61,7 +59,8 @@ export class ChatController {
 
     try {
       // check valid subscription
-      const provider_ids = await this.subscription.findActiveProvidersByUser(user_id);
+      const providers = await this.subscription.findActiveProvidersByUser(user_id);
+      const provider_ids = await this.provider.filterProviderByModelId(providers, model);
 
       // find or create conversation
       const d = { model, temperature, top_p, top_k, user_id, user_key_id, context_limit, n };

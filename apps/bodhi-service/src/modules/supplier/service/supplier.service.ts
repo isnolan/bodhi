@@ -24,7 +24,7 @@ export class SupplierService {
       // console.log(`[supplier]renewal`, provider_id);
       // Get credential instance
       const providers = await this.provider.findActive([provider_id]);
-      // console.log(`[supplier]renew: providers`, provider_id, providers);
+      console.log(`[supplier]renew: providers`, provider_id, providers);
       if (providers.length > 0) {
         let provider = providers[0];
         // check in service

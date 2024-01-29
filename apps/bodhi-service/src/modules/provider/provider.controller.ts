@@ -27,4 +27,9 @@ export class ProviderController {
     const { user_id } = req.user;
     return this.credential.findByUserId(user_id);
   }
+
+  @Get('test')
+  async test() {
+    return this.provider.filterProviderByModelId([10000, 10001], 'gemini-pro');
+  }
 }

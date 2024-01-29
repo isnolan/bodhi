@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CredentialsState, Provider, ProviderModels } from '../entity';
-import { In, IsNull, MoreThan, Repository } from 'typeorm';
+import { In, IsNull, MoreThan, Repository, getRepository } from 'typeorm';
 import { ProviderWithRelations } from '../dto/find-provider.dto';
 import { ProviderModelsService } from './models.service';
 
@@ -45,11 +45,21 @@ export class ProviderService {
       ],
     });
     if (providers.length === 0) {
-      return [];
+      throw Error(`provider is out of service`);
     }
 
     const model_ids: number[] = providers.map((provider) => provider.model_id);
     console.log(`[models]`, ids, providers);
     return await this.models.findByIds(model_ids);
+  }
+
+  public async filterProviderByModelId(ids: number[], name: string): Promise<number[]> {
+    const providers = await this.repository
+      .createQueryBuilder('provider')
+      .leftJoinAndSelect('provider.model', 'model')
+      .where('provider.id IN (:...ids)', { ids })
+      .andWhere('model.name = :name', { name })
+      .getMany();
+    return providers.map((provider) => provider.id);
   }
 }
