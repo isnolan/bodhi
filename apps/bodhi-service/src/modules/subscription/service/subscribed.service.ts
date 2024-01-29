@@ -20,17 +20,23 @@ export class SubscriptionSubscribedService {
     });
   }
 
-  public async findActiveByUserId(user_id: number): Promise<SubscriptionSubscribed[]> {
-    return this.repository.find({
-      select: {
-        id: true,
-        plan_id: true,
-        start_time: true,
-        expire_time: true,
-        is_auto_renew: true,
-        state: true,
-        create_time: true,
-        plan: { id: true, title: true, description: true, monthly_price: true },
+  public async findActiveByUserId(user_id: number, relations?: string[]): Promise<SubscriptionSubscribed[]> {
+    const select = {
+      id: true,
+      plan_id: true,
+      start_time: true,
+      expire_time: true,
+      is_auto_renew: true,
+      state: true,
+      create_time: true,
+    };
+    // plan
+    if (relations && relations.includes('plan')) {
+      Object.assign(select, { plan: { id: true, title: true, description: true, monthly_price: true } });
+    }
+    // usage
+    if (relations && relations.includes('usage')) {
+      Object.assign(select, {
         usage: {
           id: true,
           quota_id: true,
@@ -41,12 +47,12 @@ export class SubscriptionSubscribedService {
           state: true,
           create_time: true,
         },
-      },
-      where: {
-        user_id,
-        state: In([SubscribedState.ACTIVE, SubscribedState.PENDING]),
-      },
-      relations: ['plan', 'usage'],
+      });
+    }
+    return this.repository.find({
+      select,
+      where: { user_id, state: In([SubscribedState.ACTIVE, SubscribedState.PENDING]) },
+      relations,
     });
   }
 

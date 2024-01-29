@@ -38,15 +38,8 @@ export class ChatController {
     const { user_id } = req.user;
 
     try {
-      const subscribeds = await this.subscription.findActivePlansByUserId(user_id);
-      if (subscribeds.length === 0) {
-        throw new Error(`No active subscription`);
-      }
-      const quota_ids = subscribeds.map((subscribed) => subscribed.usage.map((usage) => usage.quota_id));
-      const quotas = Array.from(new Set(quota_ids.flat()));
-
-      return this.provider.findModelsByProviderIds(quotas);
-      // return this.subscription.findActiveModels(user_id);
+      const provider_ids = await this.subscription.findActiveProvidersByUser(user_id);
+      return this.provider.findModelsByProviderIds(provider_ids);
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.FORBIDDEN);
     }
@@ -68,11 +61,7 @@ export class ChatController {
 
     try {
       // check valid subscription
-      const purchased = await this.purchased.hasActiveBySlug(user_id, model);
-      console.log(`[purchased]`, purchased);
-      if (purchased.length === 0) {
-        throw new Error(`Invalid purchased model: ${model}`);
-      }
+      const provider_ids = await this.subscription.findActiveProvidersByUser(user_id);
 
       // find or create conversation
       const d = { model, temperature, top_p, top_k, user_id, user_key_id, context_limit, n };
@@ -103,7 +92,6 @@ export class ChatController {
       });
 
       // 发送消息
-      const provider_ids: number[] = purchased.map((c) => c.provider_id);
       const options: SendMessageDto = { provider_ids, messages, message_id, parent_id };
       await this.service.send(channel, conversation, options);
     } catch (err) {

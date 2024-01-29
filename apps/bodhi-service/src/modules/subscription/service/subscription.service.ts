@@ -17,19 +17,15 @@ export class SubscriptionService {
   ) {}
 
   public async findActivePlansByUserId(user_id: number) {
-    const subscribed = await this.subscribed.findActiveByUserId(user_id);
-    return subscribed;
+    return this.subscribed.findActiveByUserId(user_id, ['usage']);
+  }
 
-    if (subscribed.length === 0) {
+  public async findActiveProvidersByUser(user_id: number): Promise<number[]> {
+    const subscribeds = await this.subscribed.findActiveByUserId(user_id, ['usage']);
+    if (subscribeds.length === 0) {
       throw new Error(`No active subscription`);
     }
-
-    const plan_ids = subscribed.map((c) => c.plan_id);
-    const plans = await this.plans.findActiveByIds(plan_ids);
-    if (plans.length === 0) {
-      throw new Error(`No active plan`);
-    }
-
-    return plans;
+    const quota_ids = subscribeds.map((subscribed) => subscribed.usage.map((usage) => usage.quota_id));
+    return await this.quotas.findProvidersByIds(Array.from(new Set(quota_ids.flat())));
   }
 }

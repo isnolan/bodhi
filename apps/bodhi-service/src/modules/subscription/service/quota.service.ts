@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SubscriptionQuota } from '../entity/quota.entity';
@@ -14,5 +14,14 @@ export class SubscriptionQuotaService {
     return this.repository.find({
       where: { plan_id },
     });
+  }
+
+  async findProvidersByIds(ids: number[]): Promise<number[]> {
+    const rows = await this.repository.find({
+      select: ['provider_id'],
+      where: { id: In(ids) },
+    });
+
+    return rows.map((row) => row.provider_id);
   }
 }
