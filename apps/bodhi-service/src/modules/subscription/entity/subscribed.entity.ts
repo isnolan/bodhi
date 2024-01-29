@@ -5,12 +5,13 @@ import { SubscriptionPlan } from './plan.entity';
 export enum SubscribedPeriod {
   WEEKLY = 'weekly',
   MONTHLY = 'monthly',
+  QUARTERLY = 'quarterly',
   YEARLY = 'yearly',
 }
 
 export enum SubscribedState {
+  PENDING = 'pending', // 初始状态，尚未分配
   ACTIVE = 'active',
-  PENDING = 'pending',
   EXPIRED = 'expired',
   CANCELLED = 'cancelled',
   SUSPENDED = 'suspended',
@@ -18,8 +19,11 @@ export enum SubscribedState {
 
 @Entity('bodhi_subscription_subscribed')
 export class SubscriptionSubscribed extends Base {
-  @Column({ type: 'int', comment: 'User', default: 0 })
+  @Column({ type: 'int', comment: 'user', default: 0 })
   user_id: number;
+
+  @Column({ type: 'int', comment: 'plan', default: 0 })
+  plan_id: number;
 
   @Column({ type: 'datetime', precision: 0, comment: '开始时间', nullable: true })
   start_time: Date;
@@ -42,7 +46,7 @@ export class SubscriptionSubscribed extends Base {
   @Column({ type: 'enum', enum: SubscribedPeriod, comment: 'period', default: SubscribedPeriod.WEEKLY })
   subscribed_period: SubscribedPeriod;
 
-  // @ManyToOne(() => SubscriptionPlan)
-  // @JoinColumn()
-  // subscription_plan: SubscriptionPlan;
+  @ManyToOne(() => SubscriptionPlan)
+  @JoinColumn({ name: 'plan_id', referencedColumnName: 'id' })
+  plan: SubscriptionPlan;
 }

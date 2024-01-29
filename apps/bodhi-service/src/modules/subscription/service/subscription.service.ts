@@ -15,21 +15,24 @@ export class SubscriptionService {
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async handleDailyQuotaAllocation() {
-    await this.allocateQuotasForSubscriptions();
+    await this.allocateQuotas();
   }
 
-  async allocateQuotasForSubscriptions() {
+  async allocateQuotas() {
     // 遍历所有订阅订单（已订阅）
     const activeSubscriptions = await this.subscribed.findAllActiveSubscriptions(); // 查找所有活跃的订阅
     // 检查是否尚未到期，如尚未到期则分配配额，否则标记为已过期
     const today = new Date();
     for (const subscription of activeSubscriptions) {
-      if (subscription.expire_time < today) {
-        // 标记状态为“已过期”
-        await this.subscribed.expireActive(subscription.id);
+      const { id, user_id, plan_id, start_time, expire_time } = subscription;
+      if (expire_time < today) {
+        await this.subscribed.expireActive(id);
       } else {
-        // 分配新的配额
-        // await this.createQuotaUsageRecord(subscription);
+        const quotas = await this.quotas.findQuotasByPlanId(plan_id); // 获取订阅的配额设置
+        for (const quota of quotas) {
+          const { id: quota_id, period } = quota;
+          await this.usage.createUsageRecord(start_time, period, { user_id, plan_id, quota_id });
+        }
       }
     }
   }

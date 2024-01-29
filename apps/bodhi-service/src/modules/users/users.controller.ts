@@ -18,8 +18,6 @@ export class UsersController {
   constructor(private readonly users: UsersService, private readonly keys: UsersKeysService) {}
 
   @Get('keys')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
   @ApiOperation({ summary: 'Get API Keys', description: 'Get API Keys' })
   @ApiResponse({ status: 200, description: 'success', type: [GetKeysDto] })
   async getKeys(@Request() req): Promise<GetKeysDto[]> {

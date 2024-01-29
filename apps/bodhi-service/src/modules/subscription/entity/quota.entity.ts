@@ -2,16 +2,11 @@ import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Base } from '@/core/common/base.entity';
 import { SubscriptionPlan } from './plan.entity';
 
-export enum QuotaState {
-  ACTIVE = 1,
-  INACTIVE = 0,
-  FORBIDDEN = -1,
-}
-
 export enum QuotaPeriod {
   DAILY = 'daily',
   WEEKLY = 'weekly',
   MONTHLY = 'monthly',
+  QUARTERLY = 'quarterly',
   YEARLY = 'yearly',
 }
 
@@ -31,9 +26,6 @@ export class SubscriptionQuota extends Base {
 
   @Column('bigint', { comment: 'tokens limit', default: null, nullable: true })
   token_limit: bigint; // Token消耗量限制，适用于基于tokens计费的场景
-
-  @Column({ type: 'tinyint', comment: 'status', default: QuotaState.ACTIVE })
-  status: number;
 
   @ManyToOne(() => SubscriptionPlan)
   @JoinColumn({ name: 'plan_id', referencedColumnName: 'id' })

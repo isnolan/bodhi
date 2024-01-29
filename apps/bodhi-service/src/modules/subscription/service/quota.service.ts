@@ -9,4 +9,10 @@ export class SubscriptionQuotaService {
     @InjectRepository(SubscriptionQuota)
     private readonly repository: Repository<SubscriptionQuota>,
   ) {}
+
+  async findQuotasByPlanId(plan_id: number): Promise<SubscriptionQuota[]> {
+    return this.repository.find({
+      where: { plan_id },
+    });
+  }
 }

@@ -1,31 +1,47 @@
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Base } from '@/core/common/base.entity';
-// import { Users } from './users.entity';
-// import { SubscriptionPlan } from './plan.entity';
-// import { SubscriptionQuota } from './quota.entity';
+import { SubscriptionQuota } from './quota.entity';
+import { SubscriptionPlan } from './plan.entity';
+
+export enum UsageState {
+  PENDING = 'pending', // 初始状态，尚未分配
+  ACTIVE = 'active',
+  EXHAUSTED = 'exhausted',
+  EXPIRED = 'expired',
+  CANCELLED = 'cancelled',
+}
 
 @Entity('bodhi_subscription_usage')
 export class SubscriptionUsage extends Base {
   @Column({ comment: 'user_id' })
   user_id: number;
 
-  @Column()
-  period_Start: Date; // 当前周期开始时间
+  @Column({ type: 'int', comment: 'plan' })
+  plan_id: number;
 
-  @Column()
+  @Column({ type: 'int', comment: 'quota' })
+  quota_id: number;
+
+  @Column({ type: 'datetime', precision: 0, comment: 'start', nullable: true })
+  period_start: Date; // 当前周期开始时间
+
+  @Column({ type: 'datetime', precision: 0, comment: 'end', nullable: true })
   period_end: Date; // 当前周期结束时间
 
-  @Column('int')
+  @Column({ type: 'int', comment: 'times', default: 0 })
   times_consumed: number; // 在当前周期内已使用的调用次数
 
-  @Column('bigint', { nullable: true, default: () => "'0'" })
+  @Column({ type: 'bigint', comment: 'tokens', default: 0 })
   tokens_consumed: bigint; // 在当前周期内已消耗的Token数量
 
-  // @ManyToOne(() => Users, (user) => user.id)
-  // @JoinColumn()
-  // user: Users;
+  @Column({ type: 'enum', enum: UsageState, comment: 'state', default: UsageState.PENDING })
+  state: UsageState;
 
-  // @ManyToOne(() => SubscriptionQuota, (quota) => quota.id)
-  // @JoinColumn()
-  // subscriptionPlanQuota: SubscriptionQuota;
+  @ManyToOne(() => SubscriptionQuota)
+  @JoinColumn({ name: 'quota_id', referencedColumnName: 'id' })
+  quota: SubscriptionQuota;
+
+  @ManyToOne(() => SubscriptionPlan)
+  @JoinColumn({ name: 'plan_id', referencedColumnName: 'id' })
+  plan: SubscriptionPlan;
 }
