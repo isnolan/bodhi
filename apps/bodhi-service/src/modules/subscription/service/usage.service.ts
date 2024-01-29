@@ -1,4 +1,4 @@
-import { Repository, LessThanOrEqual, MoreThanOrEqual, In } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -11,15 +11,13 @@ export class SubscriptionUsageService {
     private readonly repository: Repository<SubscriptionUsage>,
   ) {}
 
-  async createUsageRecord(startDate: Date, period: string, opts: Partial<SubscriptionUsage>) {
-    // check if exists
+  async allocateQuota(allocationStart: Date, period: string, opts: Partial<SubscriptionUsage>) {
     // 计算当前配额周期的开始日期，基于订阅的开始时间和配额的重置周期
-    const { periodStart: period_start, periodEnd: period_end } = this.calculatePeriod(startDate, period);
-    // 检查是否已存在对应当前周期的UserQuotaUsage记录
+    const { periodStart: period_start, periodEnd: period_end } = this.calculatePeriod(allocationStart, period);
+    // 检查是否已存在对应当前周期的Usage记录
     const exists = await this.repository.find({
       where: { plan_id: opts.plan_id, quota_id: opts.quota_id, period_start, period_end },
     });
-
     if (exists.length === 0) {
       await this.repository.save(this.repository.create({ ...opts, period_start, period_end }));
     }

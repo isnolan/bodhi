@@ -17,7 +17,12 @@ export class SubscriptionSubscribedService {
       },
     });
   }
+
   async expireActive(id: number) {
     return this.repository.update(id, { state: SubscribedState.EXPIRED });
+  }
+
+  async updateState(id: number, state: SubscribedState) {
+    return this.repository.update(id, { state });
   }
 }
