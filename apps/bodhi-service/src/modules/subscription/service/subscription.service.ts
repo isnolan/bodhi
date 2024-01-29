@@ -18,8 +18,8 @@ export class SubscriptionService {
 
   public async findActivePlansByUserId(user_id: number) {
     const subscribed = await this.subscribed.findActiveByUserId(user_id);
-    console.log(`->subscribed`, subscribed);
     return subscribed;
+
     if (subscribed.length === 0) {
       throw new Error(`No active subscription`);
     }

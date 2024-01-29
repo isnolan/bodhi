@@ -11,6 +11,8 @@ import { JwtOrApiKeyGuard } from '../auth/guard/mixed.guard';
 import { RequestWithUser } from '../../core/common/request.interface';
 import { SupplierPurchasedService } from '../supplier/service';
 import { ChatConversationService } from './service';
+import { SubscriptionService } from '../subscription/service';
+import { ProviderService } from '../provider/service';
 
 @ApiTags('chat')
 @ApiBearerAuth()
@@ -20,19 +22,34 @@ import { ChatConversationService } from './service';
 export class ChatController {
   constructor(
     private readonly service: ChatService,
+    private readonly provider: ProviderService,
     private readonly purchased: SupplierPurchasedService,
     private readonly conversation: ChatConversationService,
+    private readonly subscription: SubscriptionService,
   ) {}
 
   /**
-   * Find purchased models
+   * Find subscribed models
    */
   @Get('models')
   @ApiOperation({ description: 'find purchased models', summary: 'find purchased models' })
   @ApiResponse({ status: 201, description: 'success' })
   async models(@Req() req: RequestWithUser) {
     const { user_id } = req.user;
-    return this.purchased.findActiveModels(user_id);
+
+    try {
+      const subscribeds = await this.subscription.findActivePlansByUserId(user_id);
+      if (subscribeds.length === 0) {
+        throw new Error(`No active subscription`);
+      }
+      const quota_ids = subscribeds.map((subscribed) => subscribed.usage.map((usage) => usage.quota_id));
+      const quotas = Array.from(new Set(quota_ids.flat()));
+
+      return this.provider.findModelsByProviderIds(quotas);
+      // return this.subscription.findActiveModels(user_id);
+    } catch (err) {
+      throw new HttpException(err.message, HttpStatus.FORBIDDEN);
+    }
   }
 
   /**
@@ -50,7 +67,7 @@ export class ChatController {
     // console.log(`[chat]completions`, payload);
 
     try {
-      // check valid purchased
+      // check valid subscription
       const purchased = await this.purchased.hasActiveBySlug(user_id, model);
       console.log(`[purchased]`, purchased);
       if (purchased.length === 0) {

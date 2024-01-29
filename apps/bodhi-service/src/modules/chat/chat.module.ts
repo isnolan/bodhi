@@ -10,6 +10,7 @@ import { ChatConversation } from './entity/conversation.entity';
 import { ChatMessage } from './entity/message.entity';
 import Service from './service';
 import { ProviderModule } from '../provider/provider.module';
+import { SubscriptionModule } from '../subscription/subscription.module';
 
 @Module({
   imports: [
@@ -29,6 +30,8 @@ import { ProviderModule } from '../provider/provider.module';
 
     forwardRef(() => SupplierModule),
     ProviderModule,
+
+    SubscriptionModule,
   ],
 
   controllers: [ChatController],

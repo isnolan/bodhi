@@ -10,6 +10,7 @@ export class SubscriptionSubscribedService {
     @InjectRepository(SubscriptionSubscribed)
     private readonly repository: Repository<SubscriptionSubscribed>,
   ) {}
+
   async findAllActiveSubscriptions(): Promise<SubscriptionSubscribed[]> {
     return this.repository.find({
       where: {
@@ -29,12 +30,7 @@ export class SubscriptionSubscribedService {
         is_auto_renew: true,
         state: true,
         create_time: true,
-        plan: {
-          id: true,
-          title: true,
-          description: true,
-          monthly_price: true,
-        },
+        plan: { id: true, title: true, description: true, monthly_price: true },
         usage: {
           id: true,
           quota_id: true,

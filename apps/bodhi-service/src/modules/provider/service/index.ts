@@ -3,8 +3,9 @@ export * from './models.service';
 export * from './credentials.service';
 export * from './instance.service';
 
-import { ProviderInstance, ProviderModels } from '../entity';
 import { ProviderCredentialsService } from './credentials.service';
+import { ProviderInstanceService } from './instance.service';
+import { ProviderModelsService } from './models.service';
 import { ProviderService } from './provider.service';
 
-export default [ProviderService, ProviderModels, ProviderInstance, ProviderCredentialsService];
+export default [ProviderService, ProviderModelsService, ProviderInstanceService, ProviderCredentialsService];
