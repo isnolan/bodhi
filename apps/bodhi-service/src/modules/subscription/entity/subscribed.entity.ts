@@ -1,7 +1,6 @@
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Base } from '@/core/common/base.entity';
-import { Users } from './users.entity';
-import { SubscriptionPlan } from '@/modules/subscription/entity/plan.entity';
+import { SubscriptionPlan } from './plan.entity';
 
 export enum SubscribedPeriod {
   WEEKLY = 'weekly',
@@ -9,8 +8,16 @@ export enum SubscribedPeriod {
   YEARLY = 'yearly',
 }
 
-@Entity('bodhi_users_subscribed')
-export class UsersSubscribed extends Base {
+export enum SubscribedState {
+  ACTIVE = 'active',
+  PENDING = 'pending',
+  EXPIRED = 'expired',
+  CANCELLED = 'cancelled',
+  SUSPENDED = 'suspended',
+}
+
+@Entity('bodhi_subscription_subscribed')
+export class SubscriptionSubscribed extends Base {
   @Column({ type: 'int', comment: 'User', default: 0 })
   user_id: number;
 
@@ -29,12 +36,11 @@ export class UsersSubscribed extends Base {
   @Column({ type: 'tinyint', comment: '是否续订', default: 1 })
   is_auto_renew: number;
 
-  @Column({ enum: SubscribedPeriod, comment: 'period', default: SubscribedPeriod.MONTHLY })
-  period: SubscribedPeriod; // 如 "monthly", "yearly"
+  @Column({ type: 'enum', enum: SubscribedState, comment: 'state', default: SubscribedState.PENDING })
+  state: SubscribedState;
 
-  // @ManyToOne(() => Users)
-  // @JoinColumn()
-  // user: Users;
+  @Column({ type: 'enum', enum: SubscribedPeriod, comment: 'period', default: SubscribedPeriod.WEEKLY })
+  subscribed_period: SubscribedPeriod;
 
   // @ManyToOne(() => SubscriptionPlan)
   // @JoinColumn()

@@ -1,15 +1,14 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { SubscriptionService } from './subscription.service';
 import { SubscriptionController } from './subscription.controller';
-import { SubscriptionPlan } from './entity/plan.entity';
+import Entity from './entity';
 import { SubscriptionQuota } from './entity/quota.entity';
-
+import Service, { SubscriptionService } from './service';
 @Module({
-  imports: [TypeOrmModule.forFeature([SubscriptionPlan, SubscriptionQuota])],
+  imports: [TypeOrmModule.forFeature([...Entity])],
   controllers: [SubscriptionController],
-  providers: [SubscriptionService],
+  providers: [...Service],
   exports: [SubscriptionService],
 })
 export class SubscriptionModule {}

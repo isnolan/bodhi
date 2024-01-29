@@ -1,11 +1,11 @@
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Base } from '@/core/common/base.entity';
 // import { Users } from './users.entity';
-// import { SubscriptionPlan } from '@/modules/subscription/entity/plan.entity';
-// import { SubscriptionQuota } from '@/modules/subscription/entity/quota.entity';
+// import { SubscriptionPlan } from './plan.entity';
+// import { SubscriptionQuota } from './quota.entity';
 
-@Entity('bodhi_users_usage')
-export class UsersUsage extends Base {
+@Entity('bodhi_subscription_usage')
+export class SubscriptionUsage extends Base {
   @Column({ comment: 'user_id' })
   user_id: number;
 
