@@ -1,7 +1,8 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Base } from '@/core/common/base.entity';
 import { SubscriptionPlan } from './plan.entity';
 import { Users } from '@/modules/users/entity';
+import { SubscriptionUsage } from './usage.entity';
 
 export enum SubscribedState {
   PENDING = 'pending', // 初始状态，尚未分配
@@ -37,6 +38,9 @@ export class SubscriptionSubscribed extends Base {
   @ManyToOne(() => SubscriptionPlan)
   @JoinColumn({ name: 'plan_id', referencedColumnName: 'id' })
   plan: SubscriptionPlan;
+
+  @OneToMany(() => SubscriptionUsage, 'subscribed')
+  usage: SubscriptionUsage[];
 
   @ManyToOne(() => Users)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })

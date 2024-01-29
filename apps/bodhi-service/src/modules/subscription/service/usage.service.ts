@@ -16,7 +16,7 @@ export class SubscriptionUsageService {
     const { periodStart: period_start, periodEnd: period_end } = this.calculatePeriod(allocationStart, period);
     // 检查是否已存在对应当前周期的Usage记录
     const exists = await this.repository.find({
-      where: { plan_id: opts.plan_id, quota_id: opts.quota_id, period_start, period_end },
+      where: { subscribed_id: opts.subscribed_id, quota_id: opts.quota_id, period_start, period_end },
     });
     if (exists.length === 0) {
       await this.repository.save(this.repository.create({ ...opts, period_start, period_end }));

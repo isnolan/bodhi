@@ -2,6 +2,7 @@ import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Base } from '@/core/common/base.entity';
 import { SubscriptionQuota } from './quota.entity';
 import { SubscriptionPlan } from './plan.entity';
+import { SubscriptionSubscribed } from './subscribed.entity';
 
 export enum UsageState {
   PENDING = 'pending', // 初始状态，尚未分配
@@ -16,8 +17,8 @@ export class SubscriptionUsage extends Base {
   @Column({ comment: 'user_id' })
   user_id: number;
 
-  @Column({ type: 'int', comment: 'plan' })
-  plan_id: number;
+  @Column({ type: 'int', comment: 'subscribed' })
+  subscribed_id: number;
 
   @Column({ type: 'int', comment: 'quota' })
   quota_id: number;
@@ -41,7 +42,7 @@ export class SubscriptionUsage extends Base {
   @JoinColumn({ name: 'quota_id', referencedColumnName: 'id' })
   quota: SubscriptionQuota;
 
-  @ManyToOne(() => SubscriptionPlan)
-  @JoinColumn({ name: 'plan_id', referencedColumnName: 'id' })
-  plan: SubscriptionPlan;
+  @ManyToOne(() => SubscriptionSubscribed)
+  @JoinColumn({ name: 'subscribed_id', referencedColumnName: 'id' })
+  subscribed: SubscriptionSubscribed;
 }
