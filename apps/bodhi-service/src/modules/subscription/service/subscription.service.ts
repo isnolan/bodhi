@@ -14,8 +14,9 @@ export class SubscriptionService {
     private readonly usage: SubscriptionUsageService,
   ) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_HOUR)
   async handleDailyQuotaAllocation() {
+    console.log(`[cron]`, new Date());
     await this.allocateQuotas();
   }
 
@@ -29,7 +30,9 @@ export class SubscriptionService {
       const timezone = subscription.user.timezone;
       // For a better user experience, midnight in the user's time zone is used as the allocation time point
       const allocationStart = skipMidnightCheck ? this.getStartOfTodayInUserTimezone(timezone) : today;
+
       if (skipMidnightCheck || this.isMidnightInUserTimezone(allocationStart, timezone)) {
+        console.log(`[subscribed]`, subscription.id, 'allocating quotas');
         if (expire_time < today) {
           // update state to expired
           await this.subscribed.updateState(id, SubscribedState.EXPIRED);
@@ -42,6 +45,8 @@ export class SubscriptionService {
           // update state to active
           await this.subscribed.updateState(id, SubscribedState.ACTIVE);
         }
+      } else {
+        console.log(`[subscribed]`, subscription.id, 'skipping quotas allocation');
       }
     }
   }

@@ -12,6 +12,6 @@ export class SubscriptionController {
 
   @Get('test')
   async allocateQuotas() {
-    return this.subscription.allocateQuotas();
+    return this.subscription.allocateQuotas(true);
   }
 }
