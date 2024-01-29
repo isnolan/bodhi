@@ -21,10 +21,10 @@ export class SubscriptionQuota extends Base {
   @Column({ type: 'enum', enum: QuotaPeriod, comment: 'period', default: QuotaPeriod.DAILY })
   period: QuotaPeriod; // 配额时间周期
 
-  @Column('int', { comment: 'times limit', default: null, nullable: true })
+  @Column('int', { comment: 'times limit', default: 0 })
   times_limit: number; // 调用次数限制
 
-  @Column('bigint', { comment: 'tokens limit', default: null, nullable: true })
+  @Column('bigint', { comment: 'tokens limit', default: 0 })
   token_limit: bigint; // Token消耗量限制，适用于基于tokens计费的场景
 
   @ManyToOne(() => SubscriptionPlan)

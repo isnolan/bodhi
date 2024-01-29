@@ -28,7 +28,6 @@ export class UsersController {
   @Post('keys/create')
   @ApiOperation({ summary: 'Create API Keys', description: 'Create API Keys' })
   @ApiResponse({ status: 201, description: 'success', type: GetKeysDto })
-  @ApiResponse({ status: 401, description: 'session is expired!' })
   async createKeys(@Request() req, @Body() payload: CreateKeysDto): Promise<GetKeysDto> {
     const { user_id } = req.user;
     const { quota, foreign_id, note, expire_at } = payload;
@@ -36,10 +35,9 @@ export class UsersController {
     return { id, secret_key, quota, foreign_id, note, expire_at, create_time };
   }
 
-  @Post('keys/update')
-  @ApiOperation({ summary: 'Create API Keys', description: 'Create API Keys' })
+  @Post('keys/allocate')
+  @ApiOperation({ summary: 'Allocate quota to key', description: 'Allocate quota to key' })
   @ApiResponse({ status: 201, description: 'success' })
-  @ApiResponse({ status: 401, description: 'session is expired!' })
   async updateKeys(@Request() req, @Body() payload: CreateKeysDto) {
     const { user_id } = req.user;
     const { foreign_id, quota, note } = payload;
@@ -49,7 +47,6 @@ export class UsersController {
   @Delete('keys/delete')
   @ApiOperation({ summary: 'Create API Keys', description: 'Create API Keys' })
   @ApiResponse({ status: 201, description: 'success' })
-  @ApiResponse({ status: 401, description: 'session is expired!' })
   async deleteKeys(@Request() req, @Body() payload: DeleteKeysDto) {
     const { user_id } = req.user;
     const { foreign_id } = payload;
