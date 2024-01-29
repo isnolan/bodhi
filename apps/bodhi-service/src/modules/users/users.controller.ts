@@ -9,6 +9,7 @@ import { CreateKeysDto } from './dto/create-keys.dto';
 import { UsersKeysService } from './service/';
 import { GetKeysDto } from './dto/get-keys.dto';
 import { DeleteKeysDto } from './dto/delete-keys.dto';
+import { UsersKeysQuota } from './entity';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -30,18 +31,18 @@ export class UsersController {
   @ApiResponse({ status: 201, description: 'success', type: GetKeysDto })
   async createKeys(@Request() req, @Body() payload: CreateKeysDto): Promise<GetKeysDto> {
     const { user_id } = req.user;
-    const { quota, foreign_user_id, note, expire_at } = payload;
+    const { foreign_user_id, note, expire_at } = payload;
     const { id, secret_key, create_time } = await this.keys.create(user_id, { foreign_user_id, note, expire_at });
     return { id, secret_key, foreign_user_id, note, expire_at, create_time };
   }
 
-  @Post('keys/allocate')
-  @ApiOperation({ summary: 'Allocate quota to key', description: 'Allocate quota to key' })
+  @Post('keys/limit')
+  @ApiOperation({ summary: 'Allocate quota to one key', description: 'Allocate quota to one key' })
   @ApiResponse({ status: 201, description: 'success' })
-  async updateKeys(@Request() req, @Body() payload: CreateKeysDto) {
-    const { user_id } = req.user;
-    const { foreign_user_id, note } = payload;
-    return this.keys.update(user_id, foreign_user_id, { note });
+  async updateKeysLimit(@Request() req, @Body() payload: CreateKeysDto) {
+    // const { user_id } = req.user;
+    // const { model, times_limit, tokens_limit, expire_at } = payload;
+    // return this.keys.updateKeyLimit(user_id, foreign_user_id, { note });
   }
 
   @Delete('keys/delete')

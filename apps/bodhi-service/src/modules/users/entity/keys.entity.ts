@@ -36,16 +36,13 @@ export class UsersKeysQuota extends Base {
   @Column({ type: 'int', comment: 'key_id' })
   key_id: number;
 
-  @Column({ type: 'int', comment: 'plan' })
-  plan_id: number;
+  @Column({ type: 'varchar', length: 40, comment: 'model' })
+  model: string;
 
-  @Column({ type: 'int', comment: 'provider' })
-  provider_id: number;
-
-  @Column('int', { comment: 'times limit', default: 0 })
+  @Column('int', { comment: 'times limit', default: -1 })
   times_limit: number; // -1: unlimited, 0: disabled, >0: available
 
-  @Column('bigint', { comment: 'tokens limit', default: 0 })
+  @Column('bigint', { comment: 'tokens limit', default: -1 })
   token_limit: bigint; // -1: unlimited, 0: disabled, >0: available
 
   @Column({ type: 'int', comment: 'times', default: 0 })
@@ -54,7 +51,7 @@ export class UsersKeysQuota extends Base {
   @Column({ type: 'bigint', comment: 'tokens', default: 0 })
   tokens_consumed: bigint;
 
-  @Column({ type: 'datetime', comment: 'expires', nullable: true })
+  @Column({ type: 'datetime', comment: 'expires', default: null, nullable: true })
   expire_at: Date;
 
   @Column({ type: 'tinyint', comment: '状态', default: UsersKeysState.VALID })

@@ -1,24 +1,21 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class AllocateKeysDto {
-  @ApiPropertyOptional({ description: 'plan id', example: 0 })
-  @IsNumber()
-  @IsNotEmpty()
-  plan_id: number;
-
-  @ApiPropertyOptional({ description: 'model slug', example: '' })
+  @ApiPropertyOptional({ description: 'model', example: 'gemini-pro' })
   @IsString()
+  @IsNotEmpty()
   model: string;
 
-  @ApiPropertyOptional({ description: 'Quota', example: 0 })
+  @ApiPropertyOptional({ description: 'times limit', example: 0 })
   @IsNumber()
-  quota: number;
+  times_limit: number;
 
-  @ApiPropertyOptional({ description: 'expire at', example: '' })
+  @ApiPropertyOptional({ description: 'tokens limit', example: 0 })
+  @IsNumber()
+  tokens_limit: number;
+
+  @ApiPropertyOptional({ description: 'expire at', example: null })
+  @IsOptional()
   expire_at: Date;
-
-  @ApiPropertyOptional({ description: 'note', example: '' })
-  @IsString()
-  note: string;
 }

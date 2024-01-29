@@ -49,7 +49,7 @@ export class ProviderService {
     }
 
     const model_ids: number[] = providers.map((provider) => provider.model_id);
-    console.log(`[models]`, ids, providers);
+    // console.log(`[models]`, ids, providers);
     return await this.models.findByIds(model_ids);
   }
 

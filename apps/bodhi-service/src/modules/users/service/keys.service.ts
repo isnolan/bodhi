@@ -3,13 +3,15 @@ import { Repository } from 'typeorm';
 import * as moment from 'moment-timezone';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UsersKeys, UsersKeysState } from '../entity/keys.entity';
+import { UsersKeys, UsersKeysQuota, UsersKeysState } from '../entity/keys.entity';
 
 @Injectable()
 export class UsersKeysService {
   constructor(
     @InjectRepository(UsersKeys)
     private readonly repository: Repository<UsersKeys>,
+    @InjectRepository(UsersKeysQuota)
+    private readonly quotas: Repository<UsersKeysQuota>,
   ) {}
 
   /**
@@ -59,5 +61,9 @@ export class UsersKeysService {
   async update(user_id: number, foreign_user_id: string, opts: Partial<UsersKeys>) {
     const { note, expire_at } = opts;
     return this.repository.update({ user_id, foreign_user_id }, { note, expire_at });
+  }
+
+  async updateKeyLimit(user_id: number, opts: Partial<UsersKeysQuota>) {
+    // check
   }
 }
