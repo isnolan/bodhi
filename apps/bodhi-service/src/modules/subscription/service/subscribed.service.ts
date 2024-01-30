@@ -11,7 +11,7 @@ export class SubscriptionSubscribedService {
     private readonly repository: Repository<SubscriptionSubscribed>,
   ) {}
 
-  async findAllActiveSubscriptions(): Promise<SubscriptionSubscribed[]> {
+  async findActiveWithUser(): Promise<SubscriptionSubscribed[]> {
     return this.repository.find({
       where: {
         state: In([SubscribedState.ACTIVE, SubscribedState.PENDING]),
@@ -20,39 +20,10 @@ export class SubscriptionSubscribedService {
     });
   }
 
-  public async findActiveByUserId(user_id: number, relations?: string[]): Promise<SubscriptionSubscribed[]> {
-    const select = {
-      id: true,
-      plan_id: true,
-      start_time: true,
-      expire_time: true,
-      is_auto_renew: true,
-      state: true,
-      create_time: true,
-    };
-    // plan
-    if (relations && relations.includes('plan')) {
-      Object.assign(select, { plan: { id: true, title: true, description: true, monthly_price: true } });
-    }
-    // usage
-    if (relations && relations.includes('usage')) {
-      Object.assign(select, {
-        usage: {
-          id: true,
-          quota_id: true,
-          period_start: true,
-          period_end: true,
-          times_consumed: true,
-          tokens_consumed: true,
-          state: true,
-          create_time: true,
-        },
-      });
-    }
+  public async findActiveWithPlanAndUsage(user_id: number, relations?: string[]): Promise<SubscriptionSubscribed[]> {
     return this.repository.find({
-      select,
       where: { user_id, state: In([SubscribedState.ACTIVE, SubscribedState.PENDING]) },
-      relations,
+      relations: ['plan', 'usage'],
     });
   }
 

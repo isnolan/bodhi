@@ -148,6 +148,9 @@ export class SupplierOpenAPIProcessor {
       const attr = { tokens };
       parent_conversation_id && Object.assign(attr, { parent_conversation_id });
       await this.conversation.updateAttribute(conversation_id, attr);
+
+      // 更新消耗
+
       resolve({});
     });
   }

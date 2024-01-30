@@ -24,7 +24,7 @@ export class SubscriptionProcessService {
 
   public async allocateQuotas(skipMidnightCheck: boolean = false) {
     // all active subscribed subscriptions
-    const activeSubscriptions = await this.subscribed.findAllActiveSubscriptions();
+    const activeSubscriptions = await this.subscribed.findActiveWithUser();
     // if not expired, allocate quotas, otherwise mark as expired
     const today = new Date();
     for (const subscription of activeSubscriptions) {

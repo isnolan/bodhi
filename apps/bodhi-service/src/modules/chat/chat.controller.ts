@@ -61,6 +61,9 @@ export class ChatController {
       // check valid subscription
       const providers = await this.subscription.findActiveProvidersByUser(user_id);
       const provider_ids = await this.provider.filterProviderByModelId(providers, model);
+      if (provider_ids.length === 0) {
+        throw new Error(`No valid supplier for model:${model}`);
+      }
 
       // find or create conversation
       const d = { model, temperature, top_p, top_k, user_id, user_key_id, context_limit, n };

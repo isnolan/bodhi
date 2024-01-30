@@ -17,11 +17,11 @@ export class SubscriptionService {
   ) {}
 
   public async findActivePlansByUserId(user_id: number) {
-    return this.subscribed.findActiveByUserId(user_id, ['usage']);
+    return this.subscribed.findActiveWithPlanAndUsage(user_id);
   }
 
   public async findActiveProvidersByUser(user_id: number): Promise<number[]> {
-    const subscribeds = await this.subscribed.findActiveByUserId(user_id, ['usage']);
+    const subscribeds = await this.subscribed.findActiveWithPlanAndUsage(user_id);
     if (subscribeds.length === 0) {
       throw new Error(`No active subscription`);
     }

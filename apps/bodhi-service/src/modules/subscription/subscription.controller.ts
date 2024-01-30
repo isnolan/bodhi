@@ -1,8 +1,9 @@
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards, Req } from '@nestjs/common';
 import { SubscriptionService, SubscriptionSubscribedService } from './service';
-import { Subscription } from 'rxjs';
+import { SubscriptionGuard } from './guards/subscription.guard';
+import { RequestWithUser } from '@/core/common/request.interface';
 
 @ApiTags('subscription')
 @ApiBearerAuth()
@@ -14,8 +15,9 @@ export class SubscriptionController {
     private readonly subscription: SubscriptionService,
   ) {}
 
-  @Get('test')
-  async test() {
-    return this.subscription.findActiveProvidersByUser(1);
-  }
+  // @Get('test')
+  // @UseGuards(SubscriptionGuard)
+  // async test(@Req() req: RequestWithUser) {
+  //   return this.subscription.findActiveProvidersByUser(1);
+  // }
 }
