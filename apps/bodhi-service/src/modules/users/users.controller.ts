@@ -10,6 +10,7 @@ import { UsersKeysService } from './service/';
 import { GetKeysDto } from './dto/get-keys.dto';
 import { DeleteKeysDto } from './dto/delete-keys.dto';
 import { UsersKeysQuota } from './entity';
+import { LimitKeysDto } from './dto/limit-keys.dto';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -32,17 +33,22 @@ export class UsersController {
   async createKeys(@Request() req, @Body() payload: CreateKeysDto): Promise<GetKeysDto> {
     const { user_id } = req.user;
     const { foreign_user_id, note, expire_at } = payload;
-    const { id, secret_key, create_time } = await this.keys.create(user_id, { foreign_user_id, note, expire_at });
+    const { id, secret_key, create_time } = await this.keys.createKey(user_id, { foreign_user_id, note, expire_at });
     return { id, secret_key, foreign_user_id, note, expire_at, create_time };
   }
 
-  @Post('keys/limit')
+  @Post('keys/updateLimit')
   @ApiOperation({ summary: 'Allocate quota to one key', description: 'Allocate quota to one key' })
   @ApiResponse({ status: 201, description: 'success' })
-  async updateKeysLimit(@Request() req, @Body() payload: CreateKeysDto) {
-    // const { user_id } = req.user;
-    // const { model, times_limit, tokens_limit, expire_at } = payload;
-    // return this.keys.updateKeyLimit(user_id, foreign_user_id, { note });
+  async updateKeysLimit(@Request() req, @Body() payload: LimitKeysDto) {
+    const { user_id } = req.user;
+    const { foreign_user_id, ...opts } = payload;
+    try {
+      await this.keys.updateKeyLimit(user_id, foreign_user_id, opts);
+      return;
+    } catch (err) {
+      throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Delete('keys/delete')
@@ -51,6 +57,14 @@ export class UsersController {
   async deleteKeys(@Request() req, @Body() payload: DeleteKeysDto) {
     const { user_id } = req.user;
     const { foreign_user_id } = payload;
-    return this.keys.delete(user_id, foreign_user_id);
+    try {
+      const key = await this.keys.findKey(user_id, foreign_user_id);
+      if (!key) {
+        throw new HttpException('key not found', HttpStatus.BAD_REQUEST);
+      }
+      return this.keys.deleteKey(key.id);
+    } catch (err) {
+      throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+    }
   }
 }

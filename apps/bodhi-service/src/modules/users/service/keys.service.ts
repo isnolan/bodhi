@@ -14,11 +14,15 @@ export class UsersKeysService {
     private readonly quotas: Repository<UsersKeysQuota>,
   ) {}
 
+  async findKey(user_id: number, foreign_user_id: string): Promise<UsersKeys> {
+    return this.repository.findOne({ where: { user_id, foreign_user_id } });
+  }
+
   /**
    * Create a new secret key
    * @returns
    */
-  async create(user_id: number, opts: Partial<UsersKeys>): Promise<UsersKeys> {
+  async createKey(user_id: number, opts: Partial<UsersKeys>): Promise<UsersKeys> {
     const { foreign_user_id, note = '' } = opts;
 
     // check if foreign_user_id exists
@@ -54,16 +58,22 @@ export class UsersKeysService {
     });
   }
 
-  async delete(user_id: number, foreign_user_id: string) {
-    return this.repository.update({ user_id, foreign_user_id }, { state: UsersKeysState.DELETED });
+  async deleteKey(id: number) {
+    return this.repository.update(id, { state: UsersKeysState.DELETED });
   }
 
-  async update(user_id: number, foreign_user_id: string, opts: Partial<UsersKeys>) {
-    const { note, expire_at } = opts;
-    return this.repository.update({ user_id, foreign_user_id }, { note, expire_at });
-  }
-
-  async updateKeyLimit(user_id: number, opts: Partial<UsersKeysQuota>) {
+  async updateKeyLimit(user_id: number, foreign_user_id: string, opts: Partial<UsersKeysQuota>) {
     // check
+    const key = await this.repository.findOne({ where: { user_id, foreign_user_id } });
+    if (!key) {
+      throw new Error(`key not found`);
+    }
+    const { model, times_limit, tokens_limit, expire_at } = opts;
+    const quota = await this.quotas.findOne({ where: { key_id: key.id, model, state: 1 } });
+    if (quota) {
+      return this.quotas.update(quota.id, { times_limit, tokens_limit, expire_at });
+    } else {
+      return this.quotas.save(this.quotas.create({ key_id: key.id, ...opts }));
+    }
   }
 }

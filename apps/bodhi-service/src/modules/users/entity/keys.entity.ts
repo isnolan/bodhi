@@ -42,14 +42,14 @@ export class UsersKeysQuota extends Base {
   @Column('int', { comment: 'times limit', default: -1 })
   times_limit: number; // -1: unlimited, 0: disabled, >0: available
 
-  @Column('bigint', { comment: 'tokens limit', default: -1 })
-  token_limit: bigint; // -1: unlimited, 0: disabled, >0: available
+  @Column('int', { comment: 'tokens limit', default: -1 })
+  tokens_limit: number; // -1: unlimited, 0: disabled, >0: available
 
   @Column({ type: 'int', comment: 'times', default: 0 })
   times_consumed: number;
 
-  @Column({ type: 'bigint', comment: 'tokens', default: 0 })
-  tokens_consumed: bigint;
+  @Column({ type: 'int', comment: 'tokens', default: 0 })
+  tokens_consumed: number;
 
   @Column({ type: 'datetime', comment: 'expires', default: null, nullable: true })
   expire_at: Date;
