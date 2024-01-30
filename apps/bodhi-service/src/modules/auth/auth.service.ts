@@ -33,7 +33,7 @@ export class AuthService {
 
   async validateSession(sessionId: number): Promise<AuthResponse> {
     const session = await this.session.findOne(sessionId);
-    if (session.expire_at < new Date() || session.status < 1) {
+    if (session.expires_at < new Date() || session.status < 1) {
       throw new UnauthorizedException('session is invalid!');
     }
 

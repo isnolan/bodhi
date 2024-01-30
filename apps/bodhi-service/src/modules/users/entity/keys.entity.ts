@@ -22,7 +22,7 @@ export class UsersKeys extends Base {
   note: string;
 
   @Column({ type: 'datetime', comment: 'expires', nullable: true })
-  expire_at: Date;
+  expires_at: Date;
 
   @Column({ type: 'tinyint', comment: 'state', default: UsersKeysState.VALID })
   state: UsersKeysState;
@@ -52,7 +52,7 @@ export class UsersKeysQuota extends Base {
   tokens_consumed: number;
 
   @Column({ type: 'datetime', comment: 'expires', default: null, nullable: true })
-  expire_at: Date;
+  expires_at: Date;
 
   @Column({ type: 'tinyint', comment: '状态', default: UsersKeysState.VALID })
   state: UsersKeysState;

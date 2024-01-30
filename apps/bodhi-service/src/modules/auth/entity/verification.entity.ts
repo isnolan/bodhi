@@ -35,7 +35,7 @@ export class AuthVerification extends Base {
   code: string;
 
   @Column({ precision: 3, nullable: true })
-  expire_at: Date;
+  expires_at: Date;
 
   @Column({ type: 'varchar', length: 48, comment: 'IP', default: '' })
   client_ip: string;

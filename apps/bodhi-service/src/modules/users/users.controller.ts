@@ -32,9 +32,9 @@ export class UsersController {
   @ApiResponse({ status: 201, description: 'success', type: GetKeysDto })
   async createKeys(@Request() req, @Body() payload: CreateKeysDto): Promise<GetKeysDto> {
     const { user_id } = req.user;
-    const { foreign_user_id, note, expire_at } = payload;
-    const { id, secret_key, create_time } = await this.keys.createKey(user_id, { foreign_user_id, note, expire_at });
-    return { id, secret_key, foreign_user_id, note, expire_at, create_time };
+    const { foreign_user_id, note, expires_at } = payload;
+    const { id, secret_key, create_time } = await this.keys.createKey(user_id, { foreign_user_id, note, expires_at });
+    return { id, secret_key, foreign_user_id, note, expires_at, create_time };
   }
 
   @Post('keys/updateLimit')

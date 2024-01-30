@@ -20,8 +20,8 @@ export class AuthSessionService {
    * @returns
    */
   async createOne(user_id: number, user_ip: string, locale?: string): Promise<AuthSession> {
-    const expire_at = moment.utc().add(30, 'days').toDate();
-    return await this.repository.save(plainToClass(AuthSession, { user_id, user_ip, expire_at, locale }));
+    const expires_at = moment.utc().add(30, 'days').toDate();
+    return await this.repository.save(plainToClass(AuthSession, { user_id, user_ip, expires_at, locale }));
   }
 
   async findOne(id: number): Promise<AuthSession> {
@@ -30,7 +30,7 @@ export class AuthSessionService {
 
   async validateSession(id: number): Promise<AuthSession | null> {
     const session = await this.repository.findOne({ where: { id } });
-    if (session.expire_at < new Date() || session.status < 1) {
+    if (session.expires_at < new Date() || session.status < 1) {
       return null;
     }
     return session;

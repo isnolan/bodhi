@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Repository } from 'typeorm';
+import { IsNull, MoreThan, Repository } from 'typeorm';
 import * as moment from 'moment-timezone';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,6 +13,22 @@ export class UsersKeysService {
     @InjectRepository(UsersKeysQuota)
     private readonly quotas: Repository<UsersKeysQuota>,
   ) {}
+
+  async validateKey(secret_key: string): Promise<UsersKeys> {
+    const query = { secret_key, state: UsersKeysState.VALID };
+    const keys = await this.repository.findOne({
+      where: [
+        { expires_at: MoreThan(new Date()), ...query },
+        { expires_at: IsNull(), ...query },
+      ],
+    });
+    if (keys) {
+      // update last used time
+      this.repository.update(keys.id, { update_time: moment.utc().toDate() });
+      return keys;
+    }
+    return null;
+  }
 
   async findKey(user_id: number, foreign_user_id: string): Promise<UsersKeys> {
     return this.repository.findOne({ where: { user_id, foreign_user_id } });
@@ -36,24 +52,9 @@ export class UsersKeysService {
     return this.repository.save(this.repository.create({ user_id, foreign_user_id, secret_key, note }));
   }
 
-  /**
-   * Find a secret key
-   * @param secret_key
-   * @returns
-   */
-  async validateKey(secret_key: string): Promise<UsersKeys> {
-    const keys = await this.repository.findOne({ where: { secret_key, state: UsersKeysState.VALID } });
-    if (keys && (!keys.expire_at || keys.expire_at > new Date())) {
-      // update last used time
-      this.repository.update(keys.id, { update_time: moment.utc().toDate() });
-      return keys;
-    }
-    return null;
-  }
-
   async getList(user_id: number): Promise<UsersKeys[]> {
     return this.repository.find({
-      select: ['id', 'secret_key', 'foreign_user_id', 'note', 'expire_at', 'create_time'],
+      select: ['id', 'secret_key', 'foreign_user_id', 'note', 'expires_at', 'create_time'],
       where: { user_id },
     });
   }
@@ -68,10 +69,10 @@ export class UsersKeysService {
     if (!key) {
       throw new Error(`key not found`);
     }
-    const { model, times_limit, tokens_limit, expire_at } = opts;
+    const { model, times_limit, tokens_limit, expires_at } = opts;
     const quota = await this.quotas.findOne({ where: { key_id: key.id, model, state: 1 } });
     if (quota) {
-      return this.quotas.update(quota.id, { times_limit, tokens_limit, expire_at });
+      return this.quotas.update(quota.id, { times_limit, tokens_limit, expires_at });
     } else {
       return this.quotas.save(this.quotas.create({ key_id: key.id, ...opts }));
     }

@@ -13,7 +13,7 @@ export class AuthSession extends Base {
   user_ip: string;
 
   @Column({ precision: 3, nullable: true })
-  expire_at: Date;
+  expires_at: Date;
 
   @Column({ type: 'tinyint', comment: '状态', default: 1 })
   status: number;

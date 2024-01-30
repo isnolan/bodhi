@@ -22,5 +22,5 @@ export class LimitKeysDto {
 
   @ApiPropertyOptional({ description: 'expire at', example: null })
   @IsOptional()
-  expire_at: Date;
+  expires_at: Date;
 }

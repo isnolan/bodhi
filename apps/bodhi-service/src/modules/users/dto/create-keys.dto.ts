@@ -12,7 +12,7 @@ export class CreateKeysDto {
   quota: number;
 
   @ApiPropertyOptional({ description: 'expire at', example: '' })
-  expire_at: Date;
+  expires_at: Date;
 
   @ApiPropertyOptional({ description: 'note', example: '' })
   @IsString()

@@ -14,9 +14,9 @@ export class AuthVerificationsService {
 
   async createOne(type: VerificationType, account, client_ip): Promise<AuthVerification> {
     const code = `${Math.floor(100000 + Math.random() * 900000)}`;
-    const expire_at = moment.utc().add(5, 'minutes').toDate();
+    const expires_at = moment.utc().add(5, 'minutes').toDate();
     const state = VerificationState.PENDING;
-    const model = plainToClass(AuthVerification, { type, account, code, expire_at, client_ip, state });
+    const model = plainToClass(AuthVerification, { type, account, code, expires_at, client_ip, state });
     return await this.repository.save(model);
   }
 
@@ -29,7 +29,7 @@ export class AuthVerificationsService {
       return false;
     }
 
-    if (res.expire_at < new Date()) {
+    if (res.expires_at < new Date()) {
       return false;
     }
     return res;
