@@ -3,37 +3,30 @@ import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Users } from './entity/users.entity';
+import { UsersKeysService } from './service';
+import { UsersUserService } from './service/user.service';
 
 @Injectable()
 export class UsersService {
-  private readonly hashids: Hashids;
-
-  constructor(
-    @InjectRepository(Users)
-    private readonly repository: Repository<Users>,
-  ) {
-    this.hashids = new Hashids('bodhi-users', 10);
-  }
+  constructor(private readonly user: UsersUserService, private readonly keys: UsersKeysService) {}
 
   async findOne(id: number): Promise<Users> {
-    return await this.repository.findOne({
-      select: ['id', 'user_id', 'mobile', 'email', 'nickname', 'avatar', 'locale', 'timezone', 'status'],
-      where: { id },
-    });
+    return this.user.findOne(id);
   }
 
   async findOneByEmail(email: string): Promise<Users> {
-    return await this.repository.findOne({ where: { email } });
+    return this.user.findOneByEmail(email);
   }
 
   async createOneWithEmail(email: string, opts: Partial<Users>): Promise<Users> {
-    const { nickname, avatar, locale, status = 1 } = opts || {};
-    const model = this.repository.create({ email, nickname, avatar, locale, status });
-    const user = await this.repository.save(model);
-    // generate hash id
-    user.user_id = this.hashids.encode(user.id);
-    await this.repository.update(user.id, { user_id: user.user_id });
+    return this.user.createOneWithEmail(email, opts);
+  }
 
-    return user;
+  async checkAvailableQuota(key_id: number, model: string): Promise<boolean> {
+    return this.keys.checkAvailableQuota(key_id, model);
+  }
+
+  async validateKey(secret_key: string) {
+    return this.keys.validateKey(secret_key);
   }
 }

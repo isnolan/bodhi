@@ -11,6 +11,7 @@ import { ChatMessage } from './entity/message.entity';
 import Service from './service';
 import { ProviderModule } from '../provider/provider.module';
 import { SubscriptionModule } from '../subscription/subscription.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -32,6 +33,8 @@ import { SubscriptionModule } from '../subscription/subscription.module';
     ProviderModule,
 
     SubscriptionModule,
+
+    UsersModule,
   ],
 
   controllers: [ChatController],

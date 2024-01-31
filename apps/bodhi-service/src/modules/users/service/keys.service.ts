@@ -77,4 +77,19 @@ export class UsersKeysService {
       return this.quotas.save(this.quotas.create({ key_id: key.id, ...opts }));
     }
   }
+
+  async checkAvailableQuota(key_id: number, model: string): Promise<boolean> {
+    const row = await this.quotas.findOne({ where: { key_id } });
+    if (!row) {
+      return false;
+    }
+
+    if (
+      (row.times_limit === -1 || row.times_limit >= row.times_consumed) &&
+      (row.tokens_limit === -1 || row.tokens_limit >= row.tokens_consumed)
+    ) {
+      return true;
+    }
+    return false;
+  }
 }

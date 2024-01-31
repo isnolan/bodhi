@@ -12,6 +12,7 @@ import { RequestWithUser } from '../../core/common/request.interface';
 import { ChatConversationService } from './service';
 import { SubscriptionService } from '../subscription/service';
 import { ProviderService } from '../provider/service';
+import { UsersService } from '../users/users.service';
 
 @ApiTags('chat')
 @ApiBearerAuth()
@@ -20,6 +21,7 @@ import { ProviderService } from '../provider/service';
 @ApiSecurity('api-key', [])
 export class ChatController {
   constructor(
+    private readonly users: UsersService,
     private readonly service: ChatService,
     private readonly provider: ProviderService,
     private readonly conversation: ChatConversationService,
@@ -62,7 +64,7 @@ export class ChatController {
       const usages = await this.subscription.findActiveUsageWithQuota(user_id, true);
       // console.log(`[chat]usage`, usages);
       if (usages.length === 0) {
-        throw new Error(`No active subscription or available quota`);
+        throw new Error(`No active subscription or available quota.`);
       }
 
       const ids = usages.map((usage) => usage.quota.provider_id);
@@ -70,6 +72,11 @@ export class ChatController {
       const provider_ids = await this.provider.filterProviderByModel(ids, model);
       if (provider_ids.length === 0) {
         throw new Error(`No valid supplier for model:${model}`);
+      }
+
+      // check keys limit
+      if (user_key_id > 0 && !(await this.users.checkAvailableQuota(user_key_id, model))) {
+        throw new Error(`Not enough quota for the key.`);
       }
 
       // find or create conversation
