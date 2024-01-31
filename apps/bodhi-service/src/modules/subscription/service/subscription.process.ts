@@ -8,6 +8,8 @@ import { SubscribedState } from '../entity';
 import { SubscriptionPlanService } from './plan.service';
 import { UsersService } from '@/modules/users/users.service';
 
+const Expression = process.env.NODE_ENV === 'production' ? CronExpression.EVERY_HOUR : CronExpression.EVERY_10_MINUTES;
+
 @Injectable()
 export class SubscriptionProcessService {
   constructor(
@@ -18,16 +20,16 @@ export class SubscriptionProcessService {
     private readonly users: UsersService,
   ) {}
 
-  @Cron(CronExpression.EVERY_HOUR)
+  // @Cron(CronExpression.EVERY_HOUR)
+  @Cron(Expression)
   async handleDailyQuotaAllocation() {
-    console.warn(`[cron]`, new Date());
     await this.allocateQuotas();
   }
 
   public async allocateQuotas(skipMidnightCheck: boolean = false) {
     // all active subscribed subscriptions
     const activeSubscriptions = await this.subscribed.findActive();
-    console.log(`[cron]allocate`, activeSubscriptions.length);
+    console.log(`[cron]allocate`, activeSubscriptions.length, `active subscriptions`);
     // if not expired, allocate quotas, otherwise mark as expired
     const today = new Date();
     for (const subscription of activeSubscriptions) {
@@ -65,7 +67,7 @@ export class SubscriptionProcessService {
    */
   private isMidnightInUserTimezone(utcDate: Date, timezone: string): boolean {
     const userTime = moment(utcDate).tz(timezone);
-    console.log(`[midnight]`, userTime, userTime.hours());
+    console.log(`[cron]midnight`, userTime, userTime.hours());
     // TODO: 0:00:00 ~ 1:00:00 in user's timezone
     return userTime.hours() === 0;
   }
