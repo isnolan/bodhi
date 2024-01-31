@@ -79,7 +79,13 @@ export class UsersKeysService {
   }
 
   async checkAvailableQuota(key_id: number, model: string): Promise<boolean> {
-    const row = await this.quotas.findOne({ where: { key_id } });
+    const query = { key_id, model, state: UsersKeysState.VALID };
+    const row = await this.quotas.findOne({
+      where: [
+        { expires_at: MoreThan(new Date()), ...query },
+        { expires_at: IsNull(), ...query },
+      ],
+    });
     if (!row) {
       return false;
     }
