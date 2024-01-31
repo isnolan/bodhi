@@ -1,4 +1,4 @@
-import { In, Repository, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { In, Repository, LessThanOrEqual, MoreThanOrEqual, MoreThan, LessThan } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -16,10 +16,12 @@ export class SubscriptionUsageService {
     // 计算当前配额周期的开始日期，基于订阅的开始时间和配额的重置周期
     const { periodStart: period_at, periodEnd: expires_at } = this.calculatePeriod(allocationStart, period);
     // 检查是否已存在对应当前周期的Usage记录
-    const exists = await this.repository.find({
-      where: { subscribed_id: opts.subscribed_id, quota_id: opts.quota_id, period_at, expires_at },
+    const today = new Date();
+    const { subscribed_id, quota_id } = opts;
+    const count = await this.repository.count({
+      where: { subscribed_id, quota_id, period_at: LessThan(today), expires_at: MoreThanOrEqual(today) },
     });
-    if (exists.length === 0) {
+    if (count === 0) {
       await this.repository.save(this.repository.create({ ...opts, period_at, expires_at }));
     }
   }
