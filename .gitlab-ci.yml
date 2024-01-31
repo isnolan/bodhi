@@ -16,6 +16,7 @@ install_dependencies:
   script:
     - npm i pnpm -g
     - pnpm install
+    - pnpm recursive install
   only:
     - main
 

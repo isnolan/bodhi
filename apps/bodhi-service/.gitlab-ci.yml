@@ -21,6 +21,7 @@ build:
   script:
     - export PUPPETEER_SKIP_DOWNLOAD=true
     - cd apps/bodhi-service
+    - npm i pnpm -g
     - pnpm i
     - pnpm run build
   artifacts:
