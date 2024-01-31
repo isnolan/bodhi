@@ -1,10 +1,10 @@
 image: 'node:19.4.0-alpine'
 
 cache:
-  key:
-    files:
-      - package-lock.json
-    prefix: npm
+  # key:
+  #   files:
+  #     - package-lock.json
+  #   prefix: npm
   paths:
     - node_modules/
 
