@@ -23,7 +23,7 @@ export class SubscriptionProcessService {
   // @Cron(CronExpression.EVERY_HOUR)
   @Cron(Expression)
   async handleDailyQuotaAllocation() {
-    await this.allocateQuotas();
+    await this.allocateQuotas(process.env.NODE_ENV !== 'production');
   }
 
   public async allocateQuotas(skipMidnightCheck: boolean = false) {
