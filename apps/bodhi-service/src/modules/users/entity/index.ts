@@ -1,9 +1,9 @@
 export * from './keys.entity';
-
+export * from './usage.entity';
 export * from './users.entity';
 
-import { UsersKeys, UsersKeysQuota } from './keys.entity';
-
+import { UserKey } from './keys.entity';
+import { UserKeyUsage } from './usage.entity';
 import { Users } from './users.entity';
 
-export default [Users, UsersKeys, UsersKeysQuota];
+export default [Users, UserKey, UserKeyUsage];

@@ -6,18 +6,17 @@ import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
 
 import { UsersService } from './users.service';
 import { CreateKeysDto } from './dto/create-keys.dto';
-import { UsersKeysService } from './service/';
 import { GetKeysDto } from './dto/get-keys.dto';
 import { DeleteKeysDto } from './dto/delete-keys.dto';
-import { UsersKeysQuota } from './entity';
 import { LimitKeysDto } from './dto/limit-keys.dto';
+import { UserKeyService } from './service';
 
 @ApiTags('users')
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 @Controller('users')
 export class UsersController {
-  constructor(private readonly users: UsersService, private readonly keys: UsersKeysService) {}
+  constructor(private readonly users: UsersService, private readonly keys: UserKeyService) {}
 
   @Get('keys')
   @ApiOperation({ summary: 'Get API Keys', description: 'Get API Keys' })
@@ -37,14 +36,14 @@ export class UsersController {
     return { id, secret_key, foreign_user_id, note, expires_at, create_at };
   }
 
-  @Post('keys/updateLimit')
+  @Post('keys/increaseKeyUsage')
   @ApiOperation({ summary: 'Allocate quota to one key', description: 'Allocate quota to one key' })
   @ApiResponse({ status: 201, description: 'success' })
   async updateKeysLimit(@Request() req, @Body() payload: LimitKeysDto) {
     const { user_id } = req.user;
     const { foreign_user_id, ...opts } = payload;
     try {
-      await this.keys.updateKeyLimit(user_id, foreign_user_id, opts);
+      await this.users.increaseKeyUsage(user_id, foreign_user_id, opts);
       return;
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
@@ -58,7 +57,7 @@ export class UsersController {
     const { user_id } = req.user;
     const { foreign_user_id } = payload;
     try {
-      const key = await this.keys.findKey(user_id, foreign_user_id);
+      const key = await this.keys.find(user_id, foreign_user_id);
       if (!key) {
         throw new HttpException('key not found', HttpStatus.BAD_REQUEST);
       }

@@ -1,7 +1,9 @@
 export * from './keys.service';
 export * from './user.service';
+export * from './usage.service';
 
-import { UsersKeysService } from './keys.service';
+import { UserKeyService } from './keys.service';
+import { UserKeyUsageService } from './usage.service';
 import { UsersUserService } from './user.service';
 
-export default [UsersKeysService, UsersUserService];
+export default [UserKeyService, UserKeyUsageService, UsersUserService];

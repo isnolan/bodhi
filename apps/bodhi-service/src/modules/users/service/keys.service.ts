@@ -3,15 +3,13 @@ import { IsNull, MoreThan, Repository } from 'typeorm';
 import * as moment from 'moment-timezone';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UsersKeys, UsersKeysQuota, UsersKeysState } from '../entity/keys.entity';
+import { UserKey, UserKeyState } from '../entity/keys.entity';
 
 @Injectable()
-export class UsersKeysService {
+export class UserKeyService {
   constructor(
-    @InjectRepository(UsersKeys)
-    private readonly repository: Repository<UsersKeys>,
-    @InjectRepository(UsersKeysQuota)
-    private readonly quotas: Repository<UsersKeysQuota>,
+    @InjectRepository(UserKey)
+    private readonly repository: Repository<UserKey>,
   ) {}
 
   /**
@@ -19,8 +17,8 @@ export class UsersKeysService {
    * @param secret_key
    * @returns
    */
-  async validateKey(secret_key: string): Promise<UsersKeys> {
-    const query = { secret_key, state: UsersKeysState.VALID };
+  async validateKey(secret_key: string): Promise<UserKey> {
+    const query = { secret_key, state: UserKeyState.VALID };
     const keys = await this.repository.findOne({
       where: [
         { expires_at: MoreThan(new Date()), ...query },
@@ -35,50 +33,7 @@ export class UsersKeysService {
     return null;
   }
 
-  /**
-   * Check if the key has available quota.
-   * @param key_id
-   * @param model
-   * @returns
-   */
-  async checkAvailableQuota(key_id: number, model: string): Promise<number> {
-    const query = { key_id, model, state: UsersKeysState.VALID };
-    const row = await this.quotas.findOne({
-      where: [
-        { expires_at: MoreThan(new Date()), ...query },
-        { expires_at: IsNull(), ...query },
-      ],
-    });
-    if (!row) {
-      return -1;
-    }
-
-    if (
-      (row.times_limit === -1 || row.times_limit >= row.times_consumed) &&
-      (row.tokens_limit === -1 || row.tokens_limit >= row.tokens_consumed)
-    ) {
-      return row.id;
-    }
-
-    return 0;
-  }
-
-  /**
-   * Consumes key quote, after a message has been sent.
-   * @param id
-   * @param times
-   * @param tokens
-   */
-  async consumeKeyQuote(id: number, times: number = 0, tokens: number = 0) {
-    if (times > 0) {
-      await this.quotas.increment({ id }, 'times_consumed', times);
-    }
-    if (tokens > 0) {
-      await this.quotas.increment({ id }, 'tokens_consumed', tokens);
-    }
-  }
-
-  async findKey(user_id: number, foreign_user_id: string): Promise<UsersKeys> {
+  async find(user_id: number, foreign_user_id: string): Promise<UserKey> {
     return this.repository.findOne({ where: { user_id, foreign_user_id } });
   }
 
@@ -86,7 +41,7 @@ export class UsersKeysService {
    * Create a new secret key
    * @returns
    */
-  async createKey(user_id: number, opts: Partial<UsersKeys>): Promise<UsersKeys> {
+  async createKey(user_id: number, opts: Partial<UserKey>): Promise<UserKey> {
     const { foreign_user_id, note = '' } = opts;
 
     // check if foreign_user_id exists
@@ -100,7 +55,7 @@ export class UsersKeysService {
     return this.repository.save(this.repository.create({ user_id, foreign_user_id, secret_key, note }));
   }
 
-  async getList(user_id: number): Promise<UsersKeys[]> {
+  async getList(user_id: number): Promise<UserKey[]> {
     return this.repository.find({
       select: ['id', 'secret_key', 'foreign_user_id', 'note', 'expires_at', 'create_at'],
       where: { user_id },
@@ -108,21 +63,6 @@ export class UsersKeysService {
   }
 
   async deleteKey(id: number) {
-    return this.repository.update(id, { state: UsersKeysState.DELETED });
-  }
-
-  async updateKeyLimit(user_id: number, foreign_user_id: string, opts: Partial<UsersKeysQuota>) {
-    // check
-    const key = await this.repository.findOne({ where: { user_id, foreign_user_id } });
-    if (!key) {
-      throw new Error(`key not found`);
-    }
-    const { model, times_limit, tokens_limit, expires_at } = opts;
-    const quota = await this.quotas.findOne({ where: { key_id: key.id, model, state: 1 } });
-    if (quota) {
-      return this.quotas.update(quota.id, { times_limit, tokens_limit, expires_at });
-    } else {
-      return this.quotas.save(this.quotas.create({ key_id: key.id, ...opts }));
-    }
+    return this.repository.update(id, { state: UserKeyState.DELETED });
   }
 }
