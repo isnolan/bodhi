@@ -2,9 +2,10 @@ import { BullModule } from '@nestjs/bull';
 import { Module, forwardRef } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
+import Service from './service/';
 import { ChatModule } from '../chat/chat.module';
 import { FilesModule } from '../files/files.module';
-import Service, { SupplierService } from './service/';
+import { SupplierService } from './supplier.service';
 import { ProviderModule } from '../provider/provider.module';
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { ProviderModule } from '../provider/provider.module';
     ProviderModule,
   ],
   controllers: [],
-  providers: [...Service],
+  providers: [SupplierService, ...Service],
   exports: [SupplierService],
 })
 export class SupplierModule {}

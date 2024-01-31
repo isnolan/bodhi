@@ -12,9 +12,9 @@ import { QueueMessageDto } from '../supplier/dto/queue-message.dto';
 import { ChatConversationService, ChatMessageService } from './service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { InstanceType } from '../provider/entity';
-import { SupplierService } from '../supplier/service';
 import { QueueAgentDto } from '../supplier/dto/queue-agent.dto';
 import { SubscriptionService } from '../subscription/service';
+import { SupplierService } from '../supplier/supplier.service';
 
 @Injectable()
 export class ChatService {
