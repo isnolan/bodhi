@@ -72,18 +72,26 @@ export class AliyunQwenAPI extends ChatBaseAPI {
         if (event.type === 'event') {
           const res = JSON.parse(event.data);
           // console.log(`->`, JSON.stringify(res));
-          const choices = this.convertChoices(res.output.choices);
-          onProgress?.(choices);
+          // success
+          if (res?.output) {
+            const choices = this.convertChoices(res.output.choices);
+            onProgress?.(choices);
 
-          if (res.usage) {
-            const u = res.usage;
-            Object.assign(usage, {
-              prompt_tokens: u.input_tokens,
-              completion_tokens: u.output_tokens,
-              total_tokens: u.total_tokens ? u.total_tokens : u.input_tokens + u.output_tokens,
-            });
+            if (res.usage) {
+              const u = res.usage;
+              Object.assign(usage, {
+                prompt_tokens: u.input_tokens,
+                completion_tokens: u.output_tokens,
+                total_tokens: u.total_tokens ? u.total_tokens : u.input_tokens + u.output_tokens,
+              });
+            }
+            choicesList.push(...choices);
           }
-          choicesList.push(...choices);
+
+          // error
+          if (res?.code) {
+            reject(new types.chat.ChatError(res?.message, 500));
+          }
         }
       });
       body.on('readable', async () => {
