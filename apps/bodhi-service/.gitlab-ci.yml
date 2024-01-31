@@ -23,6 +23,7 @@ build:
     - npm i pnpm -g
     - pnpm i
     - pnpm recursive install
+    - pnpm link @isnolan/bodhi-adapter
     - cd apps/bodhi-service
     - pnpm run build
   artifacts:
