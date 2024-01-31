@@ -12,11 +12,11 @@ export class ChatMessage extends Base {
   @Column({ comment: 'conversation', default: 0 })
   conversation_id: number;
 
-  @Column({ type: 'int', comment: 'purchase', default: 0 })
-  purchase_id: number;
+  @Column({ type: 'int', comment: 'usage', default: 0 })
+  usage_id: number;
 
-  @Column({ type: 'int', comment: 'credential', default: 0 })
-  credential_id: number;
+  @Column({ type: 'int', comment: 'provider', default: 0 })
+  provider_id: number;
 
   @Column({ type: 'enum', enum: RoleEnum, comment: 'role', default: RoleEnum.USER })
   role: string;

@@ -8,7 +8,7 @@ export enum FileState {
   PROCESSED = 2,
 }
 
-@Entity('agent_files')
+@Entity('bodhi_files')
 export class File extends Base {
   @Column({ type: 'varchar', length: 32, comment: 'Hash', default: '' })
   hash: string;

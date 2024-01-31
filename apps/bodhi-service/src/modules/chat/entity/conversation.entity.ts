@@ -3,10 +3,10 @@ import { Entity, Column } from 'typeorm';
 
 @Entity('bodhi_chat_conversation')
 export class ChatConversation extends Base {
-  @Column({ type: 'int', comment: 'purchase', default: 0 })
-  purchase_id: number;
+  @Column({ type: 'int', comment: 'usage', default: 0 })
+  usage_id: number;
 
-  @Column({ type: 'int', comment: 'credential', default: 0 })
+  @Column({ type: 'int', comment: 'provider', default: 0 })
   provider_id: number;
 
   @Column({ type: 'varchar', length: 40, comment: 'slug', default: '' })

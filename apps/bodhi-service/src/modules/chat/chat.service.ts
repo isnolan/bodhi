@@ -14,6 +14,7 @@ import { CreateMessageDto } from './dto/create-message.dto';
 import { InstanceType } from '../provider/entity';
 import { SupplierService } from '../supplier/service';
 import { QueueAgentDto } from '../supplier/dto/queue-agent.dto';
+import { SubscriptionService } from '../subscription/service';
 
 @Injectable()
 export class ChatService {
@@ -29,6 +30,7 @@ export class ChatService {
     private readonly message: ChatMessageService,
     private readonly configService: ConfigService,
     private readonly conversation: ChatConversationService,
+    private readonly subscrption: SubscriptionService,
   ) {
     // redis
     const option = this.configService.get('redis');
@@ -63,7 +65,7 @@ export class ChatService {
    */
   async send(channel: string, conversation: ChatConversation, options: SendMessageDto) {
     const { id: conversation_id, user_id } = conversation;
-    const { provider_ids, messages, message_id } = options;
+    const { usages, provider_ids, messages, message_id } = options;
     let { parent_id } = options;
 
     // archive message
@@ -75,12 +77,13 @@ export class ChatService {
     });
 
     try {
-      // 分配有效节点
       // Assign valid provisioning credentials
       const provider = await this.supplier.distribute(provider_ids, conversation);
-      console.log(`[chat]distribute`, provider);
+      // usage
+      const usage = usages.filter((u) => u.quota.provider_id === provider.id)[0];
+      console.log(`[chat]distribute`, provider.id, usage.id);
       if (provider.id !== conversation.provider_id) {
-        await this.conversation.updateAttribute(conversation.id, { provider_id: provider.id });
+        await this.conversation.updateAttribute(conversation.id, { provider_id: provider.id, usage_id: usage.id });
       }
 
       const s1: QueueMessageDto = { channel, provider_id: provider.id, conversation_id, parent_id: message_id };

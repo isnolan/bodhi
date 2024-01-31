@@ -24,7 +24,7 @@ export class UsersKeysService {
     });
     if (keys) {
       // update last used time
-      this.repository.update(keys.id, { update_time: moment.utc().toDate() });
+      this.repository.update(keys.id, { update_at: moment.utc().toDate() });
       return keys;
     }
     return null;
@@ -54,7 +54,7 @@ export class UsersKeysService {
 
   async getList(user_id: number): Promise<UsersKeys[]> {
     return this.repository.find({
-      select: ['id', 'secret_key', 'foreign_user_id', 'note', 'expires_at', 'create_time'],
+      select: ['id', 'secret_key', 'foreign_user_id', 'note', 'expires_at', 'create_at'],
       where: { user_id },
     });
   }

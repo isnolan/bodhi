@@ -82,7 +82,6 @@ export class SubscriptionUsageService {
 
   public async findActiveWithQuota(user_id: number): Promise<SubscriptionUsage[]> {
     const today = moment().startOf('day').toDate();
-    console.log(`->today`, today);
     return this.repository.find({
       select: {
         id: true,

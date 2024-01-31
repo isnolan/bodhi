@@ -60,13 +60,13 @@ export class ChatController {
 
     try {
       const usages = await this.subscription.findActiveUsageWithQuota(user_id, true);
-      console.log(`[chat]usage`, usages);
+      // console.log(`[chat]usage`, usages);
       if (usages.length === 0) {
         throw new Error(`No active subscription or available quota`);
       }
 
       const ids = usages.map((usage) => usage.quota.provider_id);
-      console.log(`[chat]ids`, ids);
+      // console.log(`[chat]ids`, ids);
       const provider_ids = await this.provider.filterProviderByModel(ids, model);
       if (provider_ids.length === 0) {
         throw new Error(`No valid supplier for model:${model}`);
@@ -101,7 +101,7 @@ export class ChatController {
       });
 
       // 发送消息
-      const options: SendMessageDto = { provider_ids, messages, message_id, parent_id };
+      const options: SendMessageDto = { usages, provider_ids, messages, message_id, parent_id };
       await this.service.send(channel, conversation, options);
     } catch (err) {
       res.status(400).json({ error: { message: err.message, code: 400 } });

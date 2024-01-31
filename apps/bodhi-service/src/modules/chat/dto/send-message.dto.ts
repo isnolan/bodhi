@@ -1,7 +1,12 @@
 import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { chat } from '@isnolan/bodhi-adapter';
+import { UsageWithQuota } from '@/modules/subscription/dto/find-useage.dto';
 
 export class SendMessageDto {
+  @IsNotEmpty()
+  @IsArray()
+  usages: UsageWithQuota[];
+
   @IsNotEmpty()
   @IsArray()
   provider_ids: number[];

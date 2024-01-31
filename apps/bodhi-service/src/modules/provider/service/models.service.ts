@@ -20,7 +20,7 @@ export class ProviderModelsService {
 
   async findByIds(ids: number[]): Promise<ProviderModels[]> {
     return await this.repository.find({
-      select: ['id', 'create_time', 'name', 'icon', 'context_tokens'],
+      select: ['id', 'create_at', 'name', 'icon', 'context_tokens'],
       where: {
         id: In(ids),
         status: MoreThan(-1),

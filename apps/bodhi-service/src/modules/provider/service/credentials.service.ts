@@ -16,7 +16,7 @@ export class ProviderCredentialsService {
 
   async findByUserId(user_id: number): Promise<ProviderCredentials[]> {
     return this.repository.find({
-      select: ['id', 'type', 'label', 'authorisation', 'expires_at', 'create_time', 'update_time'],
+      select: ['id', 'type', 'label', 'authorisation', 'expires_at', 'create_at', 'update_at'],
       where: { user_id, status: MoreThanOrEqual(0) },
     });
   }
