@@ -1,0 +1,3 @@
+include:
+  - project: 'bodhi/bodhi-service'
+    file: 'apps/bodhi-service/.gitlab-ci.yml'
