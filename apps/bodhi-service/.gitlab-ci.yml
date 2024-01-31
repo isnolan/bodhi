@@ -21,6 +21,7 @@ build:
   script:
     - export PUPPETEER_SKIP_DOWNLOAD=true
     - npm i pnpm -g
+    - pnpm i
     - pnpm recursive install
     - cd apps/bodhi-service
     - pnpm run build
