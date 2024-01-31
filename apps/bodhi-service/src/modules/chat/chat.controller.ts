@@ -10,9 +10,9 @@ import { Request, Response } from 'express';
 import { JwtOrApiKeyGuard } from '../auth/guard/mixed.guard';
 import { RequestWithUser } from '../../core/common/request.interface';
 import { ChatConversationService } from './service';
-import { SubscriptionService } from '../subscription/service';
 import { ProviderService } from '../provider/service';
 import { UsersService } from '../users/users.service';
+import { SubscriptionService } from '../subscription/subscription.service';
 
 @ApiTags('chat')
 @ApiBearerAuth()

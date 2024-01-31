@@ -1,9 +1,10 @@
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { Controller, Get, UseGuards, Req } from '@nestjs/common';
-import { SubscriptionService, SubscriptionSubscribedService } from './service';
+import { SubscriptionSubscribedService } from './service';
 import { SubscriptionGuard } from './guards/subscription.guard';
 import { RequestWithUser } from '@/core/common/request.interface';
+import { SubscriptionService } from './subscription.service';
 
 @ApiTags('subscription')
 @ApiBearerAuth()

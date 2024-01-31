@@ -1,15 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { SubscriptionQuotaService } from './quota.service';
-import { SubscriptionSubscribedService } from './subscribed.service';
-import { SubscriptionUsageService } from './usage.service';
-import { SubscriptionPlanService } from './plan.service';
-import { UsageWithQuota } from '../dto/find-useage.dto';
+
+import { UsageWithQuota } from './dto/find-useage.dto';
+import { SubscriptionUsageService, SubscriptionSubscribedService } from './service';
 
 @Injectable()
 export class SubscriptionService {
   constructor(
-    private readonly plans: SubscriptionPlanService,
-    private readonly quotas: SubscriptionQuotaService,
     private readonly subscribed: SubscriptionSubscribedService,
     private readonly usage: SubscriptionUsageService,
   ) {}

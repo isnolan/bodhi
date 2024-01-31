@@ -1,19 +1,11 @@
-import { Job, Queue } from 'bull';
-import { InjectQueue } from '@nestjs/bull';
-import { Process, Processor, OnGlobalQueueCompleted } from '@nestjs/bull';
-
-import { QueueMessageDto } from '../dto/queue-message.dto';
-import { CreateMessageDto } from '@/modules/chat/dto/create-message.dto';
-
-import { ChatService } from '@/modules/chat/chat.service';
-import { ChatConversationService, ChatMessageService } from '@/modules/chat/service';
+import { Job } from 'bull';
+import { Process, Processor } from '@nestjs/bull';
 import { Inject, forwardRef } from '@nestjs/common';
-import { ProviderService } from '@/modules/provider/service';
-import { KeyAuthorisation } from '@/modules/provider/entity';
-import { QueueAgentDto } from '../dto/queue-agent.dto';
-import { ChatMessage } from '@/modules/chat/entity/message.entity';
+
 import { UsersService } from '@/modules/users/users.service';
-import { SubscriptionService } from '@/modules/subscription/service';
+import { CreateMessageDto } from '@/modules/chat/dto/create-message.dto';
+import { SubscriptionService } from '@/modules/subscription/subscription.service';
+import { ChatConversationService, ChatMessageService } from '@/modules/chat/service';
 
 const importDynamic = new Function('modulePath', 'return import(modulePath)');
 
