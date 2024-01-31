@@ -39,11 +39,11 @@ export class UsersController {
   @Post('keys/increase')
   @ApiOperation({ summary: 'Allocate quota to one key', description: 'Allocate quota to one key' })
   @ApiResponse({ status: 201, description: 'success' })
-  async increaseKeyUsage(@Request() req, @Body() payload: LimitKeysDto) {
+  async increaseKeyQuota(@Request() req, @Body() payload: LimitKeysDto) {
     const { user_id } = req.user;
     const { foreign_user_id, ...opts } = payload;
     try {
-      await this.users.increaseKeyUsage(user_id, foreign_user_id, opts);
+      await this.users.increaseKeyQuota(user_id, foreign_user_id, opts);
       return;
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);

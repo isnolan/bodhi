@@ -55,15 +55,15 @@ export class UserKeyUsageService {
     }
   }
 
-  async increaseUsage(key_id, opts: Partial<UserKeyUsage>) {
-    const { model, times_limit = 0, tokens_limit = 0, expires_at } = opts;
+  async increaseQuota(key_id, opts: Partial<UserKeyUsage>) {
+    const { model, times_limit = 0, tokens_limit = 0 } = opts;
     const usage = await this.repository.findOne({
       where: { key_id, model, state: 1 },
       order: { id: 'DESC' },
     });
 
     if (usage) {
-      const d = { expires_at };
+      const d = {};
       times_limit > 0 && Object.assign(d, { times_limit: usage.times_limit + times_limit });
       tokens_limit > 0 && Object.assign(d, { tokens_limit: usage.tokens_limit + tokens_limit });
       return this.repository.update(usage.id, d);

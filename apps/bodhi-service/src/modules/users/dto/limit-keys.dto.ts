@@ -20,7 +20,7 @@ export class LimitKeysDto {
   @IsNumber()
   tokens_limit: number;
 
-  @ApiPropertyOptional({ description: 'expire at', example: null })
-  @IsOptional()
-  expires_at: Date;
+  // @ApiPropertyOptional({ description: 'expire at', example: null })
+  // @IsOptional()
+  // expires_at: Date;
 }

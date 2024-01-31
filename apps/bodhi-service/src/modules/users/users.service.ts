@@ -36,13 +36,13 @@ export class UsersService {
     return this.usage.consumeKeyQuote(key_id, times, tokens);
   }
 
-  async increaseKeyUsage(user_id: number, foreign_user_id: string, opts: Partial<UserKeyUsage>) {
+  async increaseKeyQuota(user_id: number, foreign_user_id: string, opts: Partial<UserKeyUsage>) {
     // check
     const key = await this.keys.find(user_id, foreign_user_id);
     if (!key) {
       throw new Error(`key not found`);
     }
 
-    return this.usage.increaseUsage(key.id, opts);
+    return this.usage.increaseQuota(key.id, opts);
   }
 }
