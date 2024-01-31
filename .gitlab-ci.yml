@@ -1,7 +1,8 @@
 stages:
   - prepare
   - build
-  - test
+  - deploy
+  - publish
 
 cache:
   paths:
