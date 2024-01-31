@@ -2,12 +2,9 @@ stages:
   - prepare
   - build
 
-install_dependencies:
-  stage: prepare
-  script:
-    - pnpm install # 安装所有工作区的依赖项
-  only:
-    - master # 或者其他您想在其上执行此步骤的分支
+before_script:
+  - npm i pnpm -g
+  - pnpm i
 
 include:
   - local: 'apps/bodhi-service/.gitlab-ci.yml'
