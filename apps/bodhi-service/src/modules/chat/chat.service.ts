@@ -2,9 +2,9 @@ import Redis from 'ioredis';
 import { Queue } from 'bull';
 import { v4 as uuidv4 } from 'uuid';
 import { InjectQueue } from '@nestjs/bull';
-import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 
 import { SendMessageDto } from './dto/send-message.dto';
 import { ChatConversation } from './entity/conversation.entity';
@@ -13,7 +13,6 @@ import { ChatConversationService, ChatMessageService } from './service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { InstanceType } from '../provider/entity';
 import { QueueAgentDto } from '../supplier/dto/queue-agent.dto';
-import { SubscriptionService } from '../subscription/service';
 import { SupplierService } from '../supplier/supplier.service';
 
 @Injectable()
@@ -30,7 +29,6 @@ export class ChatService {
     private readonly message: ChatMessageService,
     private readonly configService: ConfigService,
     private readonly conversation: ChatConversationService,
-    private readonly subscrption: SubscriptionService,
   ) {
     // redis
     const option = this.configService.get('redis');

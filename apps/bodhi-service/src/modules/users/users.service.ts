@@ -22,11 +22,15 @@ export class UsersService {
     return this.user.createOneWithEmail(email, opts);
   }
 
-  async checkAvailableQuota(key_id: number, model: string): Promise<boolean> {
+  async checkAvailableQuota(key_id: number, model: string): Promise<number> {
     return this.keys.checkAvailableQuota(key_id, model);
   }
 
   async validateKey(secret_key: string) {
     return this.keys.validateKey(secret_key);
+  }
+
+  async consumeKeyQuote(key_id: number, times: number, tokens: number) {
+    return this.keys.consumeKeyQuote(key_id, times, tokens);
   }
 }

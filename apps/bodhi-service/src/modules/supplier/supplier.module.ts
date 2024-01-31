@@ -7,6 +7,8 @@ import { ChatModule } from '../chat/chat.module';
 import { FilesModule } from '../files/files.module';
 import { SupplierService } from './supplier.service';
 import { ProviderModule } from '../provider/provider.module';
+import { UsersModule } from '../users/users.module';
+import { SubscriptionModule } from '../subscription/subscription.module';
 @Module({
   imports: [
     // Redis Queue
@@ -24,6 +26,8 @@ import { ProviderModule } from '../provider/provider.module';
     forwardRef(() => FilesModule),
 
     ProviderModule,
+    UsersModule,
+    SubscriptionModule,
   ],
   controllers: [],
   providers: [SupplierService, ...Service],

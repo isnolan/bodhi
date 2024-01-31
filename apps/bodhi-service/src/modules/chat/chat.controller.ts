@@ -75,12 +75,18 @@ export class ChatController {
       }
 
       // check keys limit
-      if (user_key_id > 0 && !(await this.users.checkAvailableQuota(user_key_id, model))) {
-        throw new Error(`Not enough quota for the key.`);
+      let key_usage_id = 0;
+      if (user_key_id > 0) {
+        const kui = await this.users.checkAvailableQuota(user_key_id, model);
+        if (kui > 0) {
+          key_usage_id = kui;
+        } else {
+          throw new Error(`Not enough quota for the key.`);
+        }
       }
 
       // find or create conversation
-      const d = { model, temperature, top_p, top_k, user_id, user_key_id, context_limit, n };
+      const d = { model, temperature, top_p, top_k, user_id, key_usage_id, context_limit, n };
       const conversation = await this.conversation.findAndCreateOne(conversation_id, d);
       const channel = `completions:${conversation.id}`;
       const listener = (chl: string, message: string) => {

@@ -6,6 +6,12 @@ export class ChatConversation extends Base {
   @Column({ type: 'int', comment: 'usage', default: 0 })
   usage_id: number;
 
+  @Column({ type: 'int', comment: 'user_id', default: 0 })
+  user_id: number;
+
+  @Column({ type: 'int', comment: 'key usage', default: 0 })
+  key_usage_id: number;
+
   @Column({ type: 'int', comment: 'provider', default: 0 })
   provider_id: number;
 
@@ -35,12 +41,6 @@ export class ChatConversation extends Base {
 
   @Column({ type: 'varchar', length: 40, comment: '供应商会话ID', default: '' })
   parent_conversation_id: string;
-
-  @Column({ type: 'int', comment: 'user_id', default: 0 })
-  user_id: number;
-
-  @Column({ type: 'int', comment: 'key_id', default: 0 })
-  user_key_id: number;
 
   @Column({ type: 'tinyint', comment: '状态', default: 1, nullable: true })
   status: number;

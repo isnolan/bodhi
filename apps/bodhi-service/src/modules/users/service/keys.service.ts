@@ -14,6 +14,11 @@ export class UsersKeysService {
     private readonly quotas: Repository<UsersKeysQuota>,
   ) {}
 
+  /**
+   * Validate api key, when request by api key.
+   * @param secret_key
+   * @returns
+   */
   async validateKey(secret_key: string): Promise<UsersKeys> {
     const query = { secret_key, state: UsersKeysState.VALID };
     const keys = await this.repository.findOne({
@@ -28,6 +33,49 @@ export class UsersKeysService {
       return keys;
     }
     return null;
+  }
+
+  /**
+   * Check if the key has available quota.
+   * @param key_id
+   * @param model
+   * @returns
+   */
+  async checkAvailableQuota(key_id: number, model: string): Promise<number> {
+    const query = { key_id, model, state: UsersKeysState.VALID };
+    const row = await this.quotas.findOne({
+      where: [
+        { expires_at: MoreThan(new Date()), ...query },
+        { expires_at: IsNull(), ...query },
+      ],
+    });
+    if (!row) {
+      return -1;
+    }
+
+    if (
+      (row.times_limit === -1 || row.times_limit >= row.times_consumed) &&
+      (row.tokens_limit === -1 || row.tokens_limit >= row.tokens_consumed)
+    ) {
+      return row.id;
+    }
+
+    return 0;
+  }
+
+  /**
+   * Consumes key quote, after a message has been sent.
+   * @param id
+   * @param times
+   * @param tokens
+   */
+  async consumeKeyQuote(id: number, times: number = 0, tokens: number = 0) {
+    if (times > 0) {
+      await this.quotas.increment({ id }, 'times_consumed', times);
+    }
+    if (tokens > 0) {
+      await this.quotas.increment({ id }, 'tokens_consumed', tokens);
+    }
   }
 
   async findKey(user_id: number, foreign_user_id: string): Promise<UsersKeys> {
@@ -76,26 +124,5 @@ export class UsersKeysService {
     } else {
       return this.quotas.save(this.quotas.create({ key_id: key.id, ...opts }));
     }
-  }
-
-  async checkAvailableQuota(key_id: number, model: string): Promise<boolean> {
-    const query = { key_id, model, state: UsersKeysState.VALID };
-    const row = await this.quotas.findOne({
-      where: [
-        { expires_at: MoreThan(new Date()), ...query },
-        { expires_at: IsNull(), ...query },
-      ],
-    });
-    if (!row) {
-      return false;
-    }
-
-    if (
-      (row.times_limit === -1 || row.times_limit >= row.times_consumed) &&
-      (row.tokens_limit === -1 || row.tokens_limit >= row.tokens_consumed)
-    ) {
-      return true;
-    }
-    return false;
   }
 }

@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { SubscribedState, SubscriptionUsage } from '../entity';
 import moment from 'moment-timezone';
+import { time } from 'console';
 
 @Injectable()
 export class SubscriptionUsageService {
@@ -100,5 +101,15 @@ export class SubscriptionUsageService {
       },
       relations: ['quota'],
     });
+  }
+
+  public async consumeQuote(id: number, times: number, tokens: number) {
+    if (times > 0) {
+      await this.repository.increment({ id }, 'times_consumed', times);
+    }
+
+    if (tokens > 0) {
+      await this.repository.increment({ id }, 'tokens_consumed', tokens);
+    }
   }
 }

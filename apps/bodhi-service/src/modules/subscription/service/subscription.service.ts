@@ -37,4 +37,8 @@ export class SubscriptionService {
     }
     return usages;
   }
+
+  public async comsumeUsageQuote(usage_id: number, times: number, tokens: number) {
+    return this.usage.consumeQuote(usage_id, times, tokens);
+  }
 }

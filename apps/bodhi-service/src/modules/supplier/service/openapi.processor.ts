@@ -69,7 +69,7 @@ export class SupplierOpenAPIProcessor {
         // archive
         res.choices.map((row: any) => {
           const payload = { conversation_id, role: row.role, parts: row.parts, message_id: res.id };
-          this.queue.add('archives', { parent_id, ...payload });
+          this.queue.add('archives', { parent_id, ...payload, tokens: 0 });
         });
 
         // 回复会话
@@ -128,40 +128,8 @@ export class SupplierOpenAPIProcessor {
     });
   }
 
-  /**
-   * Archives
-   */
-  @Process('archives')
-  async archives(job: Job<CreateMessageDto>) {
-    // console.log(`[archives]job:`, job.data);
-    const { conversation_id, role, parts, message_id }: CreateMessageDto = job.data; // 必备
-    const { parent_conversation_id, parent_id, status }: any = job.data; // 可选
-    return new Promise(async (resolve) => {
-      // 储存信息, system 和 user 在第一时间入库，以便于api发送消息时能够查询到最新消息列表。
-      if (role === 'assistant') {
-        const d3 = { conversation_id, role, parts, message_id, parent_id, status };
-        await this.message.save(d3);
-      }
-
-      // 更新会话
-      const tokens = await this.message.getTokensByConversationId(conversation_id);
-      const attr = { tokens };
-      parent_conversation_id && Object.assign(attr, { parent_conversation_id });
-      await this.conversation.updateAttribute(conversation_id, attr);
-
-      // 更新消耗
-
-      resolve({});
-    });
-  }
-
-  /**
-   * 任务完成
-   * @param jobId
-   * @param result
-   */
   @OnGlobalQueueCompleted()
   async onGlobalCompleted(jobId: number) {
-    console.log('Job completed:', jobId);
+    console.log(`[openapi]Queue process completed`, jobId);
   }
 }
