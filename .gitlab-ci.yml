@@ -1,3 +1,2 @@
 include:
-  - project: 'apps/bodhi-service'
-    file: 'apps/bodhi-service/.gitlab-ci.yml'
+  - local: 'apps/bodhi-service/.gitlab-ci.yml'
