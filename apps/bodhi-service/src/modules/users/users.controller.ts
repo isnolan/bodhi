@@ -21,7 +21,7 @@ export class UsersController {
   @Get('keys')
   @ApiOperation({ summary: 'Get API Keys', description: 'Get API Keys' })
   @ApiResponse({ status: 200, description: 'success', type: [GetKeysDto] })
-  async getKeys(@Request() req): Promise<GetKeysDto[]> {
+  async findKeyList(@Request() req): Promise<GetKeysDto[]> {
     const { user_id } = req.user;
     return this.keys.getList(user_id);
   }
@@ -29,17 +29,17 @@ export class UsersController {
   @Post('keys/create')
   @ApiOperation({ summary: 'Create API Keys', description: 'Create API Keys' })
   @ApiResponse({ status: 201, description: 'success', type: GetKeysDto })
-  async createKeys(@Request() req, @Body() payload: CreateKeysDto): Promise<GetKeysDto> {
+  async createKey(@Request() req, @Body() payload: CreateKeysDto): Promise<GetKeysDto> {
     const { user_id } = req.user;
     const { foreign_user_id, note, expires_at } = payload;
     const { id, secret_key, create_at } = await this.keys.createKey(user_id, { foreign_user_id, note, expires_at });
     return { id, secret_key, foreign_user_id, note, expires_at, create_at };
   }
 
-  @Post('keys/increaseKeyUsage')
+  @Post('keys/increase')
   @ApiOperation({ summary: 'Allocate quota to one key', description: 'Allocate quota to one key' })
   @ApiResponse({ status: 201, description: 'success' })
-  async updateKeysLimit(@Request() req, @Body() payload: LimitKeysDto) {
+  async increaseKeyUsage(@Request() req, @Body() payload: LimitKeysDto) {
     const { user_id } = req.user;
     const { foreign_user_id, ...opts } = payload;
     try {
@@ -53,7 +53,7 @@ export class UsersController {
   @Delete('keys/delete')
   @ApiOperation({ summary: 'Create API Keys', description: 'Create API Keys' })
   @ApiResponse({ status: 201, description: 'success' })
-  async deleteKeys(@Request() req, @Body() payload: DeleteKeysDto) {
+  async deleteKey(@Request() req, @Body() payload: DeleteKeysDto) {
     const { user_id } = req.user;
     const { foreign_user_id } = payload;
     try {
@@ -61,7 +61,7 @@ export class UsersController {
       if (!key) {
         throw new HttpException('key not found', HttpStatus.BAD_REQUEST);
       }
-      return this.keys.deleteKey(key.id);
+      return this.keys.delete(key.id);
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
     }

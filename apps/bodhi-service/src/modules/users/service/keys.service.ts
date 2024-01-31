@@ -62,7 +62,7 @@ export class UserKeyService {
     });
   }
 
-  async deleteKey(id: number) {
+  async delete(id: number) {
     return this.repository.update(id, { state: UserKeyState.DELETED });
   }
 }
