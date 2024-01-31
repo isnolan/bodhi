@@ -20,8 +20,6 @@ build:
     - node.js
   script:
     - export PUPPETEER_SKIP_DOWNLOAD=true
-    - npm i pnpm -g
-    - pnpm i
     - cd apps/bodhi-service
     - pnpm i
     - pnpm run build
