@@ -17,8 +17,8 @@ export class SubscriptionProcessService {
   ) {}
 
   @Cron(CronExpression.EVERY_HOUR)
-  private async handleDailyQuotaAllocation() {
-    console.log(`[cron]`, new Date());
+  async handleDailyQuotaAllocation() {
+    console.warn(`[cron]`, new Date());
     await this.allocateQuotas();
   }
 

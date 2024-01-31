@@ -35,7 +35,7 @@ export class ProviderService {
     });
   }
 
-  public async findModelsByProviderIds(ids: number[]): Promise<ProviderModels[]> {
+  public async findModelsByProviders(ids: number[]): Promise<ProviderModels[]> {
     const query = { id: In(ids), status: CredentialsState.ACTIVE };
     const providers = await this.repository.find({
       select: ['model_id'],
@@ -53,7 +53,7 @@ export class ProviderService {
     return await this.models.findByIds(model_ids);
   }
 
-  public async filterProviderByModelId(ids: number[], name: string): Promise<number[]> {
+  public async filterProviderByModel(ids: number[], name: string): Promise<number[]> {
     const providers = await this.repository
       .createQueryBuilder('provider')
       .leftJoinAndSelect('provider.model', 'model')

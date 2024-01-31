@@ -23,7 +23,7 @@ export class SubscriptionSubscribedService {
   public async findActiveWithPlanAndUsage(user_id: number, relations?: string[]): Promise<SubscriptionSubscribed[]> {
     return this.repository.find({
       where: { user_id, state: In([SubscribedState.ACTIVE, SubscribedState.PENDING]) },
-      relations: ['plan', 'usage'],
+      relations: ['usage'],
     });
   }
 

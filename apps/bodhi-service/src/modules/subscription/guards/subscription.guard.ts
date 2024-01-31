@@ -14,6 +14,6 @@ export class SubscriptionGuard implements CanActivate {
   }
 
   private checkSubscription(userId: number) {
-    return this.subscription.findActivePlansByUserId(userId);
+    return this.subscription.findActiveSubscribedWithPlansAndUsage(userId);
   }
 }

@@ -18,6 +18,7 @@ export class SubscriptionController {
   // @Get('test')
   // @UseGuards(SubscriptionGuard)
   // async test(@Req() req: RequestWithUser) {
-  //   return this.subscription.findActiveProvidersByUser(1);
+  //   const usages = await this.subscription.findActiveUsageWithQuota(1, true);
+  //   return usages;
   // }
 }

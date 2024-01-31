@@ -1,6 +1,7 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
 import { Base } from '@/core/common/base.entity';
 import { SubscriptionPlan } from './plan.entity';
+import { ProviderModels } from '@/modules/provider/entity';
 
 export enum QuotaPeriod {
   DAILY = 'daily',
@@ -24,8 +25,8 @@ export class SubscriptionQuota extends Base {
   @Column('int', { comment: 'times limit', default: 0 })
   times_limit: number; // -1: unlimited, 0: disabled, >0: available
 
-  @Column('bigint', { comment: 'tokens limit', default: 0 })
-  token_limit: bigint; // -1: unlimited, 0: disabled, >0: available
+  @Column('int', { comment: 'tokens limit', default: 0 })
+  token_limit: number; // -1: unlimited, 0: disabled, >0: available
 
   @ManyToOne(() => SubscriptionPlan)
   @JoinColumn({ name: 'plan_id', referencedColumnName: 'id' })

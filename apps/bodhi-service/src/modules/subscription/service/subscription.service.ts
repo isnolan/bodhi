@@ -6,6 +6,7 @@ import { SubscriptionSubscribedService } from './subscribed.service';
 import { SubscriptionUsageService } from './usage.service';
 import { SubscribedState } from '../entity';
 import { SubscriptionPlanService } from './plan.service';
+import { UsageWithQuota } from '../dto/find-useage.dto';
 
 @Injectable()
 export class SubscriptionService {
@@ -16,16 +17,27 @@ export class SubscriptionService {
     private readonly usage: SubscriptionUsageService,
   ) {}
 
-  public async findActivePlansByUserId(user_id: number) {
+  public async findActiveSubscribedWithPlansAndUsage(user_id: number) {
     return this.subscribed.findActiveWithPlanAndUsage(user_id);
   }
 
-  public async findActiveProvidersByUser(user_id: number): Promise<number[]> {
-    const subscribeds = await this.subscribed.findActiveWithPlanAndUsage(user_id);
-    if (subscribeds.length === 0) {
-      throw new Error(`No active subscription`);
+  public async findActiveUsageWithQuota(
+    user_id: number,
+    is_available?: boolean | undefined,
+  ): Promise<UsageWithQuota[]> {
+    const usages = await this.usage.findActiveWithQuota(user_id);
+    if (is_available) {
+      const rows: UsageWithQuota[] = [];
+      usages.map((u) => {
+        if (
+          (u.quota.times_limit === -1 || u.quota.times_limit > u.times_consumed) &&
+          (u.quota.token_limit === -1 || u.quota.token_limit > u.tokens_consumed)
+        ) {
+          rows.push(u);
+        }
+      });
+      return rows;
     }
-    const quota_ids = subscribeds.map((subscribed) => subscribed.usage.map((usage) => usage.quota_id));
-    return await this.quotas.findProvidersByIds(Array.from(new Set(quota_ids.flat())));
+    return usages;
   }
 }

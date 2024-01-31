@@ -30,6 +30,6 @@ export class ProviderController {
 
   @Get('test')
   async test() {
-    return this.provider.filterProviderByModelId([10000, 10001], 'gemini-pro');
+    return this.provider.filterProviderByModel([10000, 10001], 'gemini-pro');
   }
 }

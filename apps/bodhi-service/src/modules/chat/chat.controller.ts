@@ -36,8 +36,9 @@ export class ChatController {
     const { user_id } = req.user;
 
     try {
-      const provider_ids = await this.subscription.findActiveProvidersByUser(user_id);
-      return this.provider.findModelsByProviderIds(provider_ids);
+      const usages = await this.subscription.findActiveUsageWithQuota(user_id);
+      const provider_ids = usages.map((usage) => usage.quota.provider_id);
+      return this.provider.findModelsByProviders(provider_ids);
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.FORBIDDEN);
     }
@@ -58,9 +59,15 @@ export class ChatController {
     // console.log(`[chat]completions`, payload);
 
     try {
-      // check valid subscription
-      const providers = await this.subscription.findActiveProvidersByUser(user_id);
-      const provider_ids = await this.provider.filterProviderByModelId(providers, model);
+      const usages = await this.subscription.findActiveUsageWithQuota(user_id, true);
+      console.log(`[chat]usage`, usages);
+      if (usages.length === 0) {
+        throw new Error(`No active subscription or available quota`);
+      }
+
+      const ids = usages.map((usage) => usage.quota.provider_id);
+      console.log(`[chat]ids`, ids);
+      const provider_ids = await this.provider.filterProviderByModel(ids, model);
       if (provider_ids.length === 0) {
         throw new Error(`No valid supplier for model:${model}`);
       }
@@ -97,7 +104,7 @@ export class ChatController {
       const options: SendMessageDto = { provider_ids, messages, message_id, parent_id };
       await this.service.send(channel, conversation, options);
     } catch (err) {
-      throw new HttpException(err.message, HttpStatus.FORBIDDEN);
+      res.status(400).json({ error: { message: err.message, code: 400 } });
     }
   }
 

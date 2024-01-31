@@ -1,8 +1,9 @@
-import { Repository } from 'typeorm';
+import { In, Repository, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { SubscriptionUsage } from '../entity';
+import { SubscribedState, SubscriptionUsage } from '../entity';
+import moment from 'moment-timezone';
 
 @Injectable()
 export class SubscriptionUsageService {
@@ -11,7 +12,7 @@ export class SubscriptionUsageService {
     private readonly repository: Repository<SubscriptionUsage>,
   ) {}
 
-  async allocateQuota(allocationStart: Date, period: string, opts: Partial<SubscriptionUsage>) {
+  public async allocateQuota(allocationStart: Date, period: string, opts: Partial<SubscriptionUsage>) {
     // 计算当前配额周期的开始日期，基于订阅的开始时间和配额的重置周期
     const { periodStart: period_start, periodEnd: period_end } = this.calculatePeriod(allocationStart, period);
     // 检查是否已存在对应当前周期的Usage记录
@@ -77,5 +78,26 @@ export class SubscriptionUsageService {
     }
 
     throw new Error(`Unknown reset period: ${resetPeriod}`);
+  }
+
+  public async findActiveWithQuota(user_id: number): Promise<SubscriptionUsage[]> {
+    const today = moment().startOf('day').toDate();
+    console.log(`->today`, today);
+    return this.repository.find({
+      select: {
+        id: true,
+        quota_id: true,
+        times_consumed: true,
+        tokens_consumed: true,
+        quota: { id: true, provider_id: true, times_limit: true, token_limit: true },
+      },
+      where: {
+        user_id,
+        period_start: LessThanOrEqual(today),
+        period_end: MoreThanOrEqual(today),
+        state: In([SubscribedState.ACTIVE, SubscribedState.PENDING]),
+      },
+      relations: ['quota'],
+    });
   }
 }

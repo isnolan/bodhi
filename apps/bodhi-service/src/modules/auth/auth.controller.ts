@@ -93,9 +93,9 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'success', type: AuthResponse })
   @ApiResponse({ status: 401, description: 'session is expired!' })
   async getSessionStatus(@Request() req: RequestWithUser): Promise<AuthResponse> {
-    const { user_id, user_session_id } = req.user;
-    console.log(`[auth]status`, user_id, user_session_id);
+    const { user_id, session_id } = req.user;
+    console.log(`[auth]status`, user_id, session_id);
 
-    return await this.auth.validateSession(user_session_id);
+    return await this.auth.validateSession(session_id);
   }
 }
