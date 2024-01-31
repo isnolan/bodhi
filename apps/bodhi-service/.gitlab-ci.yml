@@ -23,6 +23,7 @@ build:
     - cd apps/bodhi-service
     - npm i pnpm -g
     - pnpm i
+    - pnpm recursive install
     - pnpm run build
   artifacts:
     paths:
