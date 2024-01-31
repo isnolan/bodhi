@@ -1,2 +1,11 @@
+stages:
+  - setup
+  - build
+
+setup:
+  stage: setup
+  script:
+    - pnpm install
+
 include:
   - local: 'apps/bodhi-service/.gitlab-ci.yml'
