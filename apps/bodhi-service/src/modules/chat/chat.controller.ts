@@ -62,7 +62,7 @@ export class ChatController {
 
     try {
       const usages = await this.subscription.findActiveUsageWithQuota(user_id, true);
-      // console.log(`[chat]usage`, usages);
+      // console.log(`[chat]usage`, usages.length, usages);
       if (usages.length === 0) {
         throw new Error(`No active subscription or available quota.`);
       }

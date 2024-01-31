@@ -21,7 +21,7 @@ export class SubscriptionProcessService {
   @Cron(CronExpression.EVERY_HOUR)
   async handleDailyQuotaAllocation() {
     console.warn(`[cron]`, new Date());
-    await this.allocateQuotas(true);
+    await this.allocateQuotas();
   }
 
   public async allocateQuotas(skipMidnightCheck: boolean = false) {
