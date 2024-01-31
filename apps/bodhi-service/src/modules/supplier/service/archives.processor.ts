@@ -1,6 +1,6 @@
 import { Job } from 'bull';
-import { Process, Processor } from '@nestjs/bull';
 import { Inject, forwardRef } from '@nestjs/common';
+import { Process, Processor, OnGlobalQueueCompleted } from '@nestjs/bull';
 
 import { UsersService } from '@/modules/users/users.service';
 import { CreateMessageDto } from '@/modules/chat/dto/create-message.dto';
@@ -59,5 +59,10 @@ export class SupplierArchivesProcessor {
 
       resolve({});
     });
+  }
+
+  @OnGlobalQueueCompleted()
+  async onGlobalCompleted(jobId: number) {
+    console.log(`[openapi]process completed`, jobId);
   }
 }
