@@ -14,13 +14,13 @@ export class SubscriptionUsageService {
 
   public async allocateQuota(allocationStart: Date, period: string, opts: Partial<SubscriptionUsage>) {
     // 计算当前配额周期的开始日期，基于订阅的开始时间和配额的重置周期
-    const { periodStart: period_start, periodEnd: period_end } = this.calculatePeriod(allocationStart, period);
+    const { periodStart: period_at, periodEnd: expires_at } = this.calculatePeriod(allocationStart, period);
     // 检查是否已存在对应当前周期的Usage记录
     const exists = await this.repository.find({
-      where: { subscribed_id: opts.subscribed_id, quota_id: opts.quota_id, period_start, period_end },
+      where: { subscribed_id: opts.subscribed_id, quota_id: opts.quota_id, period_at, expires_at },
     });
     if (exists.length === 0) {
-      await this.repository.save(this.repository.create({ ...opts, period_start, period_end }));
+      await this.repository.save(this.repository.create({ ...opts, period_at, expires_at }));
     }
   }
 
@@ -92,8 +92,8 @@ export class SubscriptionUsageService {
       },
       where: {
         user_id,
-        period_start: LessThanOrEqual(today),
-        period_end: MoreThanOrEqual(today),
+        period_at: LessThanOrEqual(today),
+        expires_at: MoreThanOrEqual(today),
         state: In([SubscribedState.ACTIVE, SubscribedState.PENDING]),
       },
       relations: ['quota'],

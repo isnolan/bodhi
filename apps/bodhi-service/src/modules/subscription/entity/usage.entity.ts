@@ -24,10 +24,10 @@ export class SubscriptionUsage extends Base {
   quota_id: number;
 
   @Column({ type: 'datetime', precision: 0, comment: 'start', nullable: true })
-  period_start: Date; // 当前周期开始时间
+  period_at: Date; // 当前周期开始时间
 
-  @Column({ type: 'datetime', precision: 0, comment: 'end', nullable: true })
-  period_end: Date; // 当前周期结束时间
+  @Column({ type: 'datetime', precision: 0, comment: 'expires', nullable: true })
+  expires_at: Date; // 当前周期结束时间
 
   @Column({ type: 'int', comment: 'times', default: 0 })
   times_consumed: number; // 在当前周期内已使用的调用次数

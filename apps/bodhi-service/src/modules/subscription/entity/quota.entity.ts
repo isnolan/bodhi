@@ -1,8 +1,6 @@
 import { Entity, Column, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
 import { Base } from '@/core/common/base.entity';
 import { SubscriptionPlan } from './plan.entity';
-import { ProviderModels } from '@/modules/provider/entity';
-
 export enum QuotaPeriod {
   DAILY = 'daily',
   WEEKLY = 'weekly',

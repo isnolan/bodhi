@@ -11,12 +11,11 @@ export class SubscriptionSubscribedService {
     private readonly repository: Repository<SubscriptionSubscribed>,
   ) {}
 
-  async findActiveWithUser(): Promise<SubscriptionSubscribed[]> {
+  async findActive(): Promise<SubscriptionSubscribed[]> {
     return this.repository.find({
       where: {
         state: In([SubscribedState.ACTIVE, SubscribedState.PENDING]),
       },
-      relations: ['user'],
     });
   }
 

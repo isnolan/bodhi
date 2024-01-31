@@ -21,10 +21,10 @@ export class SubscriptionSubscribed extends Base {
   plan_id: number;
 
   @Column({ type: 'datetime', precision: 0, comment: 'start', nullable: true })
-  start_time: Date;
+  start_at: Date;
 
   @Column({ type: 'datetime', precision: 0, comment: 'expires', nullable: true })
-  expire_time: Date;
+  expire_at: Date;
 
   @Column({ type: 'varchar', length: 40, comment: 'transaction', default: '' })
   transaction_id: string;
@@ -41,8 +41,4 @@ export class SubscriptionSubscribed extends Base {
 
   @OneToMany(() => SubscriptionUsage, 'subscribed')
   usage: SubscriptionUsage[];
-
-  @ManyToOne(() => Users)
-  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
-  user: Users;
 }

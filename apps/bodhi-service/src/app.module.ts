@@ -3,6 +3,7 @@ import 'winston-daily-rotate-file';
 import { Module } from '@nestjs/common';
 import { WinstonModule } from 'nest-winston';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RedisModule, RedisModuleOptions } from '@liaoliaots/nestjs-redis';
 
@@ -10,7 +11,6 @@ import Modules from './modules';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
 import configuration from './config/configuration';
-import path from 'path';
 
 @Module({
   imports: [
@@ -47,13 +47,14 @@ import path from 'path';
           datePattern: 'YYYY-MM-DD',
           zippedArchive: true,
           maxSize: '20m',
-          maxFiles: '14d',
+          maxFiles: '7d',
           format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
         }),
       ],
     }),
 
     ...Modules,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

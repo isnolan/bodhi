@@ -23,11 +23,11 @@ export class SubscriptionPlan extends Base {
   description: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, comment: 'Price', default: 0 })
-  monthly_price: number;
+  price: number; // price per unit of subscription: weekly/monthly/quaterly/yearly
 
   // 折扣金额，表示年订阅相对于月订阅总成本的节省金额
-  @Column('decimal', { precision: 10, scale: 2, comment: 'Yearly discount', default: 0 })
-  yearly_discount: number;
+  @Column('decimal', { precision: 10, scale: 2, comment: 'Annual Price', default: 0 })
+  annual_price: number;
 
   @Column({ type: 'tinyint', comment: 'status', default: PlanState.ACTIVE })
   status: number;
