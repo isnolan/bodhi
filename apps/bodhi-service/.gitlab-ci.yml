@@ -20,8 +20,9 @@ build:
     - node.js
   script:
     - export PUPPETEER_SKIP_DOWNLOAD=true
-    - npm install
-    - npm run build
+    - npm i pnpm -g
+    - pnpm i
+    - pnpm run build
   artifacts:
     paths:
       - dist
