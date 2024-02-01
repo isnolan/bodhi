@@ -13,7 +13,7 @@ import { FileQuqueDto } from './dto/queue-file.dto';
 import { FileState } from './entity/file.entity';
 import { putStream } from '@/core/utils/aliyun';
 
-@Processor('chatbot')
+@Processor('bodhi')
 export class FilesProcessor {
   private readonly proxy: any;
 

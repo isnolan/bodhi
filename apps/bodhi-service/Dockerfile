@@ -33,7 +33,7 @@ COPY build-prod.js ./
 # production
 ENV NODE_ENV=production
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/lib/chromium/chrome
-ENV NODE_TLS_REJECT_UNAUTHORIZED=0
+# ENV NODE_TLS_REJECT_UNAUTHORIZED=0
 
 RUN npm install -g pnpm
 RUN node ./build-prod.js

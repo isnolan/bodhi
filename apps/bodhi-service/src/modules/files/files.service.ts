@@ -19,7 +19,7 @@ export class FilesService {
   private readonly hashids: Hashids;
 
   constructor(
-    @InjectQueue('chatbot')
+    @InjectQueue('bodhi')
     private readonly queue: Queue,
     @InjectRedis()
     private readonly redis: Redis,
