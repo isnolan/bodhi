@@ -25,6 +25,7 @@ WORKDIR /app
 ADD dist/ ./ 
 COPY package*.json ./
 COPY startup.sh ./
+COPY build-prod.js ./
 
 # Set the DISPLAY environment variable & Start xvfb
 # RUN Xvfb :10 -screen 0 1920x1080x16 & 
