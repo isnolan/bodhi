@@ -19,19 +19,15 @@ build:
   tags:
     - node.js
   before_script:
-    - npm -v
     - npm i pnpm -g
     - pnpm -v
-    # - corepack enable
-    # - corepack prepare pnpm@latest --activate
-    # - npm install -g pnpm@latest
+    - pnpm config set store-dir .pnpm-store
+    - pnpm setup
   script:
     - export PUPPETEER_SKIP_DOWNLOAD=true
-    # - pnpm config set store-dir .pnpm-store
-    # - pnpm setup
     # - export PNPM_HOME="$HOME/.pnpm"
     # - export PATH="$PNPM_HOME:$PATH"
-    - pnpm -v
+    - pnpm i
     - pnpm recursive install
     - cd apps/bodhi-service
     - pnpm link @isnolan/bodhi-adapter
