@@ -20,8 +20,8 @@ build:
     - node.js
   before_script:
     - corepack enable
-    - corepack prepare pnpm@latest-8 --activate
-    - npm install -g pnpm@latest-8
+    - corepack prepare pnpm@latest --activate
+    # - npm install -g pnpm@latest
   script:
     - export PUPPETEER_SKIP_DOWNLOAD=true
     # - pnpm config set store-dir .pnpm-store
