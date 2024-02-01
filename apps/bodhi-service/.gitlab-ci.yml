@@ -24,7 +24,7 @@ build:
     - pnpm config set store-dir .pnpm-store
   script:
     - export PUPPETEER_SKIP_DOWNLOAD=true
-    # - pnpm recursive install
+    - pnpm recursive install
     - cd apps/bodhi-service
     - pnpm link @isnolan/bodhi-adapter
     - pnpm list @isnolan/bodhi-adapter
