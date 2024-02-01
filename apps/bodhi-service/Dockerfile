@@ -23,7 +23,7 @@ RUN apk add --no-cache \
 # workdir
 WORKDIR /app
 ADD dist/ ./ 
-COPY package*.json pnpm-lock.yaml ./
+COPY package*.json ./
 COPY startup.sh ./
 
 # Set the DISPLAY environment variable & Start xvfb
