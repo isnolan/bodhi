@@ -54,4 +54,4 @@ publish:
   variables:
     REGISTRY_PATH: $CI_REGISTRY_IMAGE:$CI_PIPELINE_ID
   script:
-    - curl -X PUT -H "content-type:application/json" -H "Cookie:KuboardUsername=${KuboardUsername};KuboardAccessKey=${KuboardAccessKey}" -d '{"kind":"deployments","namespace":"draft","name":"'${CI_PROJECT_NAME}'","images":{"'${CI_REGISTRY_IMAGE}'":"'${REGISTRY_PATH}'"}}' https://kuboard.devflow.ltd/kuboard-api/cluster/Test/kind/CICDApi/admin/resource/updateImageTag
+    - curl -X PUT -H "content-type:application/json" -H "Cookie:KuboardUsername=${KuboardUsername};KuboardAccessKey=${KuboardAccessKey}" -d '{"kind":"deployments","namespace":"draft","name":"bodhi-service","images":{"'${CI_REGISTRY_IMAGE}'":"'${REGISTRY_PATH}'"}}' https://kuboard.devflow.ltd/kuboard-api/cluster/Test/kind/CICDApi/admin/resource/updateImageTag
