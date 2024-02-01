@@ -90,10 +90,13 @@ export class ChatController {
       const conversation = await this.conversation.findAndCreateOne(conversation_id, d);
       const channel = `completions:${conversation.id}`;
       const listener = (chl: string, message: string) => {
-        if (chl === channel) {
+        if (chl === channel && !res.writableEnded) {
           const d = JSON.parse(message);
           if (d.error) {
-            res.status(400).json(d);
+            if (!res.headersSent) {
+              res.status(400).json(d);
+            }
+            this.service.unsubscribe(channel, listener);
             return;
           }
 
@@ -103,15 +106,16 @@ export class ChatController {
           }
           if (d.usage) {
             res.write(`data: [DONE]\n\n`);
-            setTimeout(() => {
-              res.end();
-            }, 100);
+            res.end();
+            this.service.unsubscribe(channel, listener);
+            return;
           }
         }
       };
       this.service.subscribe(channel, listener);
 
       req.on('close', () => {
+        console.log(`[chat]close`);
         this.service.unsubscribe(channel, listener);
       });
 
