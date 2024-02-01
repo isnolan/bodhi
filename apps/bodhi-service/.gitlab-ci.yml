@@ -22,7 +22,7 @@ build:
     - npm i pnpm -g
     - pnpm -v
     - pnpm config set store-dir .pnpm-store
-    - pnpm setup
+    # - pnpm setup
   script:
     - export PUPPETEER_SKIP_DOWNLOAD=true
     # - export PNPM_HOME="$HOME/.pnpm"
