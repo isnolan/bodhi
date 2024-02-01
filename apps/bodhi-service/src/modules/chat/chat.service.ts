@@ -106,7 +106,7 @@ export class ChatService {
    * @returns
    */
   async reply(channel: string, payload: any) {
-    // console.log(`[chat]reply`, channel, payload);
+    console.log(`[chat]reply`, channel, payload);
     await this.redis.publish(channel, JSON.stringify(payload));
   }
 

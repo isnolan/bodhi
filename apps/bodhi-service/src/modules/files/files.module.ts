@@ -14,7 +14,7 @@ import { FilesProcessor } from './files.processor';
 
     // Redis Queue
     BullModule.registerQueueAsync({
-      name: 'chatbot',
+      name: 'bodhi',
       inject: [ConfigService],
       imports: [ConfigModule],
       useFactory: async (config: ConfigService) => ({
