@@ -30,8 +30,8 @@ build:
     - pnpm i
     - pnpm recursive install
     - cd apps/bodhi-service
-    - pnpm link @isnolan/bodhi-adapter
-    - pnpm i
+    # - pnpm link @isnolan/bodhi-adapter
+    - pnpm list @isnolan/bodhi-adapter
     - pnpm run build
   artifacts:
     paths:
