@@ -31,7 +31,7 @@ build:
     - pnpm run build
   artifacts:
     paths:
-      - dist
+      - apps/bodhi-service/dist
 
 deploy:
   stage: deploy
