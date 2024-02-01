@@ -20,7 +20,8 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "@/*": ["./src/*"],
-      "@modules": ["./src/modules/*"]
+      "@modules": ["./src/modules/*"],
+      "@isnolan/bodhi-adapter": ["../packages/bodhi-adapter/src/*"]
     }
   },
   "include": ["src/**/*.ts", "typings.d.ts"],
