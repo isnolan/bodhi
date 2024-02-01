@@ -1,27 +1,27 @@
-stages:
-  - prepare
-  - build
-  - deploy
-  - publish
+# stages:
+#   - prepare
+#   - build
+#   - deploy
+#   - publish
 
-cache:
-  key:
-    files:
-      - pnpm-lock.yaml
-  paths:
-    - .pnpm-store/
-    - node_modules/
+# cache:
+#   key:
+#     files:
+#       - pnpm-lock.yaml
+#   paths:
+#     - .pnpm-store/
+#     - node_modules/
 
-install_dependencies:
-  stage: prepare
-  tags:
-    - node.js
-  script:
-    - npm i pnpm -g
-    - pnpm i
-    - pnpm recursive install
-  only:
-    - main
+# install_dependencies:
+#   stage: prepare
+#   tags:
+#     - node.js
+#   script:
+#     - npm i pnpm -g
+#     - pnpm i
+#     - pnpm recursive install
+#   only:
+#     - main
 
 include:
   - local: 'apps/bodhi-service/.gitlab-ci.yml'
