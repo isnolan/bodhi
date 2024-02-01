@@ -115,6 +115,9 @@ importers:
       class-transformer:
         specifier: 0.5.1
         version: 0.5.1
+      class-validator:
+        specifier: 0.13.2
+        version: 0.13.2
       dotenv:
         specifier: ^16.3.1
         version: 16.3.1
@@ -227,9 +230,6 @@ importers:
       '@types/uuid':
         specifier: ^9.0.7
         version: 9.0.7
-      class-validator:
-        specifier: 0.13.2
-        version: 0.13.2
       eslint-import-resolver-typescript:
         specifier: ^3.6.1
         version: 3.6.1(@typescript-eslint/parser@5.62.0)(eslint-plugin-import@2.26.0)(eslint@8.56.0)
