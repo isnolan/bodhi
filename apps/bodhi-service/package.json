@@ -63,6 +63,7 @@
     "uuid": "^9.0.1",
     "validator": "^13.11.0",
     "winston": "^3.8.1",
+    "class-transformer": "0.5.1",
     "winston-daily-rotate-file": "^4.7.1"
   },
   "devDependencies": {
@@ -80,7 +81,6 @@
     "@types/passport-jwt": "^3.0.13",
     "@types/passport-local": "^1.0.38",
     "@types/uuid": "^9.0.7",
-    "class-transformer": "0.5.1",
     "class-validator": "0.13.2",
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-simple-import-sort": "^10.0.0",
