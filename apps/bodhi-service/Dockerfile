@@ -23,7 +23,7 @@ RUN apk add --no-cache \
 # workdir
 WORKDIR /app
 ADD dist/ ./ 
-COPY package*.json ./
+COPY package*.json pnpm-lock.yaml ./
 COPY startup.sh ./
 
 # Set the DISPLAY environment variable & Start xvfb
@@ -35,6 +35,7 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/lib/chromium/chrome
 ENV NODE_TLS_REJECT_UNAUTHORIZED=0
 
 RUN npm install -g pnpm
+RUN node ./build-prod.js
 RUN pnpm install --ignore-scripts
 RUN chmod a+x ./startup.sh
 
