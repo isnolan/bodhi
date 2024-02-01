@@ -7,7 +7,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 if (isProduction) {
   // 假设您想替换的依赖项
   const dependenciesToUpdate = {
-    '@isnolan/bodhi-adapter': '^0.0.0', // 生产环境下您希望使用的版本
+    '@isnolan/bodhi-adapter': '^0.1.17', // 生产环境下您希望使用的版本
     '@isnolan/bodhi-puppet': '^1.0.0',
   };
 
