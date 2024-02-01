@@ -23,7 +23,7 @@ build:
     - corepack prepare pnpm@latest-8 --activate
   script:
     - export PUPPETEER_SKIP_DOWNLOAD=true
-    - pnpm config set store-dir .pnpm-store
+    # - pnpm config set store-dir .pnpm-store
     - pnpm recursive install
     - cd apps/bodhi-service
     - pnpm link @isnolan/bodhi-adapter
