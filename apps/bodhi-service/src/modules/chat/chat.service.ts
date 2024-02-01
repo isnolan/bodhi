@@ -79,13 +79,13 @@ export class ChatService {
       const provider = await this.supplier.distribute(provider_ids, conversation);
       // usage
       const usage = usages.filter((u) => u.quota.provider_id === provider.id)[0];
-      console.log(`[chat]distribute`, provider.id, usage.id);
+      // console.log(`[chat]distribute`, provider.id, usage.id);
       if (provider.id !== conversation.provider_id) {
         await this.conversation.updateAttribute(conversation.id, { provider_id: provider.id, usage_id: usage.id });
       }
 
       const s1: QueueMessageDto = { channel, provider_id: provider.id, conversation_id, parent_id: message_id };
-      console.log(`[chat]send`, provider, s1);
+      // console.log(`[chat]send`, provider, s1);
       if (provider.instance.type === InstanceType.SESSION) {
         await this.redis.publish('puppet', JSON.stringify(s1));
       }
@@ -106,7 +106,7 @@ export class ChatService {
    * @returns
    */
   async reply(channel: string, payload: any) {
-    console.log(`[chat]reply`, channel, payload);
+    // console.log(`[chat]reply`, channel, payload);
     await this.redis.publish(channel, JSON.stringify(payload));
   }
 

@@ -90,7 +90,6 @@ export class ChatController {
       const conversation = await this.conversation.findAndCreateOne(conversation_id, d);
       const channel = `completions:${conversation.id}`;
       const listener = (chl: string, message: string) => {
-        console.log(`[chat]listener`, chl, message);
         if (chl === channel) {
           const d = JSON.parse(message);
           if (d.error) {
@@ -102,7 +101,7 @@ export class ChatController {
           if (typeof d === 'object') {
             res.write(`data: ${message}\n\n`);
           }
-          if (d.useage) {
+          if (d.usage) {
             res.write(`data: [DONE]\n\n`);
             setTimeout(() => {
               res.end();

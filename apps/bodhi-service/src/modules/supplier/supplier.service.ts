@@ -24,7 +24,7 @@ export class SupplierService {
       // console.log(`[supplier]renewal`, provider_id);
       // Get credential instance
       const providers = await this.provider.findActive([provider_id]);
-      console.log(`[supplier]renew: providers`, provider_id, providers);
+      // console.log(`[supplier]renew: providers`, provider_id, providers);
       if (providers.length > 0) {
         let provider = providers[0];
         // check in service
@@ -64,7 +64,7 @@ export class SupplierService {
    */
   public async findInactive(product_ids, conversation, isDowngrade = false): Promise<ProviderWithRelations> {
     const services = await this.provider.findActive(product_ids);
-    console.log(`[supplier]findInactive`, product_ids, services);
+    // console.log(`[supplier]findInactive`, product_ids, services);
 
     // from session
     const chatGptServices = await this.filter(services, async (s: ProviderWithRelations) => {
