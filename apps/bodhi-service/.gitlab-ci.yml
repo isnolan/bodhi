@@ -19,6 +19,7 @@ build:
   tags:
     - node.js
   before_script:
+    - pnpm -v
     - corepack enable
     - corepack prepare pnpm@latest --activate
     # - npm install -g pnpm@latest
