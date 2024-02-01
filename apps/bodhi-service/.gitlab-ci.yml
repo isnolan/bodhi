@@ -19,9 +19,11 @@ build:
   tags:
     - node.js
   before_script:
+    - npm -v
+    - npm i pnpm -g
     - pnpm -v
-    - corepack enable
-    - corepack prepare pnpm@latest --activate
+    # - corepack enable
+    # - corepack prepare pnpm@latest --activate
     # - npm install -g pnpm@latest
   script:
     - export PUPPETEER_SKIP_DOWNLOAD=true
