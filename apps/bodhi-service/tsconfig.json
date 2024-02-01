@@ -21,7 +21,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@modules": ["./src/modules/*"],
-      "@isnolan/bodhi-adapter": ["../packages/bodhi-adapter/src/*"]
+      "@isnolan/bodhi-adapter": ["../../packages/bodhi-adapter/src/*"]
     }
   },
   "include": ["src/**/*.ts", "typings.d.ts"],
