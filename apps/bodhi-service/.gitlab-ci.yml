@@ -1,11 +1,11 @@
 image: 'node:19.4.0-alpine'
 
 cache:
-  # key:
-  #   files:
-  #     - package-lock.json
-  #   prefix: npm
+  key:
+    files:
+      - pnpm-lock.yaml
   paths:
+    - .pnpm-store/
     - node_modules/
 
 stages:
@@ -18,9 +18,13 @@ build:
   image: 'node:19.4.0-alpine'
   tags:
     - node.js
+  before_script:
+    - corepack enable
+    - corepack prepare pnpm@latest-8 --activate
+    - npm i pnpm -g
+    - pnpm config set store-dir .pnpm-store
   script:
     - export PUPPETEER_SKIP_DOWNLOAD=true
-    - npm i pnpm -g
     - pnpm i
     - pnpm recursive install
     - pnpm link @isnolan/bodhi-adapter

@@ -5,9 +5,12 @@ stages:
   - publish
 
 cache:
+  key:
+    files:
+      - pnpm-lock.yaml
   paths:
-    - node_modules/
     - .pnpm-store/
+    - node_modules/
 
 install_dependencies:
   stage: prepare
