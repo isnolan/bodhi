@@ -33,7 +33,7 @@ COPY startup.sh ./
 ENV NODE_ENV=production
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/lib/chromium/chrome
 ENV NODE_TLS_REJECT_UNAUTHORIZED=0
-RUN npm install --ignore-scripts
+# RUN pnpm install --ignore-scripts
 RUN chmod a+x ./startup.sh
 
 EXPOSE 3000
