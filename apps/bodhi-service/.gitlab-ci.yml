@@ -22,13 +22,9 @@ build:
     - npm i pnpm -g
     - pnpm -v
     - pnpm config set store-dir .pnpm-store
-    # - pnpm setup
   script:
     - export PUPPETEER_SKIP_DOWNLOAD=true
-    # - export PNPM_HOME="$HOME/.pnpm"
-    # - export PATH="$PNPM_HOME:$PATH"
-    - pnpm i
-    - pnpm recursive install
+    # - pnpm recursive install
     - cd apps/bodhi-service
     - pnpm link @isnolan/bodhi-adapter
     - pnpm list @isnolan/bodhi-adapter
