@@ -3,7 +3,6 @@ import { Injectable } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import 'moment/locale/zh-cn';
 import { AuthSession } from '../entity/session.entity';
 
 @Injectable()
