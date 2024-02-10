@@ -23,7 +23,7 @@ export class SubscriptionQuota extends Base {
   @Column('int', { comment: 'times limit', default: 0 })
   times_limit: number; // -1: unlimited, 0: disabled, >0: available
 
-  @Column('int', { comment: 'tokens limit', default: 0 })
+  @Column('bigint', { comment: 'tokens limit', default: 0 })
   token_limit: number; // -1: unlimited, 0: disabled, >0: available
 
   @ManyToOne(() => SubscriptionPlan)
