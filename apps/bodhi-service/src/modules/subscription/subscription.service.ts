@@ -24,7 +24,7 @@ export class SubscriptionService {
       usages.map((u) => {
         if (
           (u.quota.times_limit === -1 || u.quota.times_limit >= u.times_consumed) &&
-          (u.quota.token_limit === -1 || u.quota.token_limit >= u.tokens_consumed)
+          (u.quota.token_limit == -1 || u.quota.token_limit >= u.tokens_consumed)
         ) {
           rows.push(u);
         }
