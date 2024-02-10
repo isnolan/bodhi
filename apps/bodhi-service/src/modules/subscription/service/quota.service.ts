@@ -18,10 +18,9 @@ export class SubscriptionQuotaService {
 
   async findProvidersByIds(ids: number[]): Promise<number[]> {
     const rows = await this.repository.find({
-      select: ['provider_id'],
+      select: ['providers'],
       where: { id: In(ids) },
     });
-
-    return rows.map((row) => row.provider_id);
+    return rows.flatMap((row) => row.providers);
   }
 }

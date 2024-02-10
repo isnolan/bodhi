@@ -78,7 +78,7 @@ export class ChatService {
       // Assign valid provisioning credentials
       const provider = await this.supplier.distribute(provider_ids, conversation);
       // usage
-      const usage = usages.filter((u) => u.quota.provider_id === provider.id)[0];
+      const usage = usages.filter((u) => u.quota.providers.includes(provider.id))[0];
       // console.log(`[chat]distribute`, provider.id, usage.id);
       if (provider.id !== conversation.provider_id) {
         await this.conversation.updateAttribute(conversation.id, { provider_id: provider.id, usage_id: usage.id });

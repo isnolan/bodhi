@@ -91,7 +91,7 @@ export class SubscriptionUsageService {
         quota_id: true,
         times_consumed: true,
         tokens_consumed: true,
-        quota: { id: true, provider_id: true, times_limit: true, token_limit: true },
+        quota: { id: true, providers: true, times_limit: true, token_limit: true },
       },
       where: {
         user_id,

@@ -14,8 +14,8 @@ export class SubscriptionQuota extends Base {
   @Column({ type: 'int', comment: 'plan' })
   plan_id: number;
 
-  @Column('int', { comment: 'provider' })
-  provider_id: number; // 标识AI模型
+  @Column({ type: 'simple-array', comment: 'providers', default: null })
+  providers: number[]; // provider id list
 
   @Column({ type: 'enum', enum: QuotaPeriod, comment: 'period', default: QuotaPeriod.DAILY })
   period: QuotaPeriod; // 配额时间周期

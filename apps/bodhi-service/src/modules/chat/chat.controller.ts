@@ -39,8 +39,8 @@ export class ChatController {
 
     try {
       const usages = await this.subscription.findActiveUsageWithQuota(user_id);
-      const provider_ids = usages.map((usage) => usage.quota.provider_id);
-      return this.provider.findModelsByProviders(provider_ids);
+      const providers = usages.flatMap((usage) => usage.quota.providers);
+      return this.provider.findModelsByProviders(providers);
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.FORBIDDEN);
     }
@@ -67,7 +67,7 @@ export class ChatController {
         throw new Error(`No active subscription or available quota.`);
       }
 
-      const ids = usages.map((usage) => usage.quota.provider_id);
+      const ids = usages.flatMap((usage) => usage.quota.providers);
       // console.log(`[chat]ids`, ids);
       const provider_ids = await this.provider.filterProviderByModel(ids, model);
       if (provider_ids.length === 0) {
