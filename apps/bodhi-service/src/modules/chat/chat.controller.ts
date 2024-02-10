@@ -67,9 +67,10 @@ export class ChatController {
         throw new Error(`No active subscription or available quota.`);
       }
 
-      const ids = usages.flatMap((usage) => usage.quota.providers);
+      const ids = [...new Set(usages.flatMap((usage) => usage.quota.providers))];
       // console.log(`[chat]ids`, ids);
-      const provider_ids = await this.provider.filterProviderByModel(ids, model);
+      const provider_ids = await this.provider.filterProviderByModel(ids as [], model);
+      // console.log(`[chat]provider_ids`, provider_ids);
       if (provider_ids.length === 0) {
         throw new Error(`No valid supplier for model:${model}`);
       }

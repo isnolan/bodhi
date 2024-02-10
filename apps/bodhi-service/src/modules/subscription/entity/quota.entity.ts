@@ -14,7 +14,7 @@ export class SubscriptionQuota extends Base {
   @Column({ type: 'int', comment: 'plan' })
   plan_id: number;
 
-  @Column({ type: 'simple-array', comment: 'providers', default: null })
+  @Column({ type: 'simple-json', comment: 'providers', default: null })
   providers: number[]; // provider id list
 
   @Column({ type: 'enum', enum: QuotaPeriod, comment: 'period', default: QuotaPeriod.DAILY })

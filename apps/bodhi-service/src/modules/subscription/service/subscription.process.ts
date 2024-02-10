@@ -8,7 +8,7 @@ import { SubscribedState } from '../entity';
 import { SubscriptionPlanService } from './plan.service';
 import { UsersService } from '@/modules/users/users.service';
 
-const Expression = process.env.NODE_ENV === 'production' ? CronExpression.EVERY_HOUR : CronExpression.EVERY_10_MINUTES;
+const Expression = process.env.NODE_ENV === 'production' ? CronExpression.EVERY_HOUR : CronExpression.EVERY_5_MINUTES;
 
 @Injectable()
 export class SubscriptionProcessService {
