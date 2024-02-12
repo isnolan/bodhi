@@ -13,7 +13,7 @@ export class ProviderService {
     private readonly models: ProviderModelsService,
   ) {}
 
-  public async findByUserId(user_id: number, is_relation?: boolean): Promise<Provider[]> {
+  async findByUserId(user_id: number, is_relation?: boolean): Promise<Provider[]> {
     const relations = is_relation ? ['model', 'instance', 'credential'] : [];
     return this.repository.find({
       where: { user_id, status: MoreThan(0) },
@@ -24,7 +24,7 @@ export class ProviderService {
   /**
    * Find active providers, by purchased
    */
-  public async findActive(ids: number[]): Promise<ProviderWithRelations[]> {
+  async findActive(ids: number[]): Promise<ProviderWithRelations[]> {
     const query = { id: In(ids), status: CredentialsState.ACTIVE };
     return this.repository.find({
       where: [
@@ -35,24 +35,30 @@ export class ProviderService {
     });
   }
 
-  public async findModelsByProviders(ids: number[]): Promise<ProviderModels[]> {
+  async findModelsByProviders(user_id: number, ids: number[]): Promise<any[]> {
     const query = { id: In(ids), status: CredentialsState.ACTIVE };
     const providers = await this.repository.find({
-      select: ['model_id'],
+      select: ['id', 'slug', 'model_id'],
       where: [
         { expires_at: MoreThan(new Date()), ...query },
         { expires_at: IsNull(), ...query },
       ],
+      relations: ['model'],
     });
     if (providers.length === 0) {
       throw Error(`provider is out of service`);
     }
 
-    const model_ids: number[] = providers.map((provider) => provider.model_id);
-    return await this.models.findByIds(model_ids);
+    const models = [];
+    providers.map((provider) => {
+      if (!models.some((m) => m.model === provider.slug)) {
+        models.push({ model: provider.slug, icon: provider.model.icon });
+      }
+    });
+    return models;
   }
 
-  public async filterProviderByModel(ids: number[], name: string): Promise<number[]> {
+  async filterProviderByModel(ids: number[], name: string): Promise<number[]> {
     const providers = await this.repository
       .createQueryBuilder('provider')
       .leftJoinAndSelect('provider.model', 'model')

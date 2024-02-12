@@ -40,7 +40,7 @@ export class ChatController {
     try {
       const usages = await this.subscription.findActiveUsageWithQuota(user_id);
       const providers = usages.flatMap((usage) => usage.quota.providers);
-      return this.provider.findModelsByProviders(providers);
+      return this.provider.findModelsByProviders(user_id, providers);
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.FORBIDDEN);
     }
