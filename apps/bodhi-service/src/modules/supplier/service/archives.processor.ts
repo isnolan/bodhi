@@ -63,6 +63,6 @@ export class SupplierArchivesProcessor {
 
   @OnGlobalQueueCompleted()
   async onGlobalCompleted(jobId: number) {
-    console.log(`[openapi]process completed`, jobId);
+    console.log(`[process]completed`, jobId);
   }
 }

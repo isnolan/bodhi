@@ -23,7 +23,7 @@ export class SubscriptionSubscribed extends Base {
   start_at: Date;
 
   @Column({ type: 'datetime', precision: 0, comment: 'expires', nullable: true })
-  expire_at: Date;
+  expires_at: Date;
 
   @Column({ type: 'varchar', length: 40, comment: 'transaction', default: '' })
   transaction_id: string;

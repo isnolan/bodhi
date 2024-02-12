@@ -10,10 +10,19 @@ export class SubscriptionPlanService {
     private readonly repository: Repository<SubscriptionPlan>,
   ) {}
 
+  async findSimpleList() {
+    return await this.repository.find({
+      select: ['id', 'title', 'description'],
+      where: { status: In([PlanState.ACTIVE, PlanState.INACTIVE]) },
+      order: { id: 'ASC' },
+    });
+  }
+
   async findActive() {
     return this.repository.find({
+      select: ['id', 'title', 'description', 'price', 'annual_price'],
       where: {
-        status: In([PlanState.ACTIVE, PlanState.INACTIVE]),
+        status: In([PlanState.ACTIVE]),
       },
     });
   }

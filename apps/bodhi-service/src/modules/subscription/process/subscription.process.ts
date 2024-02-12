@@ -6,10 +6,13 @@ import { SubscribedState } from '../entity';
 import { SubscriptionPlanService, SubscriptionQuotaService } from '../service';
 import { SubscriptionSubscribedService, SubscriptionUsageService } from '../service';
 import { UsersService } from '@/modules/users/users.service';
+import { Process, Processor } from '@nestjs/bull';
+import { Job } from 'bull';
 
 const Expression = process.env.NODE_ENV === 'production' ? CronExpression.EVERY_HOUR : CronExpression.EVERY_5_MINUTES;
 
 @Injectable()
+@Processor('bodhi')
 export class SubscriptionProcessService {
   constructor(
     private readonly plans: SubscriptionPlanService,
@@ -25,6 +28,11 @@ export class SubscriptionProcessService {
     await this.allocateQuotas(process.env.NODE_ENV !== 'production');
   }
 
+  @Process('subscribed')
+  async handleSubscribedProcess(job: Job<any>) {
+    this.allocateQuotas(true);
+  }
+
   public async allocateQuotas(skipMidnightCheck: boolean = false) {
     // all active subscribed subscriptions
     const activeSubscriptions = await this.subscribed.findActive();
@@ -32,14 +40,14 @@ export class SubscriptionProcessService {
     // if not expired, allocate quotas, otherwise mark as expired
     const today = new Date();
     for (const subscription of activeSubscriptions) {
-      const { id, user_id, plan_id, start_at, expire_at } = subscription;
+      const { id, user_id, plan_id, start_at, expires_at } = subscription;
       const { timezone } = await this.users.findOne(user_id);
       // For a better user experience, midnight in the user's time zone is used as the allocation time point
       const allocationStart = skipMidnightCheck ? this.getStartOfTodayInUserTimezone(timezone) : today;
 
       if (skipMidnightCheck || this.isMidnightInUserTimezone(allocationStart, timezone)) {
         console.log(`[cron]`, subscription.id, 'allocating quotas');
-        if (expire_at < today) {
+        if (expires_at < today) {
           // update state to expired
           await this.subscribed.updateState(id, SubscribedState.EXPIRED);
         } else {

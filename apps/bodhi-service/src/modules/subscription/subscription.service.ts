@@ -1,23 +1,47 @@
 import { Injectable } from '@nestjs/common';
 
 import { UsageWithQuota } from './dto/find-useage.dto';
-import { SubscriptionUsageService, SubscriptionSubscribedService } from './service';
+import { SubscriptionUsageService, SubscriptionSubscribedService, SubscriptionPlanService } from './service';
+import { Queue } from 'bull';
+import { InjectQueue } from '@nestjs/bull';
+import { SubscriptionSubscribed } from './entity';
 
 @Injectable()
 export class SubscriptionService {
   constructor(
+    @InjectQueue('bodhi')
+    private readonly queue: Queue,
+    private readonly plans: SubscriptionPlanService,
     private readonly subscribed: SubscriptionSubscribedService,
     private readonly usage: SubscriptionUsageService,
   ) {}
 
-  public async findActiveSubscribedWithPlansAndUsage(user_id: number) {
+  async findPlans() {
+    return this.plans.findActive();
+  }
+
+  async findPlansBySimple() {
+    return this.plans.findSimpleList();
+  }
+
+  // find and create subscribed by transaction_id
+  async findAndCreateByTransactionId(transaction_id: string, opts: Partial<SubscriptionSubscribed>) {
+    return this.subscribed.findAndCreateByTransactionId(transaction_id, opts);
+  }
+
+  // create trail subscribed
+  async createTrial(user_id: number, plan_id = 100) {
+    const subscribed = await this.subscribed.createTrial(user_id, plan_id);
+    // aollcate usage quota
+    this.queue.add('subscribed', { subscribed_id: subscribed.id });
+    return subscribed;
+  }
+
+  async findActiveSubscribedWithPlansAndUsage(user_id: number) {
     return this.subscribed.findActiveWithPlanAndUsage(user_id);
   }
 
-  public async findActiveUsageWithQuota(
-    user_id: number,
-    is_available?: boolean | undefined,
-  ): Promise<UsageWithQuota[]> {
+  async findActiveUsageWithQuota(user_id: number, is_available?: boolean | undefined): Promise<UsageWithQuota[]> {
     const usages = await this.usage.findActiveWithQuota(user_id);
     if (is_available) {
       const rows: UsageWithQuota[] = [];
@@ -34,7 +58,7 @@ export class SubscriptionService {
     return usages;
   }
 
-  public async comsumeUsageQuote(usage_id: number, times: number, tokens: number) {
+  async comsumeUsageQuote(usage_id: number, times: number, tokens: number) {
     return this.usage.consumeQuote(usage_id, times, tokens);
   }
 }
