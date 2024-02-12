@@ -56,9 +56,9 @@ export class UserKeyUsageService {
   }
 
   async increaseQuota(key_id, opts: Partial<UserKeyUsage>) {
-    const { model, times_limit = 0, tokens_limit = 0 } = opts;
+    const { client_usage_id, times_limit = -1, tokens_limit = -1 } = opts;
     const usage = await this.repository.findOne({
-      where: { key_id, model, state: 1 },
+      where: { key_id, client_usage_id, state: 1 },
       order: { id: 'DESC' },
     });
 

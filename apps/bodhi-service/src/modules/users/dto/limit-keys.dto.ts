@@ -1,26 +1,34 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class LimitKeysDto {
-  @ApiPropertyOptional({ description: 'foreign id', example: '1' })
-  @IsString()
+  @ApiPropertyOptional({ description: 'client user', example: '1' })
   @IsNotEmpty()
+  @IsString()
   client_user_id: string;
+
+  @ApiPropertyOptional({ description: 'client usage', example: '1' })
+  @IsNotEmpty()
+  @IsString()
+  client_usage_id: string;
 
   @ApiPropertyOptional({ description: 'model', example: 'gemini-pro' })
   @IsNotEmpty()
-  @IsString()
-  models: string;
+  @IsArray()
+  models: string[];
 
   @ApiPropertyOptional({ description: 'times limit', example: -1 })
+  @IsOptional()
   @IsNumber()
   times_limit: number;
 
   @ApiPropertyOptional({ description: 'tokens limit', example: -1 })
+  @IsOptional()
   @IsNumber()
   tokens_limit: number;
 
-  // @ApiPropertyOptional({ description: 'expire at', example: null })
-  // @IsOptional()
-  // expires_at: Date;
+  @ApiPropertyOptional({ description: 'expires', example: null })
+  @IsOptional()
+  @IsDateString()
+  expires_at: Date;
 }

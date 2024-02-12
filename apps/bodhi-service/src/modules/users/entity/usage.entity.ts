@@ -13,8 +13,8 @@ export class UserKeyUsage extends Base {
   @Column({ type: 'int', comment: 'key_id' })
   key_id: number;
 
-  @Column({ type: 'varchar', length: 40, comment: 'model' })
-  model: string;
+  @Column({ type: 'simple-json', comment: 'models', default: null })
+  models: string[];
 
   @Column('int', { comment: 'times limit', default: -1 })
   times_limit: number; // -1: unlimited, 0: disabled, >0: available
@@ -30,6 +30,9 @@ export class UserKeyUsage extends Base {
 
   @Column({ type: 'datetime', comment: 'expires', default: null, nullable: true })
   expires_at: Date;
+
+  @Column({ type: 'varchar', length: 40, comment: 'client usage id' })
+  client_usage_id: string;
 
   @Column({ type: 'tinyint', comment: '状态', default: KeyUsageState.VALID })
   state: KeyUsageState;
