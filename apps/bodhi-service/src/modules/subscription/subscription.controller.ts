@@ -18,9 +18,9 @@ export class SubscriptionController {
   ) {}
 
   @Get('plans')
-  @ApiOperation({ description: 'Find plans', summary: 'Find plans' })
+  @ApiOperation({ description: 'Find plan list', summary: 'Find plan list' })
   @ApiResponse({ status: 200, description: 'success', type: PlanListDto })
-  async getPlanList(): Promise<PlanListDto[]> {
+  async findPlanList(): Promise<PlanListDto[]> {
     try {
       return await this.subscription.findPlans();
     } catch (err) {
