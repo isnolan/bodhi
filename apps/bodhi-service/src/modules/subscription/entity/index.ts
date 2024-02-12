@@ -8,4 +8,4 @@ export * from './quota.entity';
 export * from './subscribed.entity';
 export * from './usage.entity';
 
-export default [SubscriptionPlan, SubscriptionQuota, SubscriptionUsage, SubscriptionUsage, SubscriptionSubscribed];
+export default [SubscriptionPlan, SubscriptionQuota, SubscriptionUsage, SubscriptionSubscribed];

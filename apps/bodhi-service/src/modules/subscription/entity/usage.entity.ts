@@ -1,7 +1,6 @@
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Base } from '@/core/common/base.entity';
 import { SubscriptionQuota } from './quota.entity';
-import { SubscriptionPlan } from './plan.entity';
 import { SubscriptionSubscribed } from './subscribed.entity';
 
 export enum UsageState {
