@@ -16,6 +16,9 @@ export class Provider extends Base {
   user_id: number;
 
   /* model */
+  @Column({ type: 'varchar', length: 40, comment: 'slug', default: '' })
+  slug: string;
+
   @Column({ type: 'int', comment: 'model', default: 0 })
   model_id: number;
 

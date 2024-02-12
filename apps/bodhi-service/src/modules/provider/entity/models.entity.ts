@@ -9,9 +9,6 @@ export enum ModelState {
 
 @Entity('bodhi_provider_models')
 export class ProviderModels extends Base {
-  @Column({ type: 'varchar', length: 40, comment: 'slug', default: '' })
-  slug: string;
-
   @Column({ type: 'varchar', length: 40, comment: 'name', default: '' })
   name: string;
 
