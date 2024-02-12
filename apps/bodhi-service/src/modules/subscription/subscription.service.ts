@@ -1,9 +1,9 @@
+import { Queue } from 'bull';
+import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 
 import { UsageWithQuota } from './dto/find-useage.dto';
 import { SubscriptionUsageService, SubscriptionSubscribedService, SubscriptionPlanService } from './service';
-import { Queue } from 'bull';
-import { InjectQueue } from '@nestjs/bull';
 import { SubscriptionSubscribed } from './entity';
 
 @Injectable()
