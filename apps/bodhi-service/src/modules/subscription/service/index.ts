@@ -7,12 +7,10 @@ import { SubscriptionPlanService } from './plan.service';
 import { SubscriptionQuotaService } from './quota.service';
 import { SubscriptionSubscribedService } from './subscribed.service';
 import { SubscriptionUsageService } from './usage.service';
-import { SubscriptionProcessService } from './subscription.process';
 
 export default [
   SubscriptionPlanService,
   SubscriptionQuotaService,
   SubscriptionSubscribedService,
   SubscriptionUsageService,
-  SubscriptionProcessService,
 ];
