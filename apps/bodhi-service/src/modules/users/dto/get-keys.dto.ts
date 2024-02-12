@@ -12,7 +12,7 @@ export class GetKeysDto {
 
   @ApiProperty()
   @IsString()
-  foreign_user_id: string;
+  client_user_id: string;
 
   @ApiProperty()
   @IsString()

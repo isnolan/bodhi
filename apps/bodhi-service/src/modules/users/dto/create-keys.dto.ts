@@ -5,7 +5,7 @@ export class CreateKeysDto {
   @ApiPropertyOptional({ description: 'foreign id', example: '' })
   @IsNotEmpty()
   @IsString()
-  foreign_user_id: string;
+  client_user_id: string;
 
   @ApiPropertyOptional({ description: 'expire at', example: new Date() })
   @IsOptional()

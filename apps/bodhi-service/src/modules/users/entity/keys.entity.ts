@@ -17,7 +17,7 @@ export class UserKey extends Base {
   secret_key: string;
 
   @Column({ type: 'varchar', length: 40, comment: 'foreign user', default: '' })
-  foreign_user_id: string;
+  client_user_id: string;
 
   @Column({ type: 'varchar', length: 100, comment: 'Note', default: '' })
   note: string;

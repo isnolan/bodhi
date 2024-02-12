@@ -5,12 +5,12 @@ export class LimitKeysDto {
   @ApiPropertyOptional({ description: 'foreign id', example: '1' })
   @IsString()
   @IsNotEmpty()
-  foreign_user_id: string;
+  client_user_id: string;
 
   @ApiPropertyOptional({ description: 'model', example: 'gemini-pro' })
-  @IsString()
   @IsNotEmpty()
-  model: string;
+  @IsString()
+  models: string;
 
   @ApiPropertyOptional({ description: 'times limit', example: -1 })
   @IsNumber()

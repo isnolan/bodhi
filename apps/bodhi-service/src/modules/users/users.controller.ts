@@ -31,9 +31,9 @@ export class UsersController {
   @ApiResponse({ status: 201, description: 'success', type: GetKeysDto })
   async createKey(@Request() req, @Body() payload: CreateKeysDto): Promise<GetKeysDto> {
     const { user_id } = req.user;
-    const { foreign_user_id, note, expires_at } = payload;
-    const { id, secret_key, create_at } = await this.keys.createKey(user_id, { foreign_user_id, note, expires_at });
-    return { id, secret_key, foreign_user_id, note, expires_at, create_at };
+    const { client_user_id, note, expires_at } = payload;
+    const { id, secret_key, create_at } = await this.keys.createKey(user_id, { client_user_id, note, expires_at });
+    return { id, secret_key, client_user_id, note, expires_at, create_at };
   }
 
   @Post('keys/increase')
@@ -41,9 +41,9 @@ export class UsersController {
   @ApiResponse({ status: 201, description: 'success' })
   async increaseKeyQuota(@Request() req, @Body() payload: LimitKeysDto) {
     const { user_id } = req.user;
-    const { foreign_user_id, ...opts } = payload;
+    const { client_user_id, ...opts } = payload;
     try {
-      await this.users.increaseKeyQuota(user_id, foreign_user_id, opts);
+      await this.users.increaseKeyQuota(user_id, client_user_id, opts);
       return;
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
@@ -55,9 +55,9 @@ export class UsersController {
   @ApiResponse({ status: 201, description: 'success' })
   async deleteKey(@Request() req, @Body() payload: DeleteKeysDto) {
     const { user_id } = req.user;
-    const { foreign_user_id } = payload;
+    const { client_user_id } = payload;
     try {
-      const key = await this.keys.find(user_id, foreign_user_id);
+      const key = await this.keys.find(user_id, client_user_id);
       if (!key) {
         throw new HttpException('key not found', HttpStatus.BAD_REQUEST);
       }

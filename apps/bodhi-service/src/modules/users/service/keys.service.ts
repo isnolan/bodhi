@@ -33,8 +33,8 @@ export class UserKeyService {
     return null;
   }
 
-  async find(user_id: number, foreign_user_id: string): Promise<UserKey> {
-    return this.repository.findOne({ where: { user_id, foreign_user_id } });
+  async find(user_id: number, client_user_id: string): Promise<UserKey> {
+    return this.repository.findOne({ where: { user_id, client_user_id } });
   }
 
   /**
@@ -42,22 +42,22 @@ export class UserKeyService {
    * @returns
    */
   async createKey(user_id: number, opts: Partial<UserKey>): Promise<UserKey> {
-    const { foreign_user_id, note = '' } = opts;
+    const { client_user_id, note = '' } = opts;
 
-    // check if foreign_user_id exists
-    const exist = await this.repository.findOne({ where: { user_id, foreign_user_id } });
+    // check if client_user_id exists
+    const exist = await this.repository.findOne({ where: { user_id, client_user_id } });
     if (exist) {
       return exist;
     }
 
     // create a new secret key
     const secret_key = `sk-` + uuidv4();
-    return this.repository.save(this.repository.create({ user_id, foreign_user_id, secret_key, note }));
+    return this.repository.save(this.repository.create({ user_id, client_user_id, secret_key, note }));
   }
 
   async getList(user_id: number): Promise<UserKey[]> {
     return this.repository.find({
-      select: ['id', 'secret_key', 'foreign_user_id', 'note', 'expires_at', 'create_at'],
+      select: ['id', 'secret_key', 'client_user_id', 'note', 'expires_at', 'create_at'],
       where: { user_id },
     });
   }
