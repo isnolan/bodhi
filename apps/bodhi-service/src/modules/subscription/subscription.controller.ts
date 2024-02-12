@@ -22,21 +22,7 @@ export class SubscriptionController {
   @ApiResponse({ status: 200, description: 'success', type: PlanListDto })
   async getPlanList(): Promise<PlanListDto[]> {
     try {
-      // 获得产品及配额列表
-      const plans = await this.subscription.findPlans();
-      // 获取 providers
-      // const providers = plans.flatMap((item) => item.quotas.map((quota) => quota.providers));
-      // const bots = await this.bots.findByIds([...new Set(providers.flat().map(Number))]);
-
-      // 注入 bots
-      const rows: PlanListDto[] = plans.map((product) => ({
-        ...product,
-        // quotas: product.quotas.map((item) => {
-        //   return { ...item, bots: bots.filter((b) => item.providers.includes(b.id)) };
-        // }),
-      }));
-
-      return rows;
+      return await this.subscription.findPlans();
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
     }
