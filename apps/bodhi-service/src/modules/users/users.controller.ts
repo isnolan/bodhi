@@ -57,9 +57,9 @@ export class UsersController {
     const { user_id } = req.user;
     const { client_user_id } = payload;
     try {
-      const key = await this.keys.find(user_id, client_user_id);
+      const key = await this.keys.findActive(user_id, client_user_id);
       if (!key) {
-        throw new HttpException('key not found', HttpStatus.BAD_REQUEST);
+        throw new Error('key not found');
       }
       return this.keys.delete(key.id);
     } catch (err) {

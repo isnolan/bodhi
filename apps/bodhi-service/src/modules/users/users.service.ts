@@ -38,7 +38,7 @@ export class UsersService {
 
   async increaseKeyQuota(user_id: number, client_user_id: string, opts: Partial<UserKeyUsage>) {
     // check
-    const key = await this.keys.find(user_id, client_user_id);
+    const key = await this.keys.findActive(user_id, client_user_id);
     if (!key) {
       throw new Error(`This user has not created a key yet`);
     }

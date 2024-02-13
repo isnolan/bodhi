@@ -33,8 +33,8 @@ export class UserKeyService {
     return null;
   }
 
-  async find(user_id: number, client_user_id: string): Promise<UserKey> {
-    return this.repository.findOne({ where: { user_id, client_user_id } });
+  async findActive(user_id: number, client_user_id: string): Promise<UserKey> {
+    return this.repository.findOne({ where: { user_id, client_user_id, state: UserKeyState.VALID } });
   }
 
   /**
