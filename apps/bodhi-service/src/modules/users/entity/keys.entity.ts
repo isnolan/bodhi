@@ -3,9 +3,9 @@ import { Base } from '@/core/common/base.entity';
 import { UserKeyUsage } from './usage.entity';
 
 export enum UserKeyState {
-  VALID = 1,
-  INVALID = 0,
-  DELETED = -1,
+  VALID = 'valid',
+  INVALID = 'invalid',
+  DELETED = 'deleted',
 }
 
 @Entity('bodhi_users_keys')
@@ -25,7 +25,7 @@ export class UserKey extends Base {
   @Column({ type: 'datetime', comment: 'expires', nullable: true })
   expires_at: Date;
 
-  @Column({ type: 'tinyint', comment: 'state', default: UserKeyState.VALID })
+  @Column({ type: 'enum', enum: UserKeyState, comment: 'state', default: UserKeyState.VALID })
   state: UserKeyState;
 
   @OneToMany(() => UserKeyUsage, 'quota')

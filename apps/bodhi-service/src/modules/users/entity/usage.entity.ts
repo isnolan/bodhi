@@ -3,9 +3,9 @@ import { Base } from '@/core/common/base.entity';
 import { UserKey } from './keys.entity';
 
 export enum KeyUsageState {
-  VALID = 1,
-  INVALID = 0,
-  DELETED = -1,
+  VALID = 'valid',
+  INVALID = 'invalid',
+  DELETED = 'deleted',
 }
 
 @Entity('bodhi_users_keys_usage')
@@ -34,7 +34,7 @@ export class UserKeyUsage extends Base {
   @Column({ type: 'varchar', length: 40, comment: 'client usage id' })
   client_usage_id: string;
 
-  @Column({ type: 'tinyint', comment: '状态', default: KeyUsageState.VALID })
+  @Column({ type: 'enum', enum: KeyUsageState, comment: '状态', default: KeyUsageState.VALID })
   state: KeyUsageState;
 
   @ManyToOne(() => UserKey)

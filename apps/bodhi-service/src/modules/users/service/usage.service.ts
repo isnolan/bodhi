@@ -1,9 +1,8 @@
-import { v4 as uuidv4 } from 'uuid';
-import { IsNull, MoreThan, Repository } from 'typeorm';
-import * as moment from 'moment-timezone';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { KeyUsageState, UserKeyState, UserKeyUsage } from '../entity';
+import { IsNull, MoreThan, Repository } from 'typeorm';
+
+import { KeyUsageState, UserKeyUsage } from '../entity';
 
 @Injectable()
 export class UserKeyUsageService {
@@ -58,7 +57,7 @@ export class UserKeyUsageService {
   async increaseQuota(key_id, opts: Partial<UserKeyUsage>): Promise<UserKeyUsage> {
     const { client_usage_id, times_limit = -1, tokens_limit = -1 } = opts;
     const usage = await this.repository.findOne({
-      where: { key_id, client_usage_id, state: 1 },
+      where: { key_id, client_usage_id, state: KeyUsageState.VALID },
       order: { id: 'DESC' },
     });
 
