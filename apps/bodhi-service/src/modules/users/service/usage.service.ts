@@ -55,7 +55,7 @@ export class UserKeyUsageService {
     }
   }
 
-  async increaseQuota(key_id, opts: Partial<UserKeyUsage>) {
+  async increaseQuota(key_id, opts: Partial<UserKeyUsage>): Promise<UserKeyUsage> {
     const { client_usage_id, times_limit = -1, tokens_limit = -1 } = opts;
     const usage = await this.repository.findOne({
       where: { key_id, client_usage_id, state: 1 },
@@ -66,7 +66,8 @@ export class UserKeyUsageService {
       const d = {};
       times_limit > 0 && Object.assign(d, { times_limit: usage.times_limit + times_limit });
       tokens_limit > 0 && Object.assign(d, { tokens_limit: usage.tokens_limit + tokens_limit });
-      return this.repository.update(usage.id, d);
+      await this.repository.update(usage.id, d);
+      return usage;
     } else {
       return this.repository.save(this.repository.create({ key_id, ...opts }));
     }

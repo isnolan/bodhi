@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
@@ -12,7 +13,7 @@ export class LimitKeysDto {
   @IsString()
   client_usage_id: string;
 
-  @ApiPropertyOptional({ description: 'model', example: 'gemini-pro' })
+  @ApiPropertyOptional({ description: 'model', example: ['gemini-pro'] })
   @IsNotEmpty()
   @IsArray()
   models: string[];
@@ -27,7 +28,7 @@ export class LimitKeysDto {
   @IsNumber()
   tokens_limit: number;
 
-  @ApiPropertyOptional({ description: 'expires', example: null })
+  @ApiPropertyOptional({ description: 'expires', example: new Date().toISOString() })
   @IsOptional()
   @IsDateString()
   expires_at: Date;

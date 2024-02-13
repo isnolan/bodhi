@@ -43,8 +43,7 @@ export class UsersController {
     const { user_id } = req.user;
     const { client_user_id, ...opts } = payload;
     try {
-      await this.users.increaseKeyQuota(user_id, client_user_id, opts);
-      return;
+      return await this.users.increaseKeyQuota(user_id, client_user_id, opts);
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
     }
