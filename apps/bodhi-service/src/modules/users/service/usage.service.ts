@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Like, MoreThan, Repository } from 'typeorm';
 
-import { KeyUsageState, UserKeyUsage } from '../entity';
+import { KeyUsageState, UserUsage } from '../entity';
 
 @Injectable()
-export class UserKeyUsageService {
+export class UserUsageService {
   constructor(
-    @InjectRepository(UserKeyUsage)
-    private readonly repository: Repository<UserKeyUsage>,
+    @InjectRepository(UserUsage)
+    private readonly repository: Repository<UserUsage>,
   ) {}
 
   /**
@@ -48,7 +48,7 @@ export class UserKeyUsageService {
     }
   }
 
-  async allocate(user_id: number, opts: Partial<UserKeyUsage>): Promise<UserKeyUsage> {
+  async allocate(user_id: number, opts: Partial<UserUsage>): Promise<UserUsage> {
     const { client_user_id, client_usage_id, times_limit = -1, tokens_limit = -1 } = opts;
     const where = { user_id, client_user_id, client_usage_id, state: KeyUsageState.VALID };
     const usage = await this.repository.findOne({ where });

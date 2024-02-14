@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { Users } from './entity/users.entity';
-import { UserKeyService, UserKeyUsageService } from './service';
+import { UserKeyService, UserUsageService } from './service';
 import { UsersUserService } from './service/user.service';
-import { UserKeyUsage } from './entity';
+import { UserUsage } from './entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly user: UsersUserService,
     private readonly keys: UserKeyService,
-    private readonly usage: UserKeyUsageService,
+    private readonly usage: UserUsageService,
   ) {}
 
   async findOne(id: number): Promise<Users> {
@@ -36,7 +36,7 @@ export class UsersService {
     return this.usage.consume(usage_id, times, tokens);
   }
 
-  async allocateUsage(user_id: number, opts: Partial<UserKeyUsage>) {
+  async allocateUsage(user_id: number, opts: Partial<UserUsage>) {
     return this.usage.allocate(user_id, opts);
   }
 }

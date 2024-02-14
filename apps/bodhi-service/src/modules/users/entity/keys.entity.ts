@@ -1,6 +1,6 @@
 import { Entity, Column, OneToMany } from 'typeorm';
 import { Base } from '@/core/common/base.entity';
-import { UserKeyUsage } from './usage.entity';
+import { UserUsage } from './usage.entity';
 
 export enum UserKeyState {
   VALID = 'valid',

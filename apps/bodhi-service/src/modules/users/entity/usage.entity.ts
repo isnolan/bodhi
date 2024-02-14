@@ -9,7 +9,7 @@ export enum KeyUsageState {
 }
 
 @Entity('bodhi_users_usage')
-export class UserKeyUsage extends Base {
+export class UserUsage extends Base {
   @Column({ comment: 'user_id' })
   user_id: number;
 

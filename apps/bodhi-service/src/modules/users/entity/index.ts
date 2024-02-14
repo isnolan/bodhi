@@ -3,7 +3,7 @@ export * from './usage.entity';
 export * from './users.entity';
 
 import { UserKey } from './keys.entity';
-import { UserKeyUsage } from './usage.entity';
+import { UserUsage } from './usage.entity';
 import { Users } from './users.entity';
 
-export default [Users, UserKey, UserKeyUsage];
+export default [Users, UserKey, UserUsage];
