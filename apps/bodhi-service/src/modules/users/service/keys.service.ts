@@ -42,22 +42,20 @@ export class UserKeyService {
    * @returns
    */
   async createKey(user_id: number, opts: Partial<UserKey>): Promise<UserKey> {
-    const { client_user_id, note = '' } = opts;
-
-    // check if client_user_id exists
-    const exist = await this.repository.findOne({ where: { user_id, client_user_id } });
+    const { client_user_id } = opts;
+    const exist = await this.repository.findOne({ where: { user_id, client_user_id, state: UserKeyState.VALID } });
     if (exist) {
       return exist;
     }
 
     // create a new secret key
     const secret_key = `sk-` + uuidv4();
-    return this.repository.save(this.repository.create({ user_id, client_user_id, secret_key, note }));
+    return this.repository.save(this.repository.create({ user_id, ...opts, secret_key }));
   }
 
   async getList(user_id: number): Promise<UserKey[]> {
     return this.repository.find({
-      select: ['id', 'secret_key', 'client_user_id', 'note', 'expires_at', 'create_at'],
+      select: ['id', 'client_user_id', 'secret_key', 'remark', 'expires_at', 'update_at'],
       where: { user_id },
     });
   }

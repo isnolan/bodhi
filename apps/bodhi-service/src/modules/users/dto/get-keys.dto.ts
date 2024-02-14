@@ -8,15 +8,15 @@ export class GetKeysDto {
 
   @ApiProperty()
   @IsString()
-  secret_key: string;
-
-  @ApiProperty()
-  @IsString()
   client_user_id: string;
 
   @ApiProperty()
   @IsString()
-  note: string;
+  secret_key: string;
+
+  @ApiProperty()
+  @IsString()
+  remark: string;
 
   @ApiProperty()
   @IsString()
@@ -24,5 +24,5 @@ export class GetKeysDto {
 
   @ApiProperty()
   @IsString()
-  create_at: Date;
+  update_at: Date;
 }

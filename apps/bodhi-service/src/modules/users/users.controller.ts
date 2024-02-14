@@ -31,22 +31,9 @@ export class UsersController {
   @ApiResponse({ status: 201, description: 'success', type: GetKeysDto })
   async createKey(@Request() req, @Body() payload: CreateKeysDto): Promise<GetKeysDto> {
     const { user_id } = req.user;
-    const { client_user_id, note, expires_at } = payload;
-    const { id, secret_key, create_at } = await this.keys.createKey(user_id, { client_user_id, note, expires_at });
-    return { id, secret_key, client_user_id, note, expires_at, create_at };
-  }
-
-  @Post('keys/increase')
-  @ApiOperation({ summary: 'Allocate quota to one key', description: 'Allocate quota to one key' })
-  @ApiResponse({ status: 201, description: 'success' })
-  async increaseKeyQuota(@Request() req, @Body() payload: LimitKeysDto) {
-    const { user_id } = req.user;
-    const { client_user_id, ...opts } = payload;
-    try {
-      return await this.users.increaseKeyQuota(user_id, client_user_id, opts);
-    } catch (err) {
-      throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
-    }
+    const { client_user_id, remark, expires_at } = payload;
+    const { id, secret_key, update_at } = await this.keys.createKey(user_id, { client_user_id, remark, expires_at });
+    return { id, client_user_id, secret_key, remark, expires_at, update_at };
   }
 
   @Delete('keys/delete')
@@ -61,6 +48,18 @@ export class UsersController {
         throw new Error('key not found');
       }
       return this.keys.delete(key.id);
+    } catch (err) {
+      throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Post('usage/allocate')
+  @ApiOperation({ summary: 'Allocate usage to client user', description: 'Allocate usage to client user' })
+  @ApiResponse({ status: 201, description: 'success' })
+  async allocateUsage(@Request() req, @Body() payload: LimitKeysDto) {
+    const { user_id } = req.user;
+    try {
+      return this.users.allocateUsage(user_id, payload);
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
     }

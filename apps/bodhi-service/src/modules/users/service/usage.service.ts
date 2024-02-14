@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, MoreThan, Repository } from 'typeorm';
+import { IsNull, Like, MoreThan, Repository } from 'typeorm';
 
 import { KeyUsageState, UserKeyUsage } from '../entity';
 
@@ -17,8 +17,8 @@ export class UserKeyUsageService {
    * @param model
    * @returns
    */
-  async checkAvailableQuota(key_id: number, model: string): Promise<number> {
-    const query = { key_id, model, state: KeyUsageState.VALID };
+  async checkAvailable(client_user_id: string, model: string): Promise<number> {
+    const query = { client_user_id, models: Like(`%\"${model}\"%`), state: KeyUsageState.VALID };
     const row = await this.repository.findOne({
       where: [
         { expires_at: MoreThan(new Date()), ...query },
@@ -30,8 +30,8 @@ export class UserKeyUsageService {
     }
 
     if (
-      (row.times_limit === -1 || row.times_limit >= row.times_consumed) &&
-      (row.tokens_limit === -1 || row.tokens_limit >= row.tokens_consumed)
+      (row.times_limit == -1 || row.times_limit >= row.times_consumed) &&
+      (row.tokens_limit == -1 || row.tokens_limit >= row.tokens_consumed)
     ) {
       return row.id;
     }
@@ -39,27 +39,19 @@ export class UserKeyUsageService {
     return 0;
   }
 
-  /**
-   * Consumes key quote, after a message has been sent.
-   * @param id
-   * @param times
-   * @param tokens
-   */
-  async consumeKeyQuote(id: number, times: number = 0, tokens: number = 0) {
+  async consume(usage_id: number, times: number = 0, tokens: number = 0) {
     if (times > 0) {
-      await this.repository.increment({ id }, 'times_consumed', times);
+      await this.repository.increment({ id: usage_id }, 'times_consumed', times);
     }
     if (tokens > 0) {
-      await this.repository.increment({ id }, 'tokens_consumed', tokens);
+      await this.repository.increment({ id: usage_id }, 'tokens_consumed', tokens);
     }
   }
 
-  async increaseQuota(key_id, opts: Partial<UserKeyUsage>): Promise<UserKeyUsage> {
-    const { client_usage_id, times_limit = -1, tokens_limit = -1 } = opts;
-    const usage = await this.repository.findOne({
-      where: { key_id, client_usage_id, state: KeyUsageState.VALID },
-      order: { id: 'DESC' },
-    });
+  async allocate(user_id: number, opts: Partial<UserKeyUsage>): Promise<UserKeyUsage> {
+    const { client_user_id, client_usage_id, times_limit = -1, tokens_limit = -1 } = opts;
+    const where = { user_id, client_user_id, client_usage_id, state: KeyUsageState.VALID };
+    const usage = await this.repository.findOne({ where });
 
     if (usage) {
       const d = {};
@@ -68,7 +60,7 @@ export class UserKeyUsageService {
       await this.repository.update(usage.id, d);
       return usage;
     } else {
-      return this.repository.save(this.repository.create({ key_id, ...opts }));
+      return this.repository.save(this.repository.create({ user_id, client_user_id, ...opts }));
     }
   }
 }

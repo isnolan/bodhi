@@ -50,7 +50,7 @@ export class SupplierArchivesProcessor {
       // consume keys quotes, if exists
       if (key_usage_id > 0) {
         console.log(`[archives]key usage`, key_usage_id, tokens);
-        await this.users.consumeKeyQuote(key_usage_id, role === 'assistant' ? 1 : 0, tokens);
+        await this.users.consumeUsage(key_usage_id, role === 'assistant' ? 1 : 0, tokens);
       }
 
       if (usage_id > 0) {

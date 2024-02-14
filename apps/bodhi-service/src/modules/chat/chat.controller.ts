@@ -55,7 +55,7 @@ export class ChatController {
   @ApiResponse({ status: 201, description: 'success' })
   @ApiResponse({ status: 400, description: 'exception' })
   async completions(@Req() req: RequestWithUser, @Res() res: Response, @Body() payload: CreateCompletionDto) {
-    const { user_id, user_key_id = 0 } = req.user; // from jwt or apikey
+    const { user_id, client_user_id = 0 } = req.user; // from jwt or apikey
     const { conversation_id = uuidv4(), message_id = uuidv4(), parent_id } = payload;
     const { messages = [], tools = [], model, temperature, top_p, top_k, context_limit, n } = payload;
     // console.log(`[chat]completions`, payload);
@@ -77,8 +77,8 @@ export class ChatController {
 
       // check keys limit
       let key_usage_id = 0;
-      if (user_key_id > 0) {
-        const kui = await this.users.checkAvailableQuota(user_key_id, model);
+      if (client_user_id) {
+        const kui = await this.users.checkAvailableQuota(client_user_id, model);
         if (kui > 0) {
           key_usage_id = kui;
         } else {

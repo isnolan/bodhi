@@ -7,13 +7,13 @@ export class CreateKeysDto {
   @IsString()
   client_user_id: string;
 
+  @ApiPropertyOptional({ description: 'remark', example: '' })
+  @IsOptional()
+  @IsString()
+  remark: string;
+
   @ApiPropertyOptional({ description: 'expire at', example: new Date() })
   @IsOptional()
   @IsDateString()
-  expires_at: Date;
-
-  @ApiPropertyOptional({ description: 'note', example: '' })
-  @IsOptional()
-  @IsString()
-  note: string;
+  expires_at: Date | null;
 }

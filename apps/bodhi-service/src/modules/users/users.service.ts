@@ -24,25 +24,19 @@ export class UsersService {
     return this.user.createOneWithEmail(email, opts);
   }
 
-  async checkAvailableQuota(key_id: number, model: string): Promise<number> {
-    return this.usage.checkAvailableQuota(key_id, model);
+  async checkAvailableQuota(client_user_id: string, model: string): Promise<number> {
+    return this.usage.checkAvailable(client_user_id, model);
   }
 
   async validateKey(secret_key: string) {
     return this.keys.validateKey(secret_key);
   }
 
-  async consumeKeyQuote(key_id: number, times: number, tokens: number) {
-    return this.usage.consumeKeyQuote(key_id, times, tokens);
+  async consumeUsage(usage_id: number, times: number, tokens: number) {
+    return this.usage.consume(usage_id, times, tokens);
   }
 
-  async increaseKeyQuota(user_id: number, client_user_id: string, opts: Partial<UserKeyUsage>) {
-    // check
-    const key = await this.keys.findActive(user_id, client_user_id);
-    if (!key) {
-      throw new Error(`This user has not created a key yet`);
-    }
-
-    return this.usage.increaseQuota(key.id, opts);
+  async allocateUsage(user_id: number, opts: Partial<UserKeyUsage>) {
+    return this.usage.allocate(user_id, opts);
   }
 }

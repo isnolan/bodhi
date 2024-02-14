@@ -8,18 +8,21 @@ export enum KeyUsageState {
   DELETED = 'deleted',
 }
 
-@Entity('bodhi_users_keys_usage')
+@Entity('bodhi_users_usage')
 export class UserKeyUsage extends Base {
-  @Column({ type: 'int', comment: 'key_id' })
-  key_id: number;
+  @Column({ comment: 'user_id' })
+  user_id: number;
+
+  @Column({ type: 'varchar', length: 40, comment: 'foreign user', default: '' })
+  client_user_id: string;
 
   @Column({ type: 'simple-json', comment: 'models', default: null })
   models: string[];
 
-  @Column('int', { comment: 'times limit', default: -1 })
+  @Column({ type: 'int', comment: 'times limit', default: -1 })
   times_limit: number; // -1: unlimited, 0: disabled, >0: available
 
-  @Column('int', { comment: 'tokens limit', default: -1 })
+  @Column({ type: 'int', comment: 'tokens limit', default: -1 })
   tokens_limit: number; // -1: unlimited, 0: disabled, >0: available
 
   @Column({ type: 'int', comment: 'times', default: 0 })
@@ -36,8 +39,4 @@ export class UserKeyUsage extends Base {
 
   @Column({ type: 'enum', enum: KeyUsageState, comment: '状态', default: KeyUsageState.VALID })
   state: KeyUsageState;
-
-  @ManyToOne(() => UserKey)
-  @JoinColumn({ name: 'key_id', referencedColumnName: 'id' })
-  key: UserKey;
 }
