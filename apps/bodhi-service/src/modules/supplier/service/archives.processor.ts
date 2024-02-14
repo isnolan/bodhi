@@ -31,7 +31,7 @@ export class SupplierArchivesProcessor {
     let { tokens } = job.data;
     return new Promise(async (resolve) => {
       const conversation = await this.conversation.findOne(conversation_id);
-      const { usage_id, provider_id, key_usage_id } = conversation;
+      const { usage_id, provider_id, user_usage_id } = conversation;
       // archive message
       // user message have been archived in the first time.
       if (role === 'assistant') {
@@ -48,9 +48,9 @@ export class SupplierArchivesProcessor {
       await this.conversation.updateAttribute(conversation_id, attr);
 
       // consume keys quotes, if exists
-      if (key_usage_id > 0) {
-        console.log(`[archives]key usage`, key_usage_id, tokens);
-        await this.users.consumeUsage(key_usage_id, role === 'assistant' ? 1 : 0, tokens);
+      if (user_usage_id > 0) {
+        console.log(`[archives]key usage`, user_usage_id, tokens);
+        await this.users.consumeUsage(user_usage_id, role === 'assistant' ? 1 : 0, tokens);
       }
 
       if (usage_id > 0) {

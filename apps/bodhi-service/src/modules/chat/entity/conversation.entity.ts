@@ -10,7 +10,7 @@ export class ChatConversation extends Base {
   user_id: number;
 
   @Column({ type: 'int', comment: 'key usage', default: 0 })
-  key_usage_id: number;
+  user_usage_id: number;
 
   @Column({ type: 'int', comment: 'provider', default: 0 })
   provider_id: number;
