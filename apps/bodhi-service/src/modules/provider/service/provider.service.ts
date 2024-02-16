@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CredentialsState, Provider, ProviderModels } from '../entity';
-import { In, IsNull, MoreThan, Repository, getRepository } from 'typeorm';
+import { Equal, In, IsNull, MoreThan, Repository, getRepository } from 'typeorm';
 import { ProviderWithRelations } from '../dto/find-provider.dto';
 import { ProviderModelsService } from './models.service';
 
@@ -25,7 +25,13 @@ export class ProviderService {
    * Find active providers, by purchased
    */
   async findActive(ids: number[]): Promise<ProviderWithRelations[]> {
-    const query = { id: In(ids), status: CredentialsState.ACTIVE };
+    const query = {
+      id: In(ids),
+      status: CredentialsState.ACTIVE,
+      model: { status: CredentialsState.ACTIVE },
+      credential: { status: CredentialsState.ACTIVE },
+      instance: { status: CredentialsState.ACTIVE },
+    };
     return this.repository.find({
       where: [
         { expires_at: MoreThan(new Date()), ...query },
@@ -59,12 +65,17 @@ export class ProviderService {
   }
 
   async filterProviderByModel(ids: number[], name: string): Promise<number[]> {
-    const providers = await this.repository
-      .createQueryBuilder('provider')
-      .leftJoinAndSelect('provider.model', 'model')
-      .where('provider.id IN (:...ids)', { ids })
-      .andWhere('model.name = :name', { name })
-      .getMany();
+    // const providers = await this.repository
+    //   .createQueryBuilder('provider')
+    //   .leftJoinAndSelect('provider.model', 'model')
+    //   .where('provider.id IN (:...ids)', { ids })
+    //   .andWhere('model.name = :name', { name })
+    //   .getMany();
+
+    const providers = await this.repository.find({
+      select: ['id'],
+      where: { id: In(ids), slug: Equal(name) },
+    });
     return providers.map((provider) => provider.id);
   }
 }
