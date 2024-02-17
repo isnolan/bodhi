@@ -28,7 +28,11 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
   public async sendMessage(opts: types.chat.SendOptions) {
     const { onProgress = () => {}, ...options } = opts;
     return new Promise(async (resolove, reject) => {
-      const model = opts.model || 'gemini-pro';
+      // if have media, use gemini-pro-vision
+      const hasMedia = opts.messages.some((item) =>
+        item.parts.some((part) => part.type === 'image' || part.type === 'video'),
+      );
+      const model = hasMedia ? 'gemini-pro-vision' : opts.model || 'gemini-pro';
       const url = `${this.baseURL}/models/${model}:streamGenerateContent?alt=sse`;
       const params: gemini.Request = await this.convertParams(options);
       // console.log(`[fetch]params`, JSON.stringify(params, null, 2));

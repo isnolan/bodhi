@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 import * as path from 'path';
+import * as dotenv from 'dotenv';
 import { Provider, ChatAPI } from '../src/api';
-
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 const credential = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, '../../../.credentials/google-cloud.json'), 'utf8'),
 );

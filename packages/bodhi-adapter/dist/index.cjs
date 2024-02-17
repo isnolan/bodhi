@@ -348,7 +348,10 @@ var GoogleGeminiAPI = class extends ChatBaseAPI {
   async sendMessage(opts) {
     const { onProgress = () => {}, ...options } = opts;
     return new Promise(async (resolove, reject) => {
-      const model = opts.model || 'gemini-pro';
+      const hasMedia = opts.messages.some((item) =>
+        item.parts.some((part) => part.type === 'image' || part.type === 'video'),
+      );
+      const model = hasMedia ? 'gemini-pro-vision' : opts.model || 'gemini-pro';
       const url = `${this.baseURL}/models/${model}:streamGenerateContent?alt=sse`;
       const params = await this.convertParams(options);
       const res = await (0, import_node_fetch3.default)(url, {
@@ -500,7 +503,10 @@ var GoogleVertexAPI = class extends GoogleGeminiAPI {
     const { onProgress = () => {}, ...options } = opts;
     return new Promise(async (resolove, reject) => {
       const token = await this.getToken();
-      const model = opts.model || 'gemini-pro';
+      const hasMedia = opts.messages.some((item) =>
+        item.parts.some((part) => part.type === 'image' || part.type === 'video'),
+      );
+      const model = hasMedia ? 'gemini-pro-vision' : opts.model || 'gemini-pro';
       const url = `${this.baseURL}/projects/darftai/locations/asia-southeast1/publishers/google/models/${model}:streamGenerateContent?alt=sse`;
       const params = await this.convertParams(options);
       const res = await (0, import_node_fetch4.default)(url, {

@@ -38,7 +38,7 @@ describe('chat', () => {
   // vision: image part, from inline data
   it('vision:image from inline data', async () => {
     const res = await api.sendMessage({
-      model: 'gemini-pro-vision',
+      model: 'gemini-pro',
       messages: [
         {
           role: 'user',
