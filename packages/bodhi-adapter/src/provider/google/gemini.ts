@@ -105,7 +105,7 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
     };
   }
 
-  private async corvertContents(opts: types.chat.SendOptions): Promise<gemini.Content[]> {
+  protected async corvertContents(opts: types.chat.SendOptions): Promise<gemini.Content[]> {
     return Promise.all(
       opts.messages.map(async (item) => {
         const parts: gemini.Part[] = [];

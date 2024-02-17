@@ -1,4 +1,4 @@
-import { OpenAICompletionsAPI, OpenAIAssistantsAPI } from '@/provider';
+import { OpenAICompletionsAPI, OpenAIAssistantsAPI, GoogleClaudeAPI } from '@/provider';
 import { GoogleVertexAPI, GoogleGeminiAPI } from '@/provider';
 import { AnthropicClaudeAPI, AnthropicBedrockAPI } from '@/provider';
 import { AliyunQwenAPI, AliyunWanxAPI } from '@/provider';
@@ -17,6 +17,9 @@ export class ChatAPI {
         break;
       case types.Provider.GOOGLE_GEMINI:
         this.provider = new GoogleGeminiAPI(opts);
+        break;
+      case types.Provider.GOOGLE_CLAUDE:
+        this.provider = new GoogleClaudeAPI(opts);
         break;
       case types.Provider.OPENAI_COMPLETIONS:
         this.provider = new OpenAICompletionsAPI(opts);

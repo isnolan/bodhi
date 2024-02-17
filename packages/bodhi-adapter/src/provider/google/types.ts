@@ -49,3 +49,44 @@ export namespace gemini {
     safetyRatings: safetyRating[];
   };
 }
+
+export namespace claude {
+  /**
+   * Request
+   */
+  export type Request = {
+    system: string;
+    messages: Content[];
+    temperature: number;
+    top_k: number;
+    top_p: number;
+    max_tokens: number;
+    stop_sequences: string[];
+    stream: boolean;
+
+    anthropic_version: string;
+    anthropic_beta: string[];
+  };
+
+  export type Content = {
+    role: Role;
+    content: string;
+  };
+
+  export type Role = 'user' | 'assistant';
+
+  /**
+   * Response
+   */
+  // export type Response = {
+  //   candidates: Candidate[];
+  //   usageMetadata: usageMetadata;
+  // };
+
+  // export type Candidate = {
+  //   content: { parts: Part[]; role: Role };
+  //   finishReason: string;
+  //   index: number;
+  //   safetyRatings: safetyRating[];
+  // };
+}
