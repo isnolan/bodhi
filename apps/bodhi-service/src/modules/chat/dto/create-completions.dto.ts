@@ -3,7 +3,7 @@ import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-valid
 import { chat } from '@isnolan/bodhi-adapter';
 import { v4 as uuidv4 } from 'uuid';
 
-export class CreateCompletionDto {
+export class CreateCompletionsDto {
   /* 基本内容 */
   @ApiProperty({ default: 'gemini-pro' })
   @IsNotEmpty()
@@ -48,8 +48,11 @@ export class CreateCompletionDto {
   @ApiProperty({ default: uuidv4() })
   @IsOptional()
   @IsString()
-  conversation_id?: string;
+  conversation_id: string;
+}
 
+export class CreateConversationDto extends CreateCompletionsDto {
+  /* 会话保持 */
   @ApiPropertyOptional({ default: uuidv4() })
   @IsOptional()
   @IsString()
