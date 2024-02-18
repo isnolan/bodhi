@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { chat } from '@isnolan/bodhi-adapter';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -15,8 +15,8 @@ export class CreateCompletionsDto {
   @IsArray()
   messages: chat.Message[];
 
-  @ApiPropertyOptional({ default: [] })
-  tools: chat.Tools[];
+  // @ApiPropertyOptional({ default: [] })
+  // tools: chat.Tools[];
 
   /* 会话参数 */
   @ApiProperty({ default: 0.8 })
@@ -24,22 +24,27 @@ export class CreateCompletionsDto {
   @IsNumber()
   temperature?: number;
 
-  @ApiProperty({ default: 0 })
+  @ApiProperty({ default: 1 })
   @IsOptional()
   @IsNumber()
   top_p?: 0;
 
-  @ApiProperty({ default: 0 })
+  @ApiProperty({ default: 1 })
   @IsOptional()
   @IsNumber()
   top_k?: 0;
 
-  @ApiProperty({ default: 1 })
+  // @ApiProperty({ default: 1 })
   @IsOptional()
   @IsNumber()
   n?: 1;
 
-  @ApiProperty({ default: 5 })
+  @ApiProperty({ default: true })
+  @IsOptional()
+  @IsBoolean()
+  stream?: boolean;
+
+  // @ApiProperty({ default: 5 })
   @IsOptional()
   @IsNumber()
   context_limit?: 5;
@@ -48,7 +53,7 @@ export class CreateCompletionsDto {
   @ApiProperty({ default: uuidv4() })
   @IsOptional()
   @IsString()
-  conversation_id: string;
+  conversation_id?: string;
 }
 
 export class CreateConversationDto extends CreateCompletionsDto {
@@ -58,7 +63,7 @@ export class CreateConversationDto extends CreateCompletionsDto {
   @IsString()
   message_id?: string;
 
-  @ApiPropertyOptional({ default: uuidv4() })
+  @ApiPropertyOptional({ default: null })
   @IsOptional()
   @IsString()
   parent_id?: string;

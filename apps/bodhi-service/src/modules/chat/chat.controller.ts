@@ -23,7 +23,7 @@ export class ChatController {
     private readonly users: UsersService,
     private readonly service: ChatService,
     private readonly provider: ProviderService,
-    private readonly conversation: ChatConversationService,
+    private readonly conversations: ChatConversationService,
     private readonly subscription: SubscriptionService,
   ) {}
 
@@ -51,12 +51,12 @@ export class ChatController {
   @Post('conversation')
   @ApiOperation({ description: 'chat conversation', summary: 'chat conversation' })
   @ApiBody({ type: CreateConversationDto })
-  @ApiResponse({ status: 201, description: 'success' })
+  @ApiResponse({ status: 200, description: 'success' })
   @ApiResponse({ status: 400, description: 'exception' })
-  async completions(@Req() req: RequestWithUser, @Res() res: Response, @Body() payload: CreateConversationDto) {
+  async conversation(@Req() req: RequestWithUser, @Res() res: Response, @Body() payload: CreateConversationDto) {
     const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
-    const { conversation_id = uuidv4(), message_id = uuidv4(), parent_id } = payload;
-    const { messages = [], tools = [], model, temperature, top_p, top_k, context_limit, n } = payload;
+    const { model, messages = [], conversation_id = uuidv4(), message_id = uuidv4() } = payload;
+    const { stream = true, parent_id, temperature, top_p, top_k, context_limit, n } = payload;
 
     try {
       // validate subscription
@@ -64,31 +64,9 @@ export class ChatController {
 
       // find or create conversation
       const d = { model, temperature, top_p, top_k, user_id, user_usage_id, context_limit, n };
-      const conversation = await this.conversation.findAndCreateOne(conversation_id, d);
-      const channel = `completions:${conversation.id}`;
-      const listener = (chl: string, message: string) => {
-        if (chl === channel && !res.writableEnded) {
-          const d = JSON.parse(message);
-          if (d.error) {
-            if (!res.headersSent) {
-              res.status(400).json(d);
-            }
-            this.service.unsubscribe(channel, listener);
-            return;
-          }
-
-          // process & result
-          if (typeof d === 'object') {
-            res.write(`data: ${message}\n\n`);
-          }
-          if (d.usage) {
-            res.write(`data: [DONE]\n\n`);
-            res.end();
-            this.service.unsubscribe(channel, listener);
-            return;
-          }
-        }
-      };
+      const conversation = await this.conversations.findAndCreateOne(conversation_id, d);
+      const channel = `conversation:${conversation.id}`;
+      const listener = this.createListener(channel, res, stream);
       this.service.subscribe(channel, listener);
 
       req.on('close', () => {
@@ -107,49 +85,27 @@ export class ChatController {
   @Post('completions')
   @ApiOperation({ description: 'Chat completions', summary: 'Chat completions' })
   @ApiBody({ type: CreateCompletionsDto })
-  @ApiResponse({ status: 201, description: 'success' })
+  @ApiResponse({ status: 200, description: 'success' })
   @ApiResponse({ status: 400, description: 'exception' })
-  async agent(@Req() req: RequestWithUser, @Res() res: Response, @Body() payload: CreateCompletionsDto) {
+  async completions(@Req() req: RequestWithUser, @Res() res: Response, @Body() payload: CreateCompletionsDto) {
     const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
-    const { model = 'gemini-pro', messages = [], conversation_id = uuidv4() } = payload;
-    const { tools = [], temperature = 0.9, top_p = 1, top_k = 1, context_limit = 5, n = 1 } = payload;
+    const { model = 'gemini-pro', messages = [], conversation_id = uuidv4(), stream = true } = payload;
+    const { temperature = 0.9, top_p = 1, top_k = 1, context_limit = 5, n = 1 } = payload;
+    console.log(`->completions`, conversation_id, payload.conversation_id);
 
     try {
       // validate subscription
       const { usages, provider_ids, user_usage_id } = await this.validateSubscription(user_id, model, client_user_id);
-      // console.log(`->usage`, provider_ids, user_usage_id);
 
       // Get or create conversation
       const d = { model, temperature, top_p, top_k, context_limit, n, user_id, user_usage_id };
-      const conversation = await this.conversation.findAndCreateOne(conversation_id, d);
+      const conversation = await this.conversations.findAndCreateOne(conversation_id, d);
       if (!conversation) {
         throw new Error('Invalid conversation');
       }
 
-      const channel = `agent:${conversation_id}:${+new Date()}`;
-      const listener = (chl: string, message: string) => {
-        if (chl === channel && !res.writableEnded) {
-          const d = JSON.parse(message);
-          if (d.error) {
-            if (!res.headersSent) {
-              res.status(400).json(d);
-            }
-            this.service.unsubscribe(channel, listener);
-            return;
-          }
-
-          // process & result
-          if (typeof d === 'object') {
-            res.write(`data: ${message}\n\n`);
-          }
-          if (d.usage) {
-            res.write(`data: [DONE]\n\n`);
-            res.end();
-            this.service.unsubscribe(channel, listener);
-            return;
-          }
-        }
-      };
+      const channel = `completions:${conversation_id}:${+new Date()}`;
+      const listener = this.createListener(channel, res, stream);
       this.service.subscribe(channel, listener);
 
       req.on('close', () => {
@@ -189,5 +145,39 @@ export class ChatController {
     }
 
     return { usages, provider_ids, user_usage_id };
+  }
+
+  private createListener(channel: string, res: Response, stream: boolean = true) {
+    return (chl: string, message: string) => {
+      if (chl === channel && !res.writableEnded) {
+        const d = JSON.parse(message);
+        if (d.error) {
+          if (!res.headersSent) {
+            res.status(400).json(d);
+          }
+          this.service.unsubscribe(channel, this.createListener(channel, res, stream));
+          return;
+        }
+
+        // process & result
+        if (typeof d === 'object') {
+          if (stream) {
+            res.write(`data: ${message}\n\n`);
+          }
+
+          if (d.usage) {
+            if (stream) {
+              res.write(`data: [DONE]\n\n`);
+              res.end();
+            } else {
+              res.status(200).json(d);
+            }
+
+            this.service.unsubscribe(channel, this.createListener(channel, res, stream));
+            return;
+          }
+        }
+      }
+    };
   }
 }
