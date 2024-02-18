@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { chat } from '@isnolan/bodhi-adapter';
 import { UsageWithQuota } from '@/modules/subscription/dto/find-useage.dto';
 
@@ -22,4 +22,8 @@ export class SendMessageDto {
   @IsOptional()
   @IsString()
   parent_id?: string;
+
+  @IsOptional()
+  @IsNumber()
+  status?: number;
 }

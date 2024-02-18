@@ -55,36 +55,13 @@ export class ChatController {
   @ApiResponse({ status: 201, description: 'success' })
   @ApiResponse({ status: 400, description: 'exception' })
   async completions(@Req() req: RequestWithUser, @Res() res: Response, @Body() payload: CreateCompletionDto) {
-    const { user_id, client_user_id = 0 } = req.user; // from jwt or apikey
+    const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
     const { conversation_id = uuidv4(), message_id = uuidv4(), parent_id } = payload;
     const { messages = [], tools = [], model, temperature, top_p, top_k, context_limit, n } = payload;
-    // console.log(`[chat]completions`, payload);
 
     try {
-      const usages = await this.subscription.findActiveUsageWithQuota(user_id, true);
-      // console.log(`[chat]usage`, usages.length, usages);
-      if (usages.length === 0) {
-        throw new Error(`No active subscription or available quota.`);
-      }
-
-      const ids = [...new Set(usages.flatMap((usage) => usage.quota.providers))];
-      // console.log(`[chat]ids`, ids);
-      const provider_ids = await this.provider.filterProviderByModel(ids as [], model);
-      // console.log(`[chat]provider_ids`, provider_ids);
-      if (provider_ids.length === 0) {
-        throw new Error(`No valid supplier for model:${model}`);
-      }
-
-      // check keys limit
-      let user_usage_id = 0;
-      if (client_user_id) {
-        const kui = await this.users.checkAvailableQuota(client_user_id, model);
-        if (kui > 0) {
-          user_usage_id = kui;
-        } else {
-          throw new Error(`Not enough quota for the key.`);
-        }
-      }
+      // validate subscription
+      const { usages, provider_ids, user_usage_id } = await this.validateSubscription(user_id, model, client_user_id);
 
       // find or create conversation
       const d = { model, temperature, top_p, top_k, user_id, user_usage_id, context_limit, n };
@@ -133,24 +110,46 @@ export class ChatController {
   @ApiOperation({ description: 'Chat Agent' })
   @ApiResponse({ status: 201, description: 'success' })
   @ApiResponse({ status: 400, description: 'exception' })
-  async agent(@Req() req: Request, @Body() payload: CreateAgentDto) {
-    // const { user_id, user_key_id = 0 } = req.user; // from jwt or apikey
-    const { conversation_id, parent_id, message } = payload;
-    const channel = `agent:${conversation_id}:${+new Date()}`;
-    console.log(`[chat]agent`, channel, payload);
-    // 获取或创建会话
-    const conversation = await this.conversation.findOneByConversationId(conversation_id);
-    if (!conversation) {
-      throw new HttpException('Invalid conversation', HttpStatus.BAD_REQUEST);
-    }
+  async agent(@Req() req: RequestWithUser, @Res() res: Response, @Body() payload: CreateAgentDto) {
+    const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
+    const { conversation_id = uuidv4(), prompt } = payload;
+    const model = 'gemini-pro';
 
-    // `What would be a less than 50 character short and relevant title for this chat? No other text are allowed.`;
-    // Please make 3 short inspiring tips on the content of the chat. No other text are allowed.
-    return new Promise(async (resolve) => {
+    try {
+      // validate subscription
+      const { usages, provider_ids, user_usage_id } = await this.validateSubscription(user_id, model, client_user_id);
+      // console.log(`->usage`, provider_ids, user_usage_id);
+
+      // Get or create conversation
+      const d = { model, temperature: 0.9, top_p: 1, top_k: 1, user_id, user_usage_id };
+      const conversation = await this.conversation.findAndCreateOne(conversation_id, d);
+      if (!conversation) {
+        throw new Error('Invalid conversation');
+      }
+
+      const channel = `agent:${conversation_id}:${+new Date()}`;
       const listener = (chl: string, message: string) => {
-        if (chl !== channel) return;
-        this.service.unsubscribe(channel, listener);
-        resolve(message);
+        if (chl === channel && !res.writableEnded) {
+          const d = JSON.parse(message);
+          if (d.error) {
+            if (!res.headersSent) {
+              res.status(400).json(d);
+            }
+            this.service.unsubscribe(channel, listener);
+            return;
+          }
+
+          // process & result
+          if (typeof d === 'object') {
+            res.write(`data: ${message}\n\n`);
+          }
+          if (d.usage) {
+            res.write(`data: [DONE]\n\n`);
+            res.end();
+            this.service.unsubscribe(channel, listener);
+            return;
+          }
+        }
       };
       this.service.subscribe(channel, listener);
 
@@ -158,8 +157,40 @@ export class ChatController {
         this.service.unsubscribe(channel, listener);
       });
 
-      // 发送消息
-      await this.service.autoAgent(conversation, channel, { parent_id, message });
-    });
+      const messages = [{ role: 'user', parts: [{ type: 'text', text: prompt }] }];
+      const options: SendMessageDto = { usages, provider_ids, messages: [], message_id: '', parent_id: '', status: 0 };
+      Object.assign(options, { messages, message_id: uuidv4() });
+      await this.service.send(channel, conversation, options);
+    } catch (err) {
+      res.status(400).json({ error: { message: err.message, code: 400 } });
+    }
+  }
+
+  private async validateSubscription(user_id: number, model: string, client_user_id: string) {
+    // validate subscription
+    const usages = await this.subscription.findActiveUsageWithQuota(user_id, true);
+    if (usages.length === 0) {
+      throw new Error(`No active subscription or available quota.`);
+    }
+
+    // validate provider
+    const ids = [...new Set(usages.flatMap((usage) => usage.quota.providers))];
+    const provider_ids = await this.provider.filterProviderByModel(ids as [], model);
+    if (provider_ids.length === 0) {
+      throw new Error(`No valid supplier for model:${model}`);
+    }
+
+    // check keys limit
+    let user_usage_id = 0;
+    if (client_user_id) {
+      const kui = await this.users.checkAvailableQuota(client_user_id, model);
+      if (kui > 0) {
+        user_usage_id = kui;
+      } else {
+        throw new Error(`Not enough quota for the key.`);
+      }
+    }
+
+    return { usages, provider_ids, user_usage_id };
   }
 }

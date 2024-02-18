@@ -28,13 +28,9 @@ export class ChatConversationService {
       }
     }
     // create new one
-    Object.assign({ temperature: 0.8, top_p: 0, top_k: 0, n: 1 }, opts);
+    Object.assign({ temperature: 0.9, top_p: 1, top_k: 1, n: 1 }, opts);
     return await this.repository.save(this.repository.create({ conversation_id, ...opts }));
   }
-
-  // async updateCredential(id: number, credential_id: number) {
-  //   return this.repository.update(id, { credential_id });
-  // }
 
   async updateAttribute(id: number, attribute: Partial<ChatConversation>) {
     return this.repository.update(id, attribute);

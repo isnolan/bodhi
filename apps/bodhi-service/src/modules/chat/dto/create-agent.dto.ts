@@ -1,18 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, IsArray } from 'class-validator';
-// import { chat } from '@isnolan/bodhi-adapter';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { v4 as uuidv4 } from 'uuid';
+
 export class CreateAgentDto {
-  @ApiProperty({ default: '' })
-  @IsNotEmpty()
+  @ApiProperty({ default: uuidv4() })
+  @IsOptional()
   @IsString()
   conversation_id: string;
 
-  @ApiProperty({ default: '' })
-  @IsOptional()
-  @IsString()
-  parent_id: string;
-
-  @ApiProperty({ default: { role: 'user', parts: [{ type: 'text', text: 'Hi' }] } })
+  @ApiProperty({ default: `Generate a less than 50 character short and relevant title for this chat.` })
   @IsNotEmpty()
-  message: any; // chat.Message;
+  @IsString()
+  prompt: string;
 }

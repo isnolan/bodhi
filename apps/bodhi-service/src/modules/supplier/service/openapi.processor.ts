@@ -34,7 +34,7 @@ export class SupplierOpenAPIProcessor {
   @Process('openapi')
   async openai(job: Job<QueueMessageDto>) {
     console.log(`[api]job:`, job.data);
-    const { channel, provider_id, conversation_id, parent_id } = job.data;
+    const { channel, provider_id, conversation_id, parent_id, status = 1 } = job.data;
     return new Promise(async (resolve) => {
       try {
         const provider = (await this.provider.findActive([provider_id]))[0];
@@ -46,7 +46,7 @@ export class SupplierOpenAPIProcessor {
           apiSecret: (authorisation as KeyAuthorisation).api_secret,
           agent: process.env.HTTP_PROXY,
         });
-        const messages = await this.message.getLastMessages(conversation_id, conversation.context_limit);
+        const messages = await this.message.getLastMessages(conversation_id, conversation.context_limit, status);
         const res = await api.sendMessage({
           messages: [...messages],
           model: provider.model.name,
@@ -66,54 +66,11 @@ export class SupplierOpenAPIProcessor {
         // archive
         res.choices.map((row: any) => {
           const payload = { conversation_id, role: row.role, parts: row.parts, message_id: res.id };
-          this.queue.add('archives', { parent_id, ...payload, tokens: 0 });
+          this.queue.add('archives', { parent_id, ...payload, tokens: 0, status });
         });
 
         // 回复会话
         this.service.reply(channel, { conversation_id: conversation.conversation_id, ...res });
-
-        resolve({});
-      } catch (err) {
-        console.warn(`[api]`, err.code, err.message);
-        this.service.reply(channel, { error: { message: err.message, code: err.code } });
-        resolve({});
-        return;
-      }
-    });
-  }
-
-  @Process('agent')
-  async subject(job: Job<QueueAgentDto>) {
-    // console.log(`[api]job:`, job.data);
-    const { channel, provider_id, parent_id, message_id, message } = job.data;
-    return new Promise(async (resolve) => {
-      try {
-        const provider = (await this.provider.findActive([provider_id]))[0];
-        const { ChatAPI } = await importDynamic('@isnolan/bodhi-adapter');
-        const { authorisation } = provider.credential;
-        const api = new ChatAPI(provider.instance.name, {
-          apiKey: (authorisation as KeyAuthorisation).api_key,
-          apiSecret: (authorisation as KeyAuthorisation).api_secret,
-          agent: process.env.HTTP_PROXY,
-        });
-        const latest = await this.message.findMyMessageId(parent_id);
-        // console.log(`-->`, [...latest.parts, ...message.parts]);
-        const res = await api.sendMessage({
-          messages: [message],
-          model: provider.model.name,
-        });
-
-        const parts = res.choices[0].parts;
-        const tokens = res.usage?.completion_tokens;
-        console.log(`[agent]`, channel, new Date().toLocaleTimeString('zh-CN'));
-        console.log(`->`, parts);
-
-        await this.service.reply(channel, res);
-
-        // ready to archives
-        const payload = { conversation_id: latest.conversation_id, message_id: res.id, role: 'assistant', parts };
-        Object.assign(payload, { tokens, status: 0, parent_id: message_id });
-        await this.queue.add('archives', payload);
 
         resolve({});
       } catch (err) {

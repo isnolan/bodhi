@@ -46,7 +46,7 @@ export class SubscriptionProcessService {
       const allocationStart = skipMidnightCheck ? this.getStartOfTodayInUserTimezone(timezone) : today;
 
       if (skipMidnightCheck || this.isMidnightInUserTimezone(allocationStart, timezone)) {
-        console.log(`[cron]`, subscription.id, 'allocating quotas');
+        // console.log(`[cron]`, subscription.id, 'allocating quotas');
         if (expires_at < today) {
           // update state to expired
           await this.subscribed.updateState(id, SubscribedState.EXPIRED);

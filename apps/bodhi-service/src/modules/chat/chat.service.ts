@@ -63,17 +63,18 @@ export class ChatService {
    */
   async send(channel: string, conversation: ChatConversation, options: SendMessageDto) {
     const { id: conversation_id, user_id } = conversation;
-    const { usages, provider_ids, messages, message_id } = options;
+    const { usages, provider_ids, messages, message_id, status = 1 } = options;
     let { parent_id } = options;
 
     // archive message
-    messages.map(async (message) => {
-      const { role, parts } = message;
-      const a1: CreateMessageDto = { conversation_id, message_id, user_id, role, parts, parent_id };
-      const { tokens } = await this.message.save({ ...a1, parent_id });
-      await this.queue.add('archives', { ...a1, tokens });
-    });
-
+    await Promise.all(
+      messages.map(async (message) => {
+        const { role, parts } = message;
+        const a1: CreateMessageDto = { conversation_id, message_id, user_id, role, parts, parent_id, status };
+        const { tokens } = await this.message.save({ ...a1, parent_id });
+        await this.queue.add('archives', { ...a1, tokens });
+      }),
+    );
     try {
       // Assign valid provisioning credentials
       const provider = await this.supplier.distribute(provider_ids, conversation);
@@ -84,7 +85,7 @@ export class ChatService {
         await this.conversation.updateAttribute(conversation.id, { provider_id: provider.id, usage_id: usage.id });
       }
 
-      const s1: QueueMessageDto = { channel, provider_id: provider.id, conversation_id, parent_id: message_id };
+      const s1: QueueMessageDto = { channel, provider_id: provider.id, conversation_id, parent_id: message_id, status };
       // console.log(`[chat]send`, provider, s1);
       if (provider.instance.type === InstanceType.SESSION) {
         await this.redis.publish('puppet', JSON.stringify(s1));
@@ -108,34 +109,5 @@ export class ChatService {
   async reply(channel: string, payload: any) {
     // console.log(`[chat]reply`, channel, payload);
     await this.redis.publish(channel, JSON.stringify(payload));
-  }
-
-  /**
-   * 自动代理
-   * @param conversation
-   * @param content
-   * @returns
-   */
-  async autoAgent(conversation: ChatConversation, channel: string, opts: any) {
-    const { parent_id, message } = opts;
-    const conversation_id = conversation.id;
-
-    // 获取供应商
-    const provider = await this.supplier.findInactive([1000], conversation); // configuration.model
-
-    // 存储消息:用户
-    const message_id = uuidv4();
-    const user_id = conversation.user_id;
-    const a2: CreateMessageDto = { conversation_id, message_id, user_id, role: 'user', parts: [message], parent_id };
-    Object.assign(a2, { status: 0 });
-    const { tokens } = await this.message.save(a2);
-    await this.queue.add('archives', { ...a2, tokens });
-
-    // 加入消息发送队列
-    const s2: QueueAgentDto = { channel, provider_id: provider.id, parent_id, message_id, message };
-
-    // 消息队列
-    const { id } = await this.queue.add('agent', s2);
-    console.log(`[chat]agent`, id, provider.id);
   }
 }

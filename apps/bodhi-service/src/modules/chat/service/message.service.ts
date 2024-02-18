@@ -52,7 +52,7 @@ export class ChatMessageService {
    */
   async getLastMessages(conversation_id: number, context_limit = 5, status = 1): Promise<ChatMessage[]> {
     const select = { role: true, parts: true, tokens: true };
-    // 获取前两条消息
+    // 获取前两条消息，仅留下 system、user 的消息
     const user: ChatMessage[] = (
       await this.repository.find({
         select,
@@ -61,6 +61,7 @@ export class ChatMessageService {
         take: 2,
       })
     ).filter((row) => ['system', 'user'].includes(row.role));
+
     // 获取最近消息
     const latest = await this.repository.find({
       select,
@@ -69,8 +70,13 @@ export class ChatMessageService {
       take: context_limit - 2,
     });
 
-    // 合并数组
+    // 合并数组并按照user和assistant成对出现
     const messages: ChatMessage[] = [...user, ...latest.reverse()];
+    for (let i = messages.length - 1; i > 0; i--) {
+      if (messages[i].role === messages[i - 1].role) {
+        messages[i - 1] = messages[i];
+      }
+    }
 
     // 当消息条数较少时，可能出现重复，排重
     return [...new Set(messages.map((item) => JSON.stringify(item)))].map((item) => JSON.parse(item));
