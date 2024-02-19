@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Users } from './entity/users.entity';
-import { UserKeyService, UserUsageService } from './service';
+import { UserKeyService, UserUsageService, UserWebhookService } from './service';
 import { UsersUserService } from './service/user.service';
 import { UserUsage } from './entity';
 
@@ -10,6 +10,7 @@ export class UsersService {
     private readonly user: UsersUserService,
     private readonly keys: UserKeyService,
     private readonly usage: UserUsageService,
+    private readonly webhook: UserWebhookService,
   ) {}
 
   async findOne(id: number): Promise<Users> {
@@ -38,5 +39,9 @@ export class UsersService {
 
   async allocateUsage(user_id: number, opts: Partial<UserUsage>) {
     return this.usage.allocate(user_id, opts);
+  }
+
+  async findActiveWebhook(user_id: number) {
+    return this.webhook.findActive(user_id);
   }
 }
