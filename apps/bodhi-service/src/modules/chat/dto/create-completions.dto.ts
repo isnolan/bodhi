@@ -1,19 +1,14 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
-import { chat } from '@isnolan/bodhi-adapter';
 import { v4 as uuidv4 } from 'uuid';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsArray, IsBoolean, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString } from 'class-validator';
+import type { chat } from '@isnolan/bodhi-adapter';
 
-export class CreateCompletionsDto {
+class CreateChatDto {
   /* 基本内容 */
   @ApiProperty({ default: 'gemini-pro' })
   @IsNotEmpty()
   @IsString()
   model: string;
-
-  @ApiProperty({ default: [{ role: 'user', parts: [{ type: 'text', text: 'Hi' }] }] })
-  @IsNotEmpty()
-  @IsArray()
-  messages: chat.Message[];
 
   // @ApiPropertyOptional({ default: [] })
   // tools: chat.Tools[];
@@ -45,7 +40,19 @@ export class CreateCompletionsDto {
   stream?: boolean;
 }
 
-export class CreateConversationDto extends CreateCompletionsDto {
+export class CreateCompletionsDto extends CreateChatDto {
+  @ApiProperty({ default: [{ role: 'user', parts: [{ type: 'text', text: 'Hi' }] }] })
+  @IsNotEmpty()
+  @IsArray()
+  messages: chat.Message[];
+}
+
+export class CreateConversationDto extends CreateChatDto {
+  @ApiProperty({ default: { role: 'user', parts: [{ type: 'text', text: 'Hi' }] } })
+  @IsNotEmpty()
+  @IsObject()
+  message: chat.Message;
+
   // @ApiProperty({ default: 5 })
   @IsOptional()
   @IsNumber()
@@ -62,7 +69,7 @@ export class CreateConversationDto extends CreateCompletionsDto {
   @IsString()
   message_id?: string;
 
-  @ApiPropertyOptional({ default: null })
+  @ApiPropertyOptional({ default: '' })
   @IsOptional()
   @IsString()
   parent_id?: string;

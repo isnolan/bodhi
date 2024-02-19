@@ -1,3 +1,4 @@
+import compression from 'compression';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
@@ -23,6 +24,7 @@ async function bootstrap() {
   const nestWinston = app.get(WINSTON_MODULE_NEST_PROVIDER);
   app.useLogger(nestWinston);
   app.useGlobalPipes(new ValidationPipe());
+  app.use(compression());
 
   // swagger
   const options = new DocumentBuilder()
