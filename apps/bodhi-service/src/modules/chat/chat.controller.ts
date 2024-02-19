@@ -68,11 +68,7 @@ export class ChatController {
       const channel = `conversation:${conversation.id}`;
       const listener = this.createListener(channel, res, stream);
       this.service.subscribe(channel, listener);
-
-      req.on('close', () => {
-        console.log(`[chat]close`);
-        this.service.unsubscribe(channel, listener);
-      });
+      req.on('close', () => this.service.unsubscribe(channel, listener));
 
       // 发送消息
       const options: SendMessageDto = { usages, provider_ids, messages, message_id, parent_id };
@@ -104,10 +100,7 @@ export class ChatController {
       const channel = `agent:${conversation_id}:${+new Date()}`;
       const listener = this.createListener(channel, res, false);
       this.service.subscribe(channel, listener);
-
-      req.on('close', () => {
-        this.service.unsubscribe(channel, listener);
-      });
+      req.on('close', () => this.service.unsubscribe(channel, listener));
 
       const messages = [{ role: 'user', parts: [{ type: 'text', text: prompt }] }];
       const options: SendMessageDto = { usages, provider_ids, messages: [], message_id: uuidv4() }; //
@@ -144,10 +137,7 @@ export class ChatController {
       const channel = `completions:${conversation_id}:${+new Date()}`;
       const listener = this.createListener(channel, res, stream);
       this.service.subscribe(channel, listener);
-
-      req.on('close', () => {
-        this.service.unsubscribe(channel, listener);
-      });
+      req.on('close', () => this.service.unsubscribe(channel, listener));
 
       const options: SendMessageDto = { usages, provider_ids, messages, message_id: uuidv4() };
       await this.service.send(channel, conversation, options);
