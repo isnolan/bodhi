@@ -4,14 +4,14 @@ import { ApiOperation, ApiResponse, ApiTags, ApiBody, ApiBearerAuth, ApiSecurity
 
 import { ChatService } from './chat.service';
 import { SendMessageDto } from './dto/send-message.dto';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { JwtOrApiKeyGuard } from '../auth/guard/mixed.guard';
 import { RequestWithUser } from '../../core/common/request.interface';
 import { ChatConversationService } from './service';
 import { ProviderService } from '../provider/service';
 import { UsersService } from '../users/users.service';
 import { SubscriptionService } from '../subscription/subscription.service';
-import { CreateCompletionsDto, CreateConversationDto } from './dto/create-completions.dto';
+import { CreateCompletionsDto, CreateConversationDto, CreateAgentDto } from './dto/create-completions.dto';
 
 @ApiTags('chat')
 @ApiBearerAuth()
@@ -82,6 +82,42 @@ export class ChatController {
     }
   }
 
+  @Post('agent')
+  @ApiOperation({ description: 'Chat conversation agent', summary: 'Chat conversation agent' })
+  @ApiBody({ type: CreateCompletionsDto })
+  @ApiResponse({ status: 200, description: 'success' })
+  @ApiResponse({ status: 400, description: 'exception' })
+  async agent(@Req() req: RequestWithUser, @Res() res: Response, @Body() payload: CreateAgentDto) {
+    const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
+    const { conversation_id, prompt = '' } = payload;
+
+    try {
+      // validate subscription
+      const model = 'gemini-pro';
+      const { usages, provider_ids, user_usage_id } = await this.validateSubscription(user_id, model, client_user_id);
+      const d = { model, user_id, user_usage_id };
+      const conversation = await this.conversations.findAndCreateOne(conversation_id, d);
+      if (!conversation) {
+        throw new Error('Invalid conversation');
+      }
+
+      const channel = `agent:${conversation_id}:${+new Date()}`;
+      const listener = this.createListener(channel, res, false);
+      this.service.subscribe(channel, listener);
+
+      req.on('close', () => {
+        this.service.unsubscribe(channel, listener);
+      });
+
+      const messages = [{ role: 'user', parts: [{ type: 'text', text: prompt }] }];
+      const options: SendMessageDto = { usages, provider_ids, messages: [], message_id: uuidv4() }; //
+      Object.assign(options, { messages, status: 0 });
+      await this.service.send(channel, conversation, options);
+    } catch (err) {
+      res.status(400).json({ error: { message: err.message, code: 400 } });
+    }
+  }
+
   @Post('completions')
   @ApiOperation({ description: 'Chat completions', summary: 'Chat completions' })
   @ApiBody({ type: CreateCompletionsDto })
@@ -89,15 +125,16 @@ export class ChatController {
   @ApiResponse({ status: 400, description: 'exception' })
   async completions(@Req() req: RequestWithUser, @Res() res: Response, @Body() payload: CreateCompletionsDto) {
     const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
-    const { model = 'gemini-pro', messages = [], conversation_id = uuidv4(), stream = true } = payload;
-    const { temperature = 0.9, top_p = 1, top_k = 1, context_limit = 5, n = 1 } = payload;
-    console.log(`->completions`, conversation_id, payload.conversation_id);
+    const { model = 'gemini-pro', messages = [], stream = true } = payload;
+    const { temperature = 0.9, top_p = 1, top_k = 1, n = 1 } = payload;
 
     try {
       // validate subscription
       const { usages, provider_ids, user_usage_id } = await this.validateSubscription(user_id, model, client_user_id);
 
       // Get or create conversation
+      const conversation_id = uuidv4();
+      const context_limit = messages.length;
       const d = { model, temperature, top_p, top_k, context_limit, n, user_id, user_usage_id };
       const conversation = await this.conversations.findAndCreateOne(conversation_id, d);
       if (!conversation) {
@@ -112,7 +149,7 @@ export class ChatController {
         this.service.unsubscribe(channel, listener);
       });
 
-      const options: SendMessageDto = { usages, provider_ids, messages, message_id: uuidv4(), status: 0 };
+      const options: SendMessageDto = { usages, provider_ids, messages, message_id: uuidv4() };
       await this.service.send(channel, conversation, options);
     } catch (err) {
       res.status(400).json({ error: { message: err.message, code: 400 } });

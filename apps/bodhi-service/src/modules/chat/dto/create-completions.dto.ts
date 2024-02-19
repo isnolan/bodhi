@@ -43,7 +43,9 @@ export class CreateCompletionsDto {
   @IsOptional()
   @IsBoolean()
   stream?: boolean;
+}
 
+export class CreateConversationDto extends CreateCompletionsDto {
   // @ApiProperty({ default: 5 })
   @IsOptional()
   @IsNumber()
@@ -54,10 +56,7 @@ export class CreateCompletionsDto {
   @IsOptional()
   @IsString()
   conversation_id?: string;
-}
 
-export class CreateConversationDto extends CreateCompletionsDto {
-  /* 会话保持 */
   @ApiPropertyOptional({ default: uuidv4() })
   @IsOptional()
   @IsString()
@@ -67,6 +66,18 @@ export class CreateConversationDto extends CreateCompletionsDto {
   @IsOptional()
   @IsString()
   parent_id?: string;
+}
+
+export class CreateAgentDto {
+  @ApiProperty({ default: '' })
+  @IsNotEmpty()
+  @IsString()
+  conversation_id: string;
+
+  @ApiProperty({ default: 'Generate a less than 50 character short and relevant title for this chat.' })
+  @IsNotEmpty()
+  @IsString()
+  prompt: string;
 }
 
 export interface Message {

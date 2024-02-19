@@ -64,7 +64,7 @@ export class ChatService {
   async send(channel: string, conversation: ChatConversation, options: SendMessageDto) {
     const { id: conversation_id, user_id } = conversation;
     const { usages, provider_ids, messages, message_id, status = 1 } = options;
-    let { parent_id = '' } = options;
+    const { parent_id = '' } = options;
 
     // archive message
     await Promise.all(
