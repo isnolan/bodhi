@@ -83,7 +83,7 @@ export class ChatController {
   // Make 3 short and high relevant  tips base on  the latest chat to  keep conversation going .  No other text are allowed. Follow the language user use before..
   @Post('agent')
   @ApiOperation({ description: 'Chat conversation agent', summary: 'Chat conversation agent' })
-  @ApiBody({ type: CreateCompletionsDto })
+  @ApiBody({ type: CreateAgentDto })
   @ApiResponse({ status: 200, description: 'success' })
   @ApiResponse({ status: 400, description: 'exception' })
   async agent(@Req() req: RequestWithUser, @Res() res: Response, @Body() payload: CreateAgentDto) {
