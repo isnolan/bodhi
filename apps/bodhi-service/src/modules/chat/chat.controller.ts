@@ -198,6 +198,9 @@ export class ChatController {
               res.setHeader('Connection', 'keep-alive');
             }
             res.write(`data: ${message}\n\n`);
+            // TODO:
+            // 这将提升响应速度的同时会造成服务器buffer聚集而提升服务器压力
+            // 如果服务器压力过大，可以考虑2秒钟flush一次，但是这样会造成消息延迟
             res.flush();
           }
 
