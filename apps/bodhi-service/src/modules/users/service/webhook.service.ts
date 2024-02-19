@@ -15,9 +15,9 @@ export class UserWebhookService {
     return this.repository.save(this.repository.create({ user_id, ...opts }));
   }
 
-  async findActive(user_id: number): Promise<UserWebhook[]> {
+  async findActive(user_id: number): Promise<UserWebhook> {
     const query = { user_id, state: WebhookState.VALID };
-    return this.repository.find({
+    return this.repository.findOne({
       where: [
         { expires_at: MoreThan(new Date()), ...query },
         { expires_at: IsNull(), ...query },

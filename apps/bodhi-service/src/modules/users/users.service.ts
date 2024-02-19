@@ -44,4 +44,8 @@ export class UsersService {
   async findActiveWebhook(user_id: number) {
     return this.webhook.findActive(user_id);
   }
+
+  async findUsageById(usage_id: number) {
+    return this.usage.findById(usage_id);
+  }
 }

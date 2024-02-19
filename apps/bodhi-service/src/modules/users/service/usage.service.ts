@@ -63,4 +63,8 @@ export class UserUsageService {
       return this.repository.save(this.repository.create({ user_id, client_user_id, ...opts }));
     }
   }
+
+  async findById(usage_id: number): Promise<UserUsage> {
+    return this.repository.findOne({ where: { id: usage_id } });
+  }
 }
