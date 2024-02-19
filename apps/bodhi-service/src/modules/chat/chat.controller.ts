@@ -58,7 +58,6 @@ export class ChatController {
     const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
     const { model, message, conversation_id = uuidv4(), message_id = uuidv4() } = payload;
     const { stream = true, parent_id, temperature, top_p, top_k, context_limit, n } = payload;
-
     try {
       // validate subscription
       const { usages, provider_ids, user_usage_id } = await this.validateSubscription(user_id, model, client_user_id);
@@ -74,7 +73,7 @@ export class ChatController {
       // 发送消息
       const options: SendMessageDto = { usages, provider_ids, messages: [], message_id, parent_id };
       Object.assign(options, { messages: [message] });
-      await this.service.send(channel, conversation, options);
+      await this.service.completion(channel, conversation, options);
     } catch (err) {
       res.status(400).json({ error: { message: err.message, code: 400 } });
     }
@@ -109,7 +108,7 @@ export class ChatController {
       const messages = [{ role: 'user', parts: [{ type: 'text', text: prompt }] }];
       const options: SendMessageDto = { usages, provider_ids, messages: [], message_id: uuidv4() }; //
       Object.assign(options, { messages, status: 0 });
-      await this.service.send(channel, conversation, options);
+      await this.service.completion(channel, conversation, options);
     } catch (err) {
       res.status(400).json({ error: { message: err.message, code: 400 } });
     }
@@ -144,7 +143,7 @@ export class ChatController {
       req.on('close', () => this.service.unsubscribe(channel, listener));
 
       const options: SendMessageDto = { usages, provider_ids, messages, message_id: uuidv4() };
-      await this.service.send(channel, conversation, options);
+      await this.service.completion(channel, conversation, options);
     } catch (err) {
       res.status(400).json({ error: { message: err.message, code: 400 } });
     }

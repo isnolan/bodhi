@@ -61,20 +61,20 @@ export class ChatService {
    * @param content
    * @returns
    */
-  async send(channel: string, conversation: ChatConversation, options: SendMessageDto) {
+  async completion(channel: string, conversation: ChatConversation, options: SendMessageDto) {
     const { id: conversation_id, user_id } = conversation;
     const { usages, provider_ids, messages, message_id, status = 1 } = options;
     const { parent_id = '' } = options;
-
     // archive message
     await Promise.all(
       messages.map(async (message) => {
         const { role, parts } = message;
         const a1: CreateMessageDto = { conversation_id, message_id, user_id, role, parts, parent_id, status };
         const { tokens } = await this.message.save({ ...a1, parent_id });
-        await this.queue.add('archives', { ...a1, tokens });
+        this.queue.add('archives', { ...a1, tokens });
       }),
     );
+
     try {
       // Assign valid provisioning credentials
       const provider = await this.supplier.distribute(provider_ids, conversation);
@@ -82,7 +82,7 @@ export class ChatService {
       const usage = usages.filter((u) => u.quota.providers.includes(provider.id))[0];
       // console.log(`[chat]distribute`, provider.id, usage.id);
       if (provider.id !== conversation.provider_id) {
-        await this.conversation.updateAttribute(conversation.id, { provider_id: provider.id, usage_id: usage.id });
+        this.conversation.updateAttribute(conversation.id, { provider_id: provider.id, usage_id: usage.id });
       }
 
       const s1: QueueMessageDto = { channel, provider_id: provider.id, conversation_id, parent_id: message_id, status };

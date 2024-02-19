@@ -26,7 +26,18 @@ export class SupplierOpenAPIProcessor {
     @Inject(forwardRef(() => ChatConversationService))
     private readonly conversation: ChatConversationService,
     private readonly provider: ProviderService,
-  ) {}
+  ) {
+    this.initAPI();
+  }
+
+  async initAPI() {
+    if (this.apis) {
+      return this.apis;
+    }
+
+    this.apis = await importDynamic('@isnolan/bodhi-adapter');
+    return this.apis;
+  }
 
   /**
    * Bodhi API Process
@@ -34,18 +45,21 @@ export class SupplierOpenAPIProcessor {
   @Process('openapi')
   async openai(job: Job<QueueMessageDto>) {
     console.log(`[api]job:`, job.data);
+
     const { channel, provider_id, conversation_id, parent_id, status = 1 } = job.data;
     return new Promise(async (resolve) => {
       try {
         const provider = (await this.provider.findActive([provider_id]))[0];
+
         const conversation = await this.conversation.findOne(conversation_id);
-        const { ChatAPI } = await importDynamic('@isnolan/bodhi-adapter');
+        const { ChatAPI } = await this.initAPI();
         const { authorisation } = provider.credential;
         const api = new ChatAPI(provider.instance.name, {
           apiKey: (authorisation as KeyAuthorisation).api_key,
           apiSecret: (authorisation as KeyAuthorisation).api_secret,
           agent: process.env.HTTP_PROXY,
         });
+
         const messages = await this.message.getLastMessages(conversation_id, conversation.context_limit, status);
         const res = await api.sendMessage({
           messages: [...messages],
