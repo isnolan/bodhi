@@ -46,6 +46,22 @@ export class ChatController {
     }
   }
 
+  private checkAbilities(messages) {
+    const abilities = [];
+    messages.map((message) => {
+      message.parts.map((part) => {
+        if (part.type === 'image') {
+          abilities.push('vision');
+        }
+        if (part.type === 'function') {
+          abilities.push('function');
+        }
+      });
+    });
+    // 排重后返回
+    return [...new Set(abilities)];
+  }
+
   /**
    * Chat conversation
    */
@@ -60,8 +76,10 @@ export class ChatController {
     const { stream = true, parent_id, temperature, top_p, top_k, context_limit, n } = payload;
     try {
       // validate subscription
-      const { usages, provider_ids, user_usage_id } = await this.validateSubscription(user_id, model, client_user_id);
-
+      const abilities = this.checkAbilities([message]);
+      const subscription = await this.validateSubscription(user_id, model, client_user_id, abilities);
+      const { usages, provider_ids, user_usage_id } = subscription;
+      console.log(`->`, provider_ids);
       // find or create conversation
       const d = { model, temperature, top_p, top_k, user_id, user_usage_id, context_limit, n };
       const conversation = await this.conversations.findAndCreateOne(conversation_id, d);
@@ -92,7 +110,9 @@ export class ChatController {
 
     try {
       // validate subscription
-      const { usages, provider_ids, user_usage_id } = await this.validateSubscription(user_id, model, client_user_id);
+      const subscription = await this.validateSubscription(user_id, model, client_user_id, []);
+      const { usages, provider_ids, user_usage_id } = subscription;
+
       const d = { model, user_id, user_usage_id };
       const conversation = await this.conversations.findAndCreateOne(conversation_id, d);
       if (!conversation) {
@@ -125,7 +145,9 @@ export class ChatController {
 
     try {
       // validate subscription
-      const { usages, provider_ids, user_usage_id } = await this.validateSubscription(user_id, model, client_user_id);
+      const abilities = this.checkAbilities(messages);
+      const subscription = await this.validateSubscription(user_id, model, client_user_id, abilities);
+      const { usages, provider_ids, user_usage_id } = subscription;
 
       // Get or create conversation
       const conversation_id = uuidv4();
@@ -148,7 +170,7 @@ export class ChatController {
     }
   }
 
-  private async validateSubscription(user_id: number, model: string, client_user_id: string) {
+  private async validateSubscription(user_id: number, model: string, client_user_id: string, abilities?: string[]) {
     // validate subscription
     const usages = await this.subscription.findActiveUsageWithQuota(user_id, true);
     if (usages.length === 0) {
@@ -157,7 +179,7 @@ export class ChatController {
 
     // validate provider
     const ids = [...new Set(usages.flatMap((usage) => usage.quota.providers))];
-    const provider_ids = await this.provider.filterProviderByModel(ids as [], model);
+    const provider_ids = await this.provider.filterProviderByModel(ids as [], model, abilities);
     if (provider_ids.length === 0) {
       throw new Error(`No valid supplier for model:${model}`);
     }

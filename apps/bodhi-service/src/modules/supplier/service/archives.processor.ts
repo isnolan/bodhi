@@ -31,7 +31,7 @@ export class SupplierArchivesProcessor {
     let { tokens } = job.data;
     return new Promise(async (resolve) => {
       const conversation = await this.conversation.findOne(conversation_id);
-      const { usage_id, provider_id, user_usage_id } = conversation;
+      const { user_id, usage_id, provider_id, user_usage_id } = conversation;
       // archive message
       // user message have been archived in the first time.
       if (role === 'assistant') {
@@ -49,7 +49,7 @@ export class SupplierArchivesProcessor {
 
       // consume keys quotes, if exists
       if (user_usage_id > 0) {
-        console.log(`[archives]key usage`, user_usage_id, tokens);
+        // console.log(`[archives]key usage`, user_usage_id, tokens);
         this.users.consumeUsage(user_usage_id, role === 'assistant' ? 1 : 0, tokens);
       }
 
@@ -59,24 +59,31 @@ export class SupplierArchivesProcessor {
 
       // sync to webhooks
       try {
-        const webhook = await this.users.findActiveWebhook(conversation.user_id);
-        if (webhook) {
-          const { client_usage_id, client_user_id } = await this.users.findUsageById(conversation.user_id);
-          const res = await fetch(webhook.url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-SECRET-KEY': webhook.secret_key },
-            body: JSON.stringify({
-              client_user_id,
-              client_usage_id,
-              conversation: {
-                id: conversation.conversation_id,
-                model: conversation.model,
-                tokens: conversation.tokens,
-              },
-              message: { message_id, parent_id, role, parts, tokens, status },
-            }),
-          });
-          console.log(`[archives]webhook`, res.status, res.statusText);
+        const webhook = await this.users.findActiveWebhook(user_id);
+        if (webhook && user_usage_id > 0) {
+          const usage = await this.users.findUsageById(user_usage_id);
+          if (usage) {
+            const { client_usage_id, client_user_id } = usage;
+
+            const res = await fetch(webhook.url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'X-SECRET-KEY': webhook.secret_key },
+              body: JSON.stringify({
+                client_user_id,
+                client_usage_id,
+                conversation: {
+                  id: conversation.conversation_id,
+                  model: conversation.model,
+                  tokens: conversation.tokens,
+                },
+                message: { message_id, parent_id, role, parts, tokens, status },
+              }),
+            });
+
+            console.log(`[archives]webhook`, res.status, res.statusText);
+          }
+        } else {
+          console.log(`[archives]webhook`, 'skip, no webhook or no usage');
         }
       } catch (err) {
         console.log(`[archives]webhook`, err.message);
