@@ -28,7 +28,6 @@ export class ChatConversationService {
       }
     }
     // create new one
-    Object.assign({ temperature: 0.9, top_p: 1, top_k: 1, n: 1 }, opts);
     return await this.repository.save(this.repository.create({ conversation_id, ...opts }));
   }
 

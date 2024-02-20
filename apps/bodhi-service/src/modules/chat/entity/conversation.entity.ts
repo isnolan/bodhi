@@ -24,10 +24,10 @@ export class ChatConversation extends Base {
   @Column({ type: 'decimal', precision: 2, scale: 1, comment: 'temperature', default: 0.8 })
   temperature: number;
 
-  @Column({ type: 'decimal', precision: 2, scale: 1, comment: 'top_p', default: 0 })
+  @Column({ type: 'decimal', precision: 2, scale: 1, comment: 'top_p', default: 1 })
   top_p: number;
 
-  @Column({ type: 'decimal', precision: 2, scale: 1, comment: 'top_k', default: 0 })
+  @Column({ type: 'decimal', precision: 2, scale: 1, comment: 'top_k', default: 1 })
   top_k: number;
 
   @Column({ type: 'tinyint', comment: 'N', default: 1 })

@@ -76,6 +76,11 @@ export class CreateConversationDto extends CreateChatDto {
 }
 
 export class CreateAgentDto {
+  @ApiProperty({ default: 'gemini-pro' })
+  @IsOptional()
+  @IsString()
+  model: string;
+
   @ApiProperty({ default: '' })
   @IsNotEmpty()
   @IsString()

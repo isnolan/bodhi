@@ -62,8 +62,8 @@ export class SupplierOpenAPIProcessor {
 
         const messages = await this.message.getLastMessages(conversation_id, conversation.context_limit, status);
         const res = await api.sendMessage({
-          messages: [...messages],
           model: provider.model.name,
+          messages: [...messages],
           temperature: Number(conversation.temperature),
           top_p: Number(conversation.top_p),
           top_k: Number(conversation.top_k),

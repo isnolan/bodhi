@@ -88,11 +88,10 @@ export class ChatController {
   @ApiResponse({ status: 400, description: 'exception' })
   async agent(@Req() req: RequestWithUser, @Res() res: Response, @Body() payload: CreateAgentDto) {
     const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
-    const { conversation_id, prompt = '' } = payload;
+    const { model = 'gemini-pro', conversation_id, prompt = '' } = payload;
 
     try {
       // validate subscription
-      const model = 'gemini-pro';
       const { usages, provider_ids, user_usage_id } = await this.validateSubscription(user_id, model, client_user_id);
       const d = { model, user_id, user_usage_id };
       const conversation = await this.conversations.findAndCreateOne(conversation_id, d);
@@ -122,7 +121,7 @@ export class ChatController {
   async completions(@Req() req: RequestWithUser, @Res() res: Response, @Body() payload: CreateCompletionsDto) {
     const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
     const { model = 'gemini-pro', messages = [], stream = true } = payload;
-    const { temperature = 0.9, top_p = 1, top_k = 1, n = 1 } = payload;
+    const { temperature = 0.8, top_p = 1, top_k = 1, n = 1 } = payload;
 
     try {
       // validate subscription
