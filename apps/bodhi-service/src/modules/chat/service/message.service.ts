@@ -51,7 +51,7 @@ export class ChatMessageService {
    * @returns
    */
   async getLastMessages(conversation_id: number, context_limit = 5, status = 1): Promise<ChatMessage[]> {
-    const select = { role: true, parts: true, tokens: true };
+    const select = { role: true, parts: true };
     // 获取前两条消息，仅留下 system、user 的消息
     const user: ChatMessage[] = (
       await this.repository.find({

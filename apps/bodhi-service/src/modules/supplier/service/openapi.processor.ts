@@ -59,8 +59,9 @@ export class SupplierOpenAPIProcessor {
           apiSecret: (authorisation as KeyAuthorisation).api_secret,
           agent: process.env.HTTP_PROXY,
         });
-
+        // console.log(`->conversation`, conversation);
         const messages = await this.message.getLastMessages(conversation_id, conversation.context_limit, status);
+        // console.log(`->message`, JSON.stringify(messages));
         const res = await api.sendMessage({
           model: provider.model.name,
           messages: [...messages],
@@ -76,7 +77,7 @@ export class SupplierOpenAPIProcessor {
             this.service.reply(channel, choices);
           },
         });
-
+        // console.log(`->res`, JSON.stringify(res));
         // archive
         res.choices.map((row: any) => {
           const payload = { conversation_id, role: row.role, parts: row.parts, message_id: res.id };
