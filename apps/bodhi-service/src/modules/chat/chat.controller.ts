@@ -40,26 +40,10 @@ export class ChatController {
     try {
       const usages = await this.subscription.findActiveUsageWithQuota(user_id);
       const providers = usages.flatMap((usage) => usage.quota.providers);
-      return this.provider.findModelsByProviders(user_id, providers);
+      return this.provider.findModelsByProviders(providers);
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.FORBIDDEN);
     }
-  }
-
-  private checkAbilities(messages) {
-    const abilities = [];
-    messages.map((message) => {
-      message.parts.map((part) => {
-        if (part.type === 'image') {
-          abilities.push('vision');
-        }
-        if (part.type === 'function') {
-          abilities.push('function');
-        }
-      });
-    });
-    // 排重后返回
-    return [...new Set(abilities)];
   }
 
   /**
@@ -79,7 +63,7 @@ export class ChatController {
       const abilities = this.checkAbilities([message]);
       const subscription = await this.validateSubscription(user_id, model, client_user_id, abilities);
       const { usages, provider_ids, user_usage_id } = subscription;
-      console.log(`->`, provider_ids);
+      // console.log(`->`, provider_ids);
       // find or create conversation
       const d = { model, temperature, top_p, top_k, user_id, user_usage_id, context_limit, n };
       const conversation = await this.conversations.findAndCreateOne(conversation_id, d);
@@ -168,6 +152,19 @@ export class ChatController {
     } catch (err) {
       res.status(400).json({ error: { message: err.message, code: 400 } });
     }
+  }
+
+  private checkAbilities(messages) {
+    const abilities = new Set();
+    messages.forEach((message) => {
+      message.parts.forEach((part) => {
+        part.type === 'image' && abilities.add('vision');
+        part.type === 'tools' && abilities.add('tools');
+        part.type === 'docs' && abilities.add('docs');
+      });
+    });
+    // 转换为数组后返回
+    return Array.from(abilities) as string[];
   }
 
   private async validateSubscription(user_id: number, model: string, client_user_id: string, abilities?: string[]) {

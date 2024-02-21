@@ -41,7 +41,7 @@ export class ProviderService {
     });
   }
 
-  async findModelsByProviders(user_id: number, ids: number[]): Promise<any[]> {
+  async findModelsByProviders(ids: number[]): Promise<any[]> {
     const query = { id: In(ids), status: CredentialsState.ACTIVE };
     const providers = await this.repository.find({
       select: ['id', 'slug', 'model_id', 'cost_in_usd', 'cost_out_usd', 'expires_at'],
@@ -57,13 +57,13 @@ export class ProviderService {
 
     const models = [];
     providers.map((provider) => {
-      const existingModel = models.find((m) => m.model === provider.slug);
+      const existing = models.find((m) => m.model === provider.slug);
       const abilities = [];
-      provider.model.is_function == 1 && abilities.push('function');
+      provider.model.is_tools == 1 && abilities.push('tools');
       provider.model.is_vision == 1 && abilities.push('vision');
-
-      if (existingModel) {
-        existingModel.abilities = [...new Set([...existingModel.abilities, ...abilities])];
+      provider.model.is_docs == 1 && abilities.push('docs');
+      if (existing) {
+        existing.abilities = [...new Set([...existing.abilities, ...abilities])];
       } else {
         const { icon, context_tokens } = provider.model;
         const { cost_in_usd, cost_out_usd, expires_at } = provider;
@@ -74,23 +74,17 @@ export class ProviderService {
   }
 
   async filterProviderByModel(ids: number[], name: string, abilities: string[]): Promise<number[]> {
-    // const providers = await this.repository
-    //   .createQueryBuilder('provider')
-    //   .leftJoinAndSelect('provider.model', 'model')
-    //   .where('provider.id IN (:...ids)', { ids })
-    //   .andWhere('model.name = :name', { name })
-    //   .getMany();
-    const where = { id: In(ids), slug: Equal(name) };
-    if (abilities.length > 0) {
-      const model = {};
-      abilities.map((ability) => {
-        model['is_' + ability] = 1;
-      });
-      where['model'] = model;
-    }
     const providers = await this.repository.find({
       select: ['id'],
-      where,
+      where: {
+        id: In(ids),
+        slug: Equal(name),
+        model: {
+          is_tools: abilities.includes('tools') ? 1 : 0,
+          is_vision: abilities.includes('vision') ? 1 : 0,
+          is_docs: abilities.includes('docs') ? 1 : 0,
+        },
+      },
       relations: ['model'],
     });
     return providers.map((provider) => provider.id);
