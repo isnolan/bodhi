@@ -2,32 +2,41 @@ import { Base } from '@/core/common/base.entity';
 import { Entity, Column } from 'typeorm';
 
 export enum FileState {
-  DELETED = -1,
-  CREATED = 0,
-  UPLOADED = 1,
-  PROCESSED = 2,
+  CREATED = 'created',
+  ACTIVE = 'active',
+  EXPIRED = 'expired',
+  DELETED = 'deleted',
 }
 
 @Entity('bodhi_files')
 export class File extends Base {
-  @Column({ type: 'varchar', length: 32, comment: 'Hash', default: '' })
+  @Column({ type: 'int', comment: 'user_id', default: 0 })
+  user_id: number;
+
+  @Column({ type: 'varchar', length: 40, comment: 'client', default: '' })
+  client_user_id: string;
+
+  @Column({ type: 'varchar', length: 32, comment: 'hash', default: '' })
   hash: string;
 
-  @Column({ type: 'int', comment: 'Size', default: 0 })
+  @Column({ type: 'int', comment: 'size', default: 0 })
   size: number;
 
-  @Column({ type: 'varchar', length: 80, comment: 'Name', default: '' })
+  @Column({ type: 'varchar', length: 80, comment: 'name', default: '' })
   name: string;
 
-  @Column({ type: 'varchar', length: 40, comment: 'Type', default: '' })
+  @Column({ type: 'varchar', length: 40, comment: 'type', default: '' })
   mimetype: string;
 
-  @Column({ type: 'varchar', length: 100, comment: 'Path', default: '' })
+  @Column({ type: 'varchar', length: 100, comment: 'path', default: '' })
   path: string;
+
+  @Column({ type: 'datetime', comment: 'expires', default: null, nullable: true })
+  expires_at: Date;
 
   @Column({ type: 'varchar', length: 40, comment: 'FileID', default: '' })
   file_id: string;
 
-  @Column({ type: 'tinyint', comment: '状态', default: 1, nullable: true })
-  state: number;
+  @Column({ type: 'enum', enum: FileState, comment: '状态', default: FileState.CREATED })
+  state: FileState;
 }

@@ -8,7 +8,7 @@ import { Injectable, OnModuleInit, Inject, forwardRef } from '@nestjs/common';
 import { QueueMessageDto } from '../dto/queue-message.dto';
 import { FilesService } from '@/modules/files/files.service';
 import { ChatConversation } from '@/modules/chat/entity/conversation.entity';
-import { FileDto } from '@/modules/files/dto/upload.dto';
+import { FileDto, FileSimpleDto } from '@/modules/files/dto/upload.dto';
 import { FilePuppetDto } from '@/modules/files/dto/queue-file.dto';
 import { ChatService } from '@/modules/chat/chat.service';
 import { ChatConversationService, ChatMessageService } from '@/modules/chat/service';
@@ -18,8 +18,8 @@ const importDynamic = new Function('modulePath', 'return import(modulePath)');
 @Injectable()
 export class SupplierPuppetProcessor implements OnModuleInit {
   private readonly subscriber;
-  private readonly apis: { [key: string]: any } = {};
-  private readonly files: { [key: string]: { [key: string]: FileDto } } = {};
+  private apis: any;
+  private readonly files: { [key: string]: { [key: string]: FileSimpleDto } } = {};
 
   constructor(
     private readonly configService: ConfigService,
@@ -39,7 +39,17 @@ export class SupplierPuppetProcessor implements OnModuleInit {
 
     // init puppet node
     // process.env.PUPPET_ID && this.initPuppet(process.env.PUPPET_ID);
+    // this.initAPI();
   }
+
+  // async initAPI() {
+  //   if (this.apis) {
+  //     return this.apis;
+  //   }
+
+  //   this.apis = await importDynamic('@isnolan/bodhi-adapter');
+  //   return this.apis;
+  // }
 
   async onModuleInit(): Promise<void> {
     // 订阅 Redis

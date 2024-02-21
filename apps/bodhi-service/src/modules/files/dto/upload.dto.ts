@@ -7,16 +7,11 @@ export class UploadFileReq {
 
 export class FileDto {
   @ApiProperty()
-  id: string;
+  id: number;
 
   @ApiProperty()
   name: string;
 
-  @ApiProperty()
-  url: string;
-}
-
-export class FileListDto extends FileDto {
   @ApiProperty()
   size: number;
 
@@ -25,4 +20,21 @@ export class FileListDto extends FileDto {
 
   @ApiProperty()
   hash: string;
+
+  @ApiProperty()
+  expires_at: Date;
+
+  @ApiProperty()
+  url: string;
+}
+
+export class FileSimpleDto {
+  @ApiProperty()
+  id: number;
+
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  url: string;
 }

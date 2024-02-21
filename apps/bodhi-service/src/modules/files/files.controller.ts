@@ -1,70 +1,81 @@
-import Redis from 'ioredis';
 import { createHash } from 'crypto';
-import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UseInterceptors, UploadedFile, Put } from '@nestjs/common';
-import { Controller, Get, Query, Post, HttpException, HttpStatus } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiBody, ApiConsumes, ApiTags, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { UseInterceptors, UploadedFile, Put, UseGuards, Req, Query } from '@nestjs/common';
+import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiBody, ApiConsumes } from '@nestjs/swagger';
 
 import { FilesService } from './files.service';
-import { UploadFileReq, FileDto, FileListDto } from './dto/upload.dto';
-import { File } from './entity/file.entity';
+import { UploadFileReq, FileDto } from './dto/upload.dto';
+import { JwtOrApiKeyGuard } from '../auth/guard/mixed.guard';
+import { RequestWithUser } from '@/core/common/request.interface';
 
 @ApiTags('files')
 @ApiBearerAuth()
+@UseGuards(JwtOrApiKeyGuard)
+@ApiSecurity('api-key', [])
 @Controller('files')
 export class FilesController {
-  constructor(
-    @InjectRedis()
-    private readonly redis: Redis,
-    private readonly service: FilesService,
-  ) {}
+  constructor(private readonly service: FilesService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get File', description: 'Get File' })
-  @ApiResponse({ status: 200, description: 'success', type: FileListDto })
-  async get(@Query('id') fileId: string): Promise<FileListDto> {
-    const id = this.service.decodeId(fileId);
-    console.log(`[file]get`, id);
-    const { id: file_id, name, path, size, mimetype, hash } = (await this.service.get(id)) as File;
-    const url = `https://s.alidraft.com${path}`;
-    return { id: this.service.encodeId(file_id), name, url, size, mimetype, hash };
+  @ApiOperation({ summary: 'Get Files', description: 'Get Files' })
+  @ApiResponse({ status: 200, description: 'success', type: [FileDto] })
+  async files(@Req() req: RequestWithUser): Promise<FileDto[]> {
+    const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
+
+    try {
+      // const files = this.service.getFiles();
+      const rows = await this.service.findActiveFilesByUserId(user_id, client_user_id);
+      return rows.map((item) => {
+        const url = `https://s.alidraft.com${item.path}`;
+        const { id, name, size, mimetype, hash, expires_at } = item;
+        return { id, name, size, mimetype, hash, url, expires_at };
+      });
+    } catch (err) {
+      throw new HttpException(err.message, HttpStatus.FORBIDDEN);
+    }
+  }
+
+  @Get('detail')
+  @ApiOperation({ summary: 'Get file detail', description: 'Get file detail' })
+  @ApiResponse({ status: 200, description: 'success', type: FileDto })
+  async get(@Req() req: RequestWithUser, @Query('id') id: number): Promise<FileDto> {
+    const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
+
+    try {
+      const file = await this.service.findActiveFilesById(id, user_id, client_user_id);
+      const url = `https://s.alidraft.com${file.path}`;
+      delete file.path;
+
+      return { ...file, url };
+    } catch (err) {
+      throw new HttpException(err.message, HttpStatus.FORBIDDEN);
+    }
   }
 
   @Put('upload')
   @ApiOperation({ summary: 'Upload File', description: 'Upload File' })
   @ApiConsumes('multipart/form-data')
-  @ApiQuery({ name: 'model', required: false, example: '' })
   @ApiBody({ type: UploadFileReq })
-  @ApiResponse({ status: 201, description: 'success', type: FileListDto })
+  @ApiResponse({ status: 201, description: 'success', type: FileDto })
   @UseInterceptors(FileInterceptor('file', {}))
-  async upload(@UploadedFile() upload: any, @Query('model') model: string): Promise<FileListDto> {
-    console.log(`[file]upload`, upload.originalname, model);
-    // 计算并检查hash
-    const hashhex = createHash('md5');
-    hashhex.update(upload.buffer);
-    const mimetype = upload.mimetype;
-    const hash = hashhex.digest('hex');
-    const size = upload.size;
-    const name = Buffer.from(upload.originalname, 'latin1').toString('utf8');
+  async upload(@Req() req: RequestWithUser, @UploadedFile() upload: any): Promise<FileDto> {
+    // console.log(`[file]upload`, upload.originalname);
 
     try {
-      console.log(`[file]upload`, hash, name, mimetype, size, model);
-      return await this.service.uploadFile(upload, { hash, name, mimetype, size }, model);
+      // 计算并检查hash
+      const hashhex = createHash('md5');
+      hashhex.update(upload.buffer);
+      const mimetype = upload.mimetype;
+      const hash = hashhex.digest('hex');
+      const size = upload.size;
+      const name = Buffer.from(upload.originalname, 'latin1').toString('utf8');
+
+      console.log(`[file]upload`, hash, name, mimetype, size);
+      return await this.service.uploadFile(upload, { hash, name, mimetype, size });
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
     }
-  }
-
-  @Get('files')
-  @ApiOperation({ summary: 'Get Files', description: 'Get Files' })
-  @ApiResponse({ status: 200, description: 'success', type: [FileDto] })
-  async files(@Query('ids') fileIds: string[]): Promise<FileDto[]> {
-    const ids = fileIds.map((id) => this.service.decodeId(id));
-    const files = await this.service.findByIds(ids);
-    return files.map(({ id, name, path }) => {
-      const url = `https://s.alidraft.com${path}`;
-      return { id: this.service.encodeId(id), name, url };
-    });
   }
 }

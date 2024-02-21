@@ -6,7 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { FilesService } from './files.service';
 import { FilesController } from './files.controller';
 import { File } from './entity/file.entity';
-import { FilesProcessor } from './files.processor';
+import Service from './service';
 
 @Module({
   imports: [
@@ -24,7 +24,7 @@ import { FilesProcessor } from './files.processor';
     }),
   ],
   controllers: [FilesController],
-  providers: [FilesService, FilesProcessor],
+  providers: [FilesService, ...Service],
   exports: [FilesService],
 })
 export class FilesModule {}
