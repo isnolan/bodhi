@@ -46,6 +46,7 @@ module.exports = __toCommonJS(src_exports);
 var Provider = /* @__PURE__ */ ((Provider2) => {
   Provider2['GOOGLE_GEMINI'] = 'google-gemini';
   Provider2['GOOGLE_VERTEX'] = 'google-vertex';
+  Provider2['GOOGLE_CLAUDE'] = 'google-claude';
   Provider2['OPENAI_COMPLETIONS'] = 'openai-completion';
   Provider2['OPENAI_ASSISTANTS'] = 'openai-assistant';
   Provider2['ANTHROPIC_CLAUDE'] = 'anthropic-claude';
@@ -348,12 +349,10 @@ var GoogleGeminiAPI = class extends ChatBaseAPI {
   async sendMessage(opts) {
     const { onProgress = () => {}, ...options } = opts;
     return new Promise(async (resolove, reject) => {
-      const hasMedia = opts.messages.some((item) =>
-        item.parts.some((part) => part.type === 'image' || part.type === 'video'),
-      );
+      const params = await this.convertParams(options);
+      const hasMedia = params.contents.some((item) => item.parts.some((part) => 'inline_data' in part));
       const model = hasMedia ? 'gemini-pro-vision' : opts.model || 'gemini-pro';
       const url = `${this.baseURL}/models/${model}:streamGenerateContent?alt=sse`;
-      const params = await this.convertParams(options);
       const res = await (0, import_node_fetch3.default)(url, {
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': this.apiKey },
         body: JSON.stringify(params),
@@ -423,8 +422,10 @@ var GoogleGeminiAPI = class extends ChatBaseAPI {
               parts.push({ text: part.text });
             }
             if (['image', 'video'].includes(part.type)) {
-              const inline_data = await this.fetchFile(part.url);
-              parts.push({ inline_data });
+              try {
+                const inline_data = await this.fetchFile(part.url);
+                parts.push({ inline_data });
+              } catch (err) {}
             }
             if (part.type === 'function_call') {
               const { name, args } = part.function_call;
@@ -553,10 +554,126 @@ var GoogleVertexAPI = class extends GoogleGeminiAPI {
   }
 };
 
-// src/provider/anthropic/claude.ts
+// src/provider/google/claude.ts
 var import_node_fetch5 = __toESM(require('node-fetch'), 1);
+var import_uuid4 = require('uuid');
+var import_google_auth_library2 = require('google-auth-library');
 var import_https_proxy_agent5 = require('https-proxy-agent');
 var import_eventsource_parser4 = require('eventsource-parser');
+var GoogleClaudeAPI = class extends ChatBaseAPI {
+  constructor(opts) {
+    const options = Object.assign({ baseURL: 'https://us-central1-aiplatform.googleapis.com/v1' }, opts);
+    super(options);
+    this.provider = 'google';
+  }
+  models() {
+    return ['claude-instant-1p2', 'claude-2p0'];
+  }
+  /**
+   * 根据服务账号获取 access token
+   */
+  async getToken() {
+    const auth = new import_google_auth_library2.GoogleAuth({
+      credentials: { client_email: this.apiKey, private_key: this.apiSecret },
+      scopes: 'https://www.googleapis.com/auth/cloud-platform',
+    });
+    return await auth.getAccessToken();
+  }
+  /**
+   * 发送消息
+   * @param opts <types.chat.SendOptions>
+   * Reference: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/GenerateContentResponse
+   * Reference: https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/gemini?hl=zh-cn
+   * Multi-modal: https://cloud.google.com/vertex-ai/docs/generative-ai/multimodal/send-multimodal-prompts?hl=zh-cn#gemini-send-multimodal-samples-drest
+   * Tools: https://cloud.google.com/vertex-ai/docs/generative-ai/multimodal/function-calling?hl=zh-cn
+   * @returns
+   */
+  async sendMessage(opts) {
+    const { onProgress = () => {}, ...options } = opts;
+    return new Promise(async (resolove, reject) => {
+      const token = await this.getToken();
+      const hasMedia = opts.messages.some((item) =>
+        item.parts.some((part) => part.type === 'image' || part.type === 'video'),
+      );
+      const model = hasMedia ? 'gemini-pro-vision' : opts.model || 'gemini-pro';
+      const url = `${this.baseURL}/projects/darftai/locations/us-central1/publishers/anthropic/models/${model}:streamRawPredict?alt=sse`;
+      const params = await this.convertParams(options);
+      console.log(`[fetch]url`, url);
+      console.log(`[fetch]params`, JSON.stringify(params, null, 2));
+      const res = await (0, import_node_fetch5.default)(url, {
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(params),
+        agent: this.agent ? new import_https_proxy_agent5.HttpsProxyAgent(this.agent) : void 0,
+        method: 'POST',
+      });
+      if (!res.ok) {
+        const reason = await res.json();
+        console.log(`->`, reason, res.status);
+        reject(new chat.ChatError(reason.error?.message || 'request error', res.status));
+      }
+      let response;
+      const body = res.body;
+      body.on('error', (err) => reject(new chat.ChatError(err.message, 500)));
+      const choicesList = [];
+      const usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+      const parser = (0, import_eventsource_parser4.createParser)((event) => {
+        if (event.type === 'event') {
+          const res2 = JSON.parse(event.data);
+          console.log(`->`, res2);
+        }
+      });
+      body.on('readable', async () => {
+        let chunk;
+        while ((chunk = body.read())) {
+          parser.feed(chunk.toString());
+        }
+      });
+      body.on('end', () => {
+        const choices = this.combineChoices(choicesList);
+        resolove({ id: (0, import_uuid4.v4)(), model: opts.model, choices, usage });
+      });
+    });
+  }
+  /**
+   * Claude docs
+   * https://docs.anthropic.com/claude/reference/messages_post
+   * @returns
+   */
+  async convertParams(opts) {
+    return {
+      system: '',
+      messages: await this.corvertContents(opts),
+      temperature: opts.temperature || 0.8,
+      top_p: opts.top_p || 0,
+      top_k: opts.top_k || 0,
+      max_tokens: opts.max_tokens || 1024,
+      stop_sequences: opts.stop_sequences || [],
+      stream: true,
+      anthropic_version: 'vertex-2023-10-16',
+      anthropic_beta: ['private-messages-testing'],
+    };
+  }
+  async corvertContents(opts) {
+    return Promise.all(
+      opts.messages.map(async (item) => {
+        const content = [];
+        await Promise.all(
+          item.parts.map(async (part) => {
+            if (part.type === 'text') {
+              content.push(part.text);
+            }
+          }),
+        );
+        return { role: item.role, content: content.join('\n') };
+      }),
+    );
+  }
+};
+
+// src/provider/anthropic/claude.ts
+var import_node_fetch6 = __toESM(require('node-fetch'), 1);
+var import_https_proxy_agent6 = require('https-proxy-agent');
+var import_eventsource_parser5 = require('eventsource-parser');
 var AnthropicClaudeAPI = class extends ChatBaseAPI {
   constructor(opts) {
     const options = Object.assign({ baseURL: 'https://api.anthropic.com' }, opts);
@@ -573,14 +690,14 @@ var AnthropicClaudeAPI = class extends ChatBaseAPI {
     const { onProgress = () => {}, ...options } = opts;
     return new Promise(async (resolove, reject) => {
       const url = `${this.baseURL}/v1/messages`;
-      const res = await (0, import_node_fetch5.default)(url, {
+      const res = await (0, import_node_fetch6.default)(url, {
         headers: {
           'Content-Type': 'application/json',
           'Anthropic-Beta': 'messages-2023-12-15',
           'X-Api-Key': this.apiKey,
         },
         body: JSON.stringify(this.convertParams(options)),
-        agent: this.agent ? new import_https_proxy_agent5.HttpsProxyAgent(this.agent) : void 0,
+        agent: this.agent ? new import_https_proxy_agent6.HttpsProxyAgent(this.agent) : void 0,
         method: 'POST',
       });
       if (!res.ok) {
@@ -590,7 +707,7 @@ var AnthropicClaudeAPI = class extends ChatBaseAPI {
       let response;
       const body = res.body;
       body.on('error', (err) => reject(new chat.ChatError(err.message, 500)));
-      const parser = (0, import_eventsource_parser4.createParser)((event) => {
+      const parser = (0, import_eventsource_parser5.createParser)((event) => {
         if (event.type === 'event') {
           response = JSON.parse(event.data);
           onProgress?.(response);
@@ -634,9 +751,9 @@ var AnthropicClaudeAPI = class extends ChatBaseAPI {
 };
 
 // src/provider/anthropic/bedrock.ts
-var import_node_fetch6 = __toESM(require('node-fetch'), 1);
-var import_https_proxy_agent6 = require('https-proxy-agent');
-var import_eventsource_parser5 = require('eventsource-parser');
+var import_node_fetch7 = __toESM(require('node-fetch'), 1);
+var import_https_proxy_agent7 = require('https-proxy-agent');
+var import_eventsource_parser6 = require('eventsource-parser');
 
 // src/provider/anthropic/auth.ts
 var import_signature_v4 = require('@smithy/signature-v4');
@@ -694,10 +811,10 @@ var AnthropicBedrockAPI = class extends ChatBaseAPI {
           body: JSON.stringify(this.convertParams(options), null, 2),
         },
       );
-      const res = await (0, import_node_fetch6.default)(url, {
+      const res = await (0, import_node_fetch7.default)(url, {
         headers: req.headers,
         body: req.body,
-        agent: this.agent ? new import_https_proxy_agent6.HttpsProxyAgent(this.agent) : void 0,
+        agent: this.agent ? new import_https_proxy_agent7.HttpsProxyAgent(this.agent) : void 0,
         method: req.method,
       });
       if (!res.ok) {
@@ -707,7 +824,7 @@ var AnthropicBedrockAPI = class extends ChatBaseAPI {
       let response;
       const body = res.body;
       body.on('error', (err) => reject(new chat.ChatError(err.message, 500)));
-      const parser = (0, import_eventsource_parser5.createParser)((event) => {
+      const parser = (0, import_eventsource_parser6.createParser)((event) => {
         console.log(`[bedrock]`, event);
       });
       body.on('readable', async () => {
@@ -748,10 +865,10 @@ var AnthropicBedrockAPI = class extends ChatBaseAPI {
 };
 
 // src/provider/aliyun/qwen.ts
-var import_node_fetch7 = __toESM(require('node-fetch'), 1);
-var import_uuid4 = require('uuid');
-var import_https_proxy_agent7 = require('https-proxy-agent');
-var import_eventsource_parser6 = require('eventsource-parser');
+var import_node_fetch8 = __toESM(require('node-fetch'), 1);
+var import_uuid5 = require('uuid');
+var import_https_proxy_agent8 = require('https-proxy-agent');
+var import_eventsource_parser7 = require('eventsource-parser');
 var AliyunQwenAPI = class extends ChatBaseAPI {
   constructor(opts) {
     const options = Object.assign({ baseURL: 'https://dashscope.aliyuncs.com/api/v1' }, opts);
@@ -784,14 +901,14 @@ var AliyunQwenAPI = class extends ChatBaseAPI {
       const isMultimodal = opts.model === 'qwen-vl-plus';
       const url = `${this.baseURL}/services/aigc/${isMultimodal ? 'multimodal' : 'text'}-generation/generation`;
       const params = await this.convertParams(options);
-      const res = await (0, import_node_fetch7.default)(url, {
+      const res = await (0, import_node_fetch8.default)(url, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${this.apiKey}`,
           'X-DashScope-SSE': 'enable',
         },
         body: JSON.stringify(params),
-        agent: this.agent ? new import_https_proxy_agent7.HttpsProxyAgent(this.agent) : void 0,
+        agent: this.agent ? new import_https_proxy_agent8.HttpsProxyAgent(this.agent) : void 0,
         method: 'POST',
       });
       if (!res.ok) {
@@ -802,7 +919,7 @@ var AliyunQwenAPI = class extends ChatBaseAPI {
       body.on('error', (err) => reject(new chat.ChatError(err.message, 500)));
       const choicesList = [];
       const usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
-      const parser = (0, import_eventsource_parser6.createParser)((event) => {
+      const parser = (0, import_eventsource_parser7.createParser)((event) => {
         if (event.type === 'event') {
           const res2 = JSON.parse(event.data);
           if (res2?.output) {
@@ -831,7 +948,7 @@ var AliyunQwenAPI = class extends ChatBaseAPI {
       });
       body.on('end', () => {
         const choices = this.combineChoices(choicesList);
-        resolove({ id: (0, import_uuid4.v4)(), model: opts.model, choices, usage });
+        resolove({ id: (0, import_uuid5.v4)(), model: opts.model, choices, usage });
       });
     });
   }
@@ -914,8 +1031,8 @@ var AliyunQwenAPI = class extends ChatBaseAPI {
 };
 
 // src/provider/aliyun/wanx.ts
-var import_node_fetch8 = __toESM(require('node-fetch'), 1);
-var import_https_proxy_agent8 = require('https-proxy-agent');
+var import_node_fetch9 = __toESM(require('node-fetch'), 1);
+var import_https_proxy_agent9 = require('https-proxy-agent');
 var AliyunWanxAPI = class extends ChatBaseAPI {
   constructor(opts) {
     const options = Object.assign({ baseURL: 'https://dashscope.aliyuncs.com/api/v1' }, opts);
@@ -933,14 +1050,14 @@ var AliyunWanxAPI = class extends ChatBaseAPI {
   async sendMessage(opts) {
     return new Promise(async (resolove, reject) => {
       const url = `${this.baseURL}/services/aigc/text2image/image-synthesis`;
-      const res = await (0, import_node_fetch8.default)(url, {
+      const res = await (0, import_node_fetch9.default)(url, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${this.apiKey}`,
           'X-DashScope-Async': 'enable',
         },
         body: JSON.stringify(this.convertParams(opts)),
-        agent: this.agent ? new import_https_proxy_agent8.HttpsProxyAgent(this.agent) : void 0,
+        agent: this.agent ? new import_https_proxy_agent9.HttpsProxyAgent(this.agent) : void 0,
         method: 'POST',
       });
       if (!res.ok) {
@@ -961,9 +1078,9 @@ var AliyunWanxAPI = class extends ChatBaseAPI {
   async getTaskResult(task_id) {
     const url = `${this.baseURL}/tasks/${task_id}`;
     return new Promise(async (resolove, reject) => {
-      const res = await (0, import_node_fetch8.default)(url, {
+      const res = await (0, import_node_fetch9.default)(url, {
         headers: { Authorization: `Bearer ${this.apiKey}` },
-        agent: this.agent ? new import_https_proxy_agent8.HttpsProxyAgent(this.agent) : void 0,
+        agent: this.agent ? new import_https_proxy_agent9.HttpsProxyAgent(this.agent) : void 0,
       });
       try {
         const { output } = await res.json();
@@ -1005,7 +1122,7 @@ var AliyunWanxAPI = class extends ChatBaseAPI {
 };
 
 // src/provider/tencent/hunyuan.ts
-var import_uuid5 = require('uuid');
+var import_uuid6 = require('uuid');
 var tencentcloud = __toESM(require('tencentcloud-sdk-nodejs'), 1);
 var TencentHunyuanAPI = class extends ChatBaseAPI {
   constructor(opts) {
@@ -1037,7 +1154,7 @@ var TencentHunyuanAPI = class extends ChatBaseAPI {
       }
       const params = await this.convertParams(options);
       const response = await this.client[opts.model](params);
-      let id = (0, import_uuid5.v4)();
+      let id = (0, import_uuid6.v4)();
       const choicesList = [];
       const usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
       for await (let message of response) {
@@ -1109,6 +1226,9 @@ var ChatAPI = class {
         break;
       case 'google-gemini' /* GOOGLE_GEMINI */:
         this.provider = new GoogleGeminiAPI(opts);
+        break;
+      case 'google-claude' /* GOOGLE_CLAUDE */:
+        this.provider = new GoogleClaudeAPI(opts);
         break;
       case 'openai-completion' /* OPENAI_COMPLETIONS */:
         this.provider = new OpenAICompletionsAPI(opts);

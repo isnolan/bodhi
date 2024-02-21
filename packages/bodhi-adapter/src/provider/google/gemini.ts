@@ -28,13 +28,11 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
   public async sendMessage(opts: types.chat.SendOptions) {
     const { onProgress = () => {}, ...options } = opts;
     return new Promise(async (resolove, reject) => {
+      const params: gemini.Request = await this.convertParams(options);
       // if have media, use gemini-pro-vision
-      const hasMedia = opts.messages.some((item) =>
-        item.parts.some((part) => part.type === 'image' || part.type === 'video'),
-      );
+      const hasMedia = params.contents.some((item) => item.parts.some((part) => 'inline_data' in part));
       const model = hasMedia ? 'gemini-pro-vision' : opts.model || 'gemini-pro';
       const url = `${this.baseURL}/models/${model}:streamGenerateContent?alt=sse`;
-      const params: gemini.Request = await this.convertParams(options);
       // console.log(`[fetch]params`, JSON.stringify(params, null, 2));
 
       const res = await fetchSSE(url, {
@@ -116,8 +114,12 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
             }
             if (['image', 'video'].includes(part.type)) {
               // TODO: fetch 下载图片并转化buffer为base64
-              const inline_data = await this.fetchFile((part as types.chat.FilePart).url);
-              parts.push({ inline_data });
+              try {
+                const inline_data = await this.fetchFile((part as types.chat.FilePart).url);
+                parts.push({ inline_data });
+              } catch (err) {
+                // console.warn(``);
+              }
             }
             if (part.type === 'function_call') {
               const { name, args } = part.function_call;
