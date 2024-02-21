@@ -35,7 +35,7 @@ export class ChatMessageService {
    * @param conversation_id
    * @returns
    */
-  async getLastMessage(conversation_id: number): Promise<ChatMessage> {
+  async findLastMessage(conversation_id: number): Promise<ChatMessage> {
     // 获取最近消息
     return await this.repository.findOne({
       select: ['id', 'message_id', 'role', 'parts'],
@@ -50,7 +50,7 @@ export class ChatMessageService {
    * @param context_limit 上下文条数
    * @returns
    */
-  async getLastMessages(conversation_id: number, context_limit = 5, status = 1): Promise<ChatMessage[]> {
+  async findLastMessages(conversation_id: number, context_limit = 5, status = 1): Promise<ChatMessage[]> {
     const select = { role: true, parts: true };
     // 获取前两条消息，仅留下 system、user 的消息
     const user: ChatMessage[] = (

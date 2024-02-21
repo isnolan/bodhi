@@ -5,17 +5,15 @@ import { Process, Processor, OnGlobalQueueCompleted } from '@nestjs/bull';
 import { UsersService } from '@/modules/users/users.service';
 import { CreateMessageDto } from '@/modules/chat/dto/create-message.dto';
 import { SubscriptionService } from '@/modules/subscription/subscription.service';
-import { ChatConversationService, ChatMessageService } from '@/modules/chat/service';
+import { ChatService } from '@/modules/chat/chat.service';
 
 const importDynamic = new Function('modulePath', 'return import(modulePath)');
 
 @Processor('bodhi')
 export class SupplierArchivesProcessor {
   constructor(
-    @Inject(forwardRef(() => ChatMessageService))
-    private readonly message: ChatMessageService,
-    @Inject(forwardRef(() => ChatConversationService))
-    private readonly conversation: ChatConversationService,
+    @Inject(forwardRef(() => ChatService))
+    private readonly chat: ChatService,
     private readonly users: UsersService,
     private readonly subscription: SubscriptionService,
   ) {}
@@ -30,22 +28,22 @@ export class SupplierArchivesProcessor {
     const { parent_conversation_id, parent_id, status }: any = job.data; // 可选
     let { tokens } = job.data;
     return new Promise(async (resolve) => {
-      const conversation = await this.conversation.findOne(conversation_id);
+      const conversation = await this.chat.findConversation(conversation_id);
       const { user_id, usage_id, provider_id, user_usage_id } = conversation;
       // archive message
       // user message have been archived in the first time.
       if (role === 'assistant') {
         const d3 = { conversation_id, role, parts, message_id, parent_id, status };
         Object.assign(d3, { usage_id, provider_id, tokens });
-        const d4 = await this.message.save(d3);
+        const d4 = await this.chat.createMessage(d3);
         tokens = d4.tokens;
       }
 
       // update conversation attribute
-      const total_tokens = await this.message.getTokensByConversationId(conversation_id);
+      const total_tokens = await this.chat.getTokensByConversationId(conversation_id);
       const attr = { tokens: total_tokens };
       parent_conversation_id && Object.assign(attr, { parent_conversation_id });
-      this.conversation.updateAttribute(conversation_id, attr);
+      this.chat.updateConversationAttr(conversation_id, attr);
 
       // consume keys quotes, if exists
       if (user_usage_id > 0) {

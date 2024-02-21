@@ -38,6 +38,9 @@ export class ProviderCredentials extends Base {
   @Column({ type: 'simple-json', comment: 'authorisation', default: null })
   authorisation: Authorisation;
 
+  @Column({ type: 'varchar', length: 100, comment: 'label', default: '' })
+  remark: string;
+
   /* Expires */
   @Column({ precision: 3, comment: 'expires', default: null })
   expires_at: Date;

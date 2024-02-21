@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Repository, MoreThan, In, MoreThanOrEqual } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CredentialsState, ProviderCredentials } from '../entity';
+import { CredentialsState, InstanceType, ProviderCredentials } from '../entity';
 
 @Injectable()
 export class ProviderCredentialsService {
@@ -19,5 +19,9 @@ export class ProviderCredentialsService {
       select: ['id', 'type', 'label', 'authorisation', 'expires_at', 'create_at', 'update_at'],
       where: { user_id, status: MoreThanOrEqual(0) },
     });
+  }
+
+  async updateState(id: number, state: CredentialsState) {
+    return await this.repository.update(id, { status: state });
   }
 }

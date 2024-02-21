@@ -6,6 +6,24 @@ export enum InstanceType {
   SESSION = 'session',
 }
 
+export enum InstanceName {
+  // API
+  GOOGLE_GEMINI = 'google-gemini',
+  GOOGLE_VERTEX = 'google-vertex',
+  GOOGLE_CLAUDE = 'google-claude',
+  OPENAI_COMPLETIONS = 'openai-completion',
+  OPENAI_ASSISTANTS = 'openai-assistant',
+  ANTHROPIC_CLAUDE = 'anthropic-claude',
+  ANTHROPIC_BEDROCK = 'anthropic-bedrock',
+  ALIYUN_QWEN = 'aliyun-qwen',
+  ALIYUN_WANX = 'aliyun-wanx',
+  TENCENT_HUNYUAN = 'tencent-hunyuan',
+
+  // SESSION
+  OPENAI_CHATGPT = 'openai-chatgpt',
+  OPENAI_SIGNIN = 'openai-signin',
+}
+
 export enum InstanceState {
   ACTIVE = 1,
   INACTIVE = 0,
@@ -22,6 +40,9 @@ export class ProviderInstance extends Base {
 
   @Column({ type: 'varchar', length: 100, comment: 'description', default: '' })
   description: string;
+
+  @Column({ type: 'varchar', length: 40, comment: 'node' })
+  node: string;
 
   @Column({ type: 'tinyint', comment: '状态', default: InstanceState.ACTIVE })
   status: number;

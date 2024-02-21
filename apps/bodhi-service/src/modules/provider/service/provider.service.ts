@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CredentialsState, Provider, ProviderModels } from '../entity';
-import { Equal, In, IsNull, MoreThan, Repository, getRepository } from 'typeorm';
+import { CredentialsState, Provider } from '../entity';
+import { Equal, In, IsNull, MoreThan, Repository } from 'typeorm';
 import { ProviderWithRelations } from '../dto/find-provider.dto';
 import { ProviderModelsService } from './models.service';
 
@@ -88,5 +88,21 @@ export class ProviderService {
       relations: ['model'],
     });
     return providers.map((provider) => provider.id);
+  }
+
+  async findProvidersByNode(node: string): Promise<Provider[]> {
+    const query = {
+      status: CredentialsState.ACTIVE,
+      model: { status: CredentialsState.ACTIVE },
+      credential: { status: CredentialsState.ACTIVE, node },
+      instance: { status: CredentialsState.ACTIVE },
+    };
+    return this.repository.find({
+      where: [
+        { expires_at: MoreThan(new Date()), ...query },
+        { expires_at: IsNull(), ...query },
+      ],
+      relations: ['model', 'instance', 'credential'],
+    });
   }
 }

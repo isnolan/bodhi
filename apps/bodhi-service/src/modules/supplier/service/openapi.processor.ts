@@ -4,11 +4,10 @@ import { Process, Processor } from '@nestjs/bull';
 
 import { QueueMessageDto } from '../dto/queue-message.dto';
 import { ChatService } from '@/modules/chat/chat.service';
-import { ChatConversationService, ChatMessageService } from '@/modules/chat/service';
+import { ChatMessageService } from '@/modules/chat/service';
 import { Inject, forwardRef } from '@nestjs/common';
 import { ProviderService } from '@/modules/provider/service';
 import { KeyAuthorisation } from '@/modules/provider/entity';
-import { QueueAgentDto } from '../dto/queue-agent.dto';
 
 const importDynamic = new Function('modulePath', 'return import(modulePath)');
 
@@ -20,11 +19,7 @@ export class SupplierOpenAPIProcessor {
     @InjectQueue('bodhi')
     private readonly queue: Queue,
     @Inject(forwardRef(() => ChatService))
-    private readonly service: ChatService,
-    @Inject(forwardRef(() => ChatMessageService))
-    private readonly message: ChatMessageService,
-    @Inject(forwardRef(() => ChatConversationService))
-    private readonly conversation: ChatConversationService,
+    private readonly chat: ChatService,
     private readonly provider: ProviderService,
   ) {
     this.initAPI();
@@ -50,8 +45,7 @@ export class SupplierOpenAPIProcessor {
     return new Promise(async (resolve) => {
       try {
         const provider = (await this.provider.findActive([provider_id]))[0];
-
-        const conversation = await this.conversation.findOne(conversation_id);
+        const conversation = await this.chat.findConversation(conversation_id);
         const { ChatAPI } = await this.initAPI();
         const { authorisation } = provider.credential;
         const api = new ChatAPI(provider.instance.name, {
@@ -60,7 +54,8 @@ export class SupplierOpenAPIProcessor {
           agent: process.env.HTTP_PROXY,
         });
         // console.log(`->conversation`, conversation);
-        const messages = await this.message.getLastMessages(conversation_id, conversation.context_limit, status);
+        const { context_limit } = conversation;
+        const messages = await this.chat.findLastMessagesByConversationId(conversation_id, context_limit, status);
         // console.log(`->message`, JSON.stringify(messages));
         const res = await api.sendMessage({
           model: provider.model.name,
@@ -74,7 +69,7 @@ export class SupplierOpenAPIProcessor {
             choices.forEach((row: any, idx: number) => {
               console.log(`->idx:`, idx, row.parts);
             });
-            this.service.reply(channel, choices);
+            this.chat.reply(channel, choices);
           },
         });
         // console.log(`->res`, JSON.stringify(res));
@@ -85,12 +80,12 @@ export class SupplierOpenAPIProcessor {
         });
 
         // 回复会话
-        this.service.reply(channel, { conversation_id: conversation.conversation_id, ...res });
+        this.chat.reply(channel, { conversation_id: conversation.conversation_id, ...res });
 
         resolve({});
       } catch (err) {
         console.warn(`[api]`, err.code, err.message);
-        this.service.reply(channel, { error: { message: err.message, code: err.code } });
+        this.chat.reply(channel, { error: { message: err.message, code: err.code } });
         resolve({});
         return;
       }

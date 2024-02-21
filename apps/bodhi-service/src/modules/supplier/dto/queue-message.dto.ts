@@ -1,5 +1,3 @@
-import { chat } from '@isnolan/bodhi-adapter';
-
 export class QueueMessageDto {
   channel: string;
 

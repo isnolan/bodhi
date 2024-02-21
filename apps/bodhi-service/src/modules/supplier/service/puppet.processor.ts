@@ -7,11 +7,11 @@ import { Injectable, OnModuleInit, Inject, forwardRef } from '@nestjs/common';
 
 import { QueueMessageDto } from '../dto/queue-message.dto';
 import { FilesService } from '@/modules/files/files.service';
-import { ChatConversation } from '@/modules/chat/entity/conversation.entity';
-import { FileDto, FileSimpleDto } from '@/modules/files/dto/upload.dto';
-import { FilePuppetDto } from '@/modules/files/dto/queue-file.dto';
+import { FileSimpleDto } from '@/modules/files/dto/upload.dto';
 import { ChatService } from '@/modules/chat/chat.service';
-import { ChatConversationService, ChatMessageService } from '@/modules/chat/service';
+import { ProviderCredentialsService, ProviderService } from '@/modules/provider/service';
+import { CredentialsState } from '@/modules/provider/entity';
+import { SupplierService } from '../supplier.service';
 
 const importDynamic = new Function('modulePath', 'return import(modulePath)');
 
@@ -28,28 +28,17 @@ export class SupplierPuppetProcessor implements OnModuleInit {
     private readonly file: FilesService,
     @Inject(forwardRef(() => ChatService))
     private readonly chat: ChatService,
-    @Inject(forwardRef(() => ChatMessageService))
-    private readonly message: ChatMessageService,
-    @Inject(forwardRef(() => ChatConversationService))
-    private readonly conversation: ChatConversationService,
+    private readonly supplier: SupplierService,
+    private readonly provider: ProviderService,
+    private readonly credentials: ProviderCredentialsService,
   ) {
     // redis
     const option = this.configService.get('redis');
     this.subscriber = new Redis(option);
 
     // init puppet node
-    // process.env.PUPPET_ID && this.initPuppet(process.env.PUPPET_ID);
-    // this.initAPI();
+    process.env.PUPPET_ID && this.initPuppet(process.env.PUPPET_ID);
   }
-
-  // async initAPI() {
-  //   if (this.apis) {
-  //     return this.apis;
-  //   }
-
-  //   this.apis = await importDynamic('@isnolan/bodhi-adapter');
-  //   return this.apis;
-  // }
 
   async onModuleInit(): Promise<void> {
     // 订阅 Redis
@@ -68,13 +57,9 @@ export class SupplierPuppetProcessor implements OnModuleInit {
     this.subscriber.on('message', (channel, json) => {
       const message = JSON.parse(json);
       console.log(`[redis]subscriber`, channel, message);
-      if (channel === 'puppet' && this.apis[message.supplier_id]) {
+      if (channel === 'puppet' && this.apis[message.provider_id]) {
         // this.sendMessage(message);
         return;
-      }
-
-      if (channel === 'attachment' && message.model) {
-        // this.uploadFile(message);
       }
     });
   }
@@ -82,173 +67,173 @@ export class SupplierPuppetProcessor implements OnModuleInit {
   /**
    * 初始化 initPuppet 节点
    */
-  // async initPuppet(serverId: string) {
-  //   // 获取该节点所有 Puppet 实例
-  //   const services = await this.supplier.findSuppliersByNode(serverId);
-  //   console.log(`[subscribe]puppet:`, serverId, services.length);
-  //   if (services.length == 0) {
-  //     return;
-  //   }
-  //   // 初始化Puppet
-  //   const { Puppet, ChatAPI } = await importDynamic('@isnolan/bodhi-puppet');
-  //   const puppet = new Puppet({ agent: process.env.PROXY_AGENT });
-  //   await puppet.start();
+  async initPuppet(serverId: string) {
+    // 获取该节点所有 Puppet 实例
+    const services = await this.provider.findProvidersByNode(serverId);
+    console.log(`[subscribe]puppet:`, serverId, services.length);
+    if (services.length == 0) {
+      return;
+    }
+    // 初始化Puppet
+    const { Puppet, ChatAPI } = await importDynamic('@isnolan/bodhi-puppet');
+    const puppet = new Puppet({ agent: process.env.PROXY_AGENT });
+    await puppet.start();
 
-  //   // 初始化Page
-  //   for (const supplier of services) {
-  //     // 解析账号授权信息
-  //     // const { username, password, cookies } = JSON.parse(supplier?.authorisation);
-  //     const opts = { pageId: `chat${supplier.id}`, sessionToken: '', accessToken: '' };
-  //     // const opts = { pageId: `chat${supplier.id}` };
-  //     const page = new ChatAPI(puppet, supplier.instance_name, {
-  //       pageId: supplier.id,
-  //       sessionToken: supplier.api_secret,
-  //       fileServer: process.env.NODE_HOST as string,
-  //     });
-  //     this.apis[supplier.id] = page;
+    // 初始化Page
+    for (const supplier of services) {
+      // 解析账号授权信息
+      // const { username, password, cookies } = JSON.parse(supplier?.authorisation);
+      const opts = { pageId: `chat${supplier.id}`, sessionToken: '', accessToken: '' };
+      // const opts = { pageId: `chat${supplier.id}` };
+      const page = new ChatAPI(puppet, supplier.instance.name, {
+        pageId: supplier.id,
+        authorisation: supplier.credential.authorisation,
+        fileServer: process.env.NODE_HOST as string,
+      });
+      this.apis[supplier.id] = page;
 
-  //     // 准备就绪:允许流量接入
-  //     page.on('active', async ({ pageId, cookies }: any) => {
-  //       console.log(`[puppet]active`, pageId);
-  //       // 保存cookies
-  //       // const newAuth = JSON.stringify({ username, password, cookies });
-  //       // await this.supplier.updateAuthoriazations(supplier.id, newAuth);
-  //     });
+      // 准备就绪:允许流量接入
+      page.on('active', async ({ pageId, cookies }: any) => {
+        console.log(`[puppet]active`, pageId);
+        // 保存cookies
+        // const newAuth = JSON.stringify({ username, password, cookies });
+        // await this.supplier.updateAuthoriazations(supplier.id, newAuth);
+      });
 
-  //     // 会话失效: 不允许流量接入
-  //     page.on('inactive', async ({ pageId }: any) => {
-  //       console.log(`[puppet]inactive`, pageId);
-  //       await this.supplier.updateState(supplier.id, 0);
-  //     });
+      // 会话失效: 不允许流量接入
+      page.on('inactive', async ({ pageId }: any) => {
+        console.log(`[puppet]inactive`, pageId);
+        this.credentials.updateState(supplier.credential_id, CredentialsState.INACTIVE);
+      });
 
-  //     // 会话异常: 可继续提供服务
-  //     page.on('error', async ({ pageId, message }: any) => {
-  //       console.log(`[puppet]error:`, pageId, message);
-  //     });
+      // 会话异常: 可继续提供服务
+      page.on('error', async ({ pageId, message }: any) => {
+        console.log(`[puppet]error:`, pageId, message);
+      });
 
-  //     try {
-  //       await page.initSession();
-  //       console.log(`[puppet]initialization:complete`, supplier.id);
-  //     } catch (err) {
-  //       console.log(`[puppet]error:`, err);
-  //       await this.supplier.updateState(supplier.id, -1);
-  //     }
-  //   }
-  // }
+      try {
+        await page.initSession();
+        console.log(`[puppet]initialization:complete`, supplier.id);
+      } catch (err) {
+        console.log(`[puppet]error:`, err);
+        this.credentials.updateState(supplier.credential_id, CredentialsState.EXPIRED);
+      }
+    }
+  }
 
   /**
    * 服务降级
    * @param data {SendMessageDto}
    */
-  // private async downgrade(data: QueueMessageDto) {
-  //   // 获取当前会话
-  //   const { conversation_id } = data;
-  //   const conversation = (await this.conversation.findOne(conversation_id)) as ChatConversation;
-  //   // 获取降级节点
-  //   try {
-  //     const supplier = await this.supplier.getInactive(conversation.model, conversation_id, true); // configuration.model
-  //     await this.conversation.updateSupplier(conversation_id, supplier.id);
-  //     // 消息队列
-  //     Object.assign(data, { supplier_id: supplier.id, model: supplier.name });
-  //     const job = await this.queue.add('openapi', data, { priority: 1, delay: 10 });
-  //     console.log(`[puppet]downgrade`, supplier.instance_name, supplier.id, job.id);
-  //   } catch (err) {
-  //     console.warn(`[puppet]downgrade`, err);
-  //   }
-  // }
+  private async downgrade(provider_ids, data: QueueMessageDto) {
+    // 获取当前会话
+    const { conversation_id } = data;
+    const conversation = await this.chat.findConversation(conversation_id);
+    // 获取降级节点
+    try {
+      const supplier = await this.supplier.findInactive(provider_ids, conversation, true); // configuration.model
+      await this.chat.updateProviderByConversationId(conversation_id, supplier.id);
+      // 消息队列
+      Object.assign(data, { supplier_id: supplier.id });
+      const job = await this.queue.add('openapi', data, { priority: 1, delay: 10 });
+      console.log(`[puppet]downgrade`, supplier.instance.name, supplier.id, job.id);
+    } catch (err) {
+      console.warn(`[puppet]downgrade`, err);
+    }
+  }
 
   /**
    * 发送消息
    * @param data
    */
-  // async sendMessage(data: QueueMessageDto) {
-  //   console.log(`[puppet]job:`, data);
-  //   const { channel, model_id, conversation_id, parent_id } = data;
-  //   const conversation = (await this.conversation.findOne(conversation_id)) as ChatConversation;
-  //   const message = await this.message.getLastMessage(conversation_id);
-  //   const supplier = await this.supplier.get(model_id);
+  async sendMessage(data: QueueMessageDto) {
+    console.log(`[puppet]job:`, data);
+    const { channel, provider_id, conversation_id, parent_id } = data;
+    const conversation = await this.chat.findConversation(conversation_id);
+    const message = await this.chat.findLastMessageByConversationId(conversation_id);
+    const provider = (await this.provider.findActive([provider_id]))[0];
 
-  //   // 发送消息
-  //   const opts: any = {};
-  //   if (conversation?.parent_conversation_id) {
-  //     opts['conversation_id'] = conversation.parent_conversation_id;
-  //   }
+    // 发送消息
+    const opts: any = {};
+    if (conversation?.parent_conversation_id) {
+      opts['conversation_id'] = conversation.parent_conversation_id;
+    }
 
-  //   // transform local file to supplier file
-  //   // if (attachments.length > 0) {
-  //   //   const files = await this.file.findFilesByIds(attachments);
-  //   //   opts['attachments'] = files.map((r) => ({ id: r.file_id, name: r.name, size: r.size, mimetype: r.mimetype }));
-  //   // }
-  //   if (message?.message_id) {
-  //     opts['parent_id'] = message.message_id;
-  //   }
-  //   // if (configuration?.system) {
-  //   //   content += `\n------\n# System Instructions:\n${configuration.system}\n------`;
-  //   // }
-  //   console.log(`[puppet]opts`, opts);
-  //   try {
-  //     this.files[conversation_id] = {};
-  //     const content = '';
-  //     // console.log(`[chatgpt]`, supplierId, 2, typeof this.apis[supplierId]);
-  //     const res = await this.apis[model_id].sendMessage(content, {
-  //       model: supplier.name,
-  //       ...opts,
-  //       id: uuidv4(),
-  //       timeoutMs: 120000,
-  //       onProgress: ({ choices }: any) => {
-  //         console.log(`[puppet]progress`, model_id, supplier.name, new Date().toLocaleTimeString('zh-CN'));
-  //         console.log(`->1`, JSON.stringify(choices));
-  //         // try {
-  //         // multiple choice
-  //         const c = choices.map((row: any) => {
-  //           const { attachments = [] } = row.message;
-  //           if (attachments && attachments.length > 0 && this.files[conversation_id]) {
-  //             attachments.map((file: any) => this.transformFile(conversation_id, file));
-  //           }
-  //           row.message.attachments = Object.values(this.files[conversation_id]);
-  //           console.log(`->choice:`, row.message.content);
-  //           return row;
-  //         });
-  //         this.chat.reply(channel, c);
-  //         //   console.log(`->2`);
-  //         // } catch (err) {
-  //         //   console.warn(`->0`, err);
-  //         // }
-  //       },
-  //     });
-  //     console.log(`[puppet]result`, res);
-  //     // 封存消息
-  //     res.choices = res.choices.map((row: any) => {
-  //       const { content, attachments = [] } = row.message;
-  //       const payload = { conversation_id, role: 'assistant', content, message_id: res.id, parent_id };
-  //       // 异步同步文件
-  //       if (attachments && attachments.length > 0) {
-  //         const atts = Object.values(this.files[conversation_id]);
-  //         Object.assign(payload, { attachments: atts.map((r) => r.id) });
-  //         row.message.attachments = atts;
-  //       }
-  //       this.queue.add('archives', { ...payload, parent_conversation_id: res.conversation_id });
-  //       return row;
-  //     });
+    // transform local file to supplier file
+    // if (attachments.length > 0) {
+    //   const files = await this.file.findFilesByIds(attachments);
+    //   opts['attachments'] = files.map((r) => ({ id: r.file_id, name: r.name, size: r.size, mimetype: r.mimetype }));
+    // }
+    if (message?.message_id) {
+      opts['parent_id'] = message.message_id;
+    }
 
-  //     console.log(`[puppet]result`, JSON.stringify(res, null, 2));
+    console.log(`[puppet]opts`, opts);
+    try {
+      this.files[conversation_id] = {};
+      const content = '';
+      // console.log(`[chatgpt]`, supplierId, 2, typeof this.apis[supplierId]);
+      const res = await this.apis[provider_id].sendMessage(content, {
+        model: provider.model.name,
+        ...opts,
+        id: uuidv4(),
+        timeoutMs: 120000,
+        onProgress: ({ choices }: any) => {
+          console.log(`[puppet]progress`, provider_id, provider.model.name, new Date().toLocaleTimeString('zh-CN'));
+          console.log(`->1`, JSON.stringify(choices));
+          // try {
+          // multiple choice
+          const c = choices.map((row: any, idx: number) => {
+            // const { attachments = [] } = row.message;
+            // if (attachments && attachments.length > 0 && this.files[conversation_id]) {
+            //   attachments.map((file: any) => this.transformFile(conversation_id, file));
+            // }
+            // row.message.attachments = Object.values(this.files[conversation_id]);
 
-  //     // delete this.files[conversation_id];
-  //     this.chat.reply(channel, { ...res, conversation_id: conversation.conversation_id });
-  //   } catch (err) {
-  //     // 尝试捕获消息发送异常，进行降级
-  //     console.warn(`[puppet]catch`, err);
-  //     this.chat.reply(channel, { choices: [{ message: { content: err.message } }] });
-  //     // 服务降级
-  //     // await this.downgrade(data);
-  //     // expire the cache key
-  //     // await this.supplier.RenewalProvider(supplier_id, conversation_id, 30);
-  //     // return;
-  //   }
+            console.log(`->idx:`, idx, row.parts);
 
-  //   // expire the cache key
-  //   // await this.supplier.RenewalProvider(model_id, conversation_id, 60);
-  // }
+            // return row;
+          });
+          this.chat.reply(channel, choices);
+          //   console.log(`->2`);
+          // } catch (err) {
+          //   console.warn(`->0`, err);
+          // }
+        },
+      });
+      console.log(`[puppet]result`, res);
+      // 封存消息
+      res.choices = res.choices.map((row: any) => {
+        const { content, attachments = [] } = row.message;
+        const payload = { conversation_id, role: 'assistant', content, message_id: res.id, parent_id };
+        // 异步同步文件
+        if (attachments && attachments.length > 0) {
+          const atts = Object.values(this.files[conversation_id]);
+          Object.assign(payload, { attachments: atts.map((r) => r.id) });
+          row.message.attachments = atts;
+        }
+        this.queue.add('archives', { ...payload, parent_conversation_id: res.conversation_id });
+        return row;
+      });
+
+      console.log(`[puppet]result`, JSON.stringify(res, null, 2));
+
+      // delete this.files[conversation_id];
+      this.chat.reply(channel, { ...res, conversation_id: conversation.conversation_id });
+    } catch (err) {
+      // 尝试捕获消息发送异常，进行降级
+      console.warn(`[puppet]catch`, err);
+      this.chat.reply(channel, { choices: [{ message: { content: err.message } }] });
+      // 服务降级
+      // await this.downgrade(data);
+      // expire the cache key
+      // await this.supplier.RenewalProvider(supplier_id, conversation_id, 30);
+      // return;
+    }
+
+    // expire the cache key
+    // await this.supplier.RenewalProvider(model_id, conversation_id, 60);
+  }
 
   /**
    * Transform supplier file to local file object

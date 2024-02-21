@@ -14,6 +14,7 @@ import { CreateMessageDto } from './dto/create-message.dto';
 import { InstanceType } from '../provider/entity';
 import { QueueAgentDto } from '../supplier/dto/queue-agent.dto';
 import { SupplierService } from '../supplier/supplier.service';
+import { ChatMessage } from './entity/message.entity';
 
 @Injectable()
 export class ChatService {
@@ -55,6 +56,34 @@ export class ChatService {
     this.subscriber.removeListener('message', messageListener);
   }
 
+  async updateProviderByConversationId(id: number, provider_id: number) {
+    return this.conversation.updateAttribute(id, { provider_id });
+  }
+
+  async findConversation(id: number) {
+    return this.conversation.findOne(id);
+  }
+
+  async findLastMessageByConversationId(conversation_id: number) {
+    return this.message.findLastMessage(conversation_id);
+  }
+
+  async findLastMessagesByConversationId(conversation_id: number, context_limit = 5, status = 1) {
+    return this.message.findLastMessages(conversation_id, context_limit, status);
+  }
+
+  async updateConversationAttr(id: number, attr: any) {
+    return this.conversation.updateAttribute(id, attr);
+  }
+
+  async createMessage(opts: Partial<ChatMessage>) {
+    return this.message.save(opts);
+  }
+
+  async getTokensByConversationId(conversation_id: number) {
+    return this.message.getTokensByConversationId(conversation_id);
+  }
+
   /**
    * 发送消息
    * @param conversation
@@ -88,7 +117,7 @@ export class ChatService {
       const s1: QueueMessageDto = { channel, provider_id: provider.id, conversation_id, parent_id: message_id, status };
       // console.log(`[chat]send`, provider, s1);
       if (provider.instance.type === InstanceType.SESSION) {
-        await this.redis.publish('puppet', JSON.stringify(s1));
+        await this.redis.publish('puppet', JSON.stringify({ ...s1, provider_ids }));
       }
 
       if (provider.instance.type === InstanceType.API) {

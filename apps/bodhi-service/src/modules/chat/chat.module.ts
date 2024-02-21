@@ -39,6 +39,6 @@ import { UsersModule } from '../users/users.module';
 
   controllers: [ChatController],
   providers: [ChatService, ...Service],
-  exports: [ChatService, ...Service],
+  exports: [ChatService],
 })
 export class ChatModule {}
