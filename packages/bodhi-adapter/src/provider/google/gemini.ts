@@ -97,7 +97,7 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
         topP: opts.top_p || undefined, // gemini-pro:none, gemini-pro-vision:32
         topK: opts.top_k || undefined,
         candidateCount: opts.n || 1,
-        maxOutputTokens: opts.max_tokens || 2048, // gemini-pro:2048, gemini-pro-vision:8192
+        maxOutputTokens: opts.max_tokens || 1000, // gemini-pro:2048, gemini-pro-vision:8192
         stopSequences: opts.stop_sequences || undefined,
       },
     };

@@ -64,6 +64,7 @@ export class SupplierOpenAPIProcessor {
           top_p: Number(conversation.top_p),
           top_k: Number(conversation.top_k),
           n: conversation.n,
+          max_tokens: 1000,
           onProgress: (choices) => {
             console.log(`[api]progress`, provider_id, provider.model.name, new Date().toLocaleTimeString('zh-CN'));
             choices.forEach((row: any, idx: number) => {

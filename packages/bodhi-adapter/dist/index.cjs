@@ -406,7 +406,7 @@ var GoogleGeminiAPI = class extends ChatBaseAPI {
         // gemini-pro:none, gemini-pro-vision:32
         topK: opts.top_k || void 0,
         candidateCount: opts.n || 1,
-        maxOutputTokens: opts.max_tokens || 2048,
+        maxOutputTokens: opts.max_tokens || 1e3,
         // gemini-pro:2048, gemini-pro-vision:8192
         stopSequences: opts.stop_sequences || void 0,
       },
