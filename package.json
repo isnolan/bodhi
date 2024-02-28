@@ -1,5 +1,5 @@
 {
-  "name": "pnpm-monorepo-demo",
+  "name": "bodhi",
   "private": true,
   "scripts": {
     "build": "turbo run build",
