@@ -77,6 +77,9 @@ export class ChatBaseAPI {
             }
           }
         });
+
+        // finish_reason
+        existingItem.finish_reason = item.finish_reason;
       } else {
         acc.push(item);
       }
