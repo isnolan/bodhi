@@ -142,6 +142,7 @@ var ChatBaseAPI = class {
             }
           }
         });
+        existingItem.finish_reason = item.finish_reason;
       } else {
         acc.push(item);
       }
@@ -680,6 +681,9 @@ var AnthropicClaudeAPI = class extends ChatBaseAPI {
     super(options);
     this.provider = 'anthropic';
   }
+  models() {
+    return ['claude-2.1', 'claude-2.0', 'claude-instant-1.2'];
+  }
   /**
    * Send message
    * https://docs.anthropic.com/claude/reference/messages_post
@@ -690,27 +694,34 @@ var AnthropicClaudeAPI = class extends ChatBaseAPI {
     const { onProgress = () => {}, ...options } = opts;
     return new Promise(async (resolove, reject) => {
       const url = `${this.baseURL}/v1/messages`;
+      const params = await this.convertParams(options);
       const res = await (0, import_node_fetch6.default)(url, {
         headers: {
-          'Content-Type': 'application/json',
-          'Anthropic-Beta': 'messages-2023-12-15',
-          'X-Api-Key': this.apiKey,
+          'content-type': 'application/json',
+          'anthropic-version': '2023-06-01',
+          'x-api-key': this.apiKey,
         },
-        body: JSON.stringify(this.convertParams(options)),
+        body: JSON.stringify(params),
         agent: this.agent ? new import_https_proxy_agent6.HttpsProxyAgent(this.agent) : void 0,
         method: 'POST',
       });
       if (!res.ok) {
         const reason = await res.json();
-        reject(new chat.ChatError(reason[0].error?.message || 'request error', res.status));
+        reject(new chat.ChatError(reason.error?.message || 'request error', res.status));
       }
-      let response;
       const body = res.body;
       body.on('error', (err) => reject(new chat.ChatError(err.message, 500)));
+      let response;
+      const choicesList = [];
       const parser = (0, import_eventsource_parser5.createParser)((event) => {
         if (event.type === 'event') {
-          response = JSON.parse(event.data);
-          onProgress?.(response);
+          const res2 = JSON.parse(event.data);
+          response = this.convertResult(response, res2);
+          const choices = this.convertChoices(res2);
+          if (choices.length > 0) {
+            onProgress?.(choices);
+            choicesList.push(...choices);
+          }
         }
       });
       body.on('readable', async () => {
@@ -720,6 +731,7 @@ var AnthropicClaudeAPI = class extends ChatBaseAPI {
         }
       });
       body.on('end', () => {
+        response.choices = this.combineChoices(choicesList);
         resolove(response);
       });
     });
@@ -728,25 +740,76 @@ var AnthropicClaudeAPI = class extends ChatBaseAPI {
    * https://docs.anthropic.com/claude/reference/messages-streaming
    * @returns
    */
-  convertParams(opts) {
+  async convertParams(opts) {
     return {
       model: opts.model || 'claude-instant-1.2',
-      messages: opts.messages || [],
+      messages: await this.corvertContents(opts),
+      system: '',
       temperature: opts.temperature || 0.8,
-      top_k: opts.top_k || 0,
-      top_p: opts.top_p || 0,
+      top_k: opts.top_k || 1,
+      top_p: opts.top_p || 1,
       max_tokens: opts.max_tokens || 1024,
+      // metadata:
       stop_sequences: opts.stop_sequences || [],
       stream: true,
     };
   }
-  // 将 Gemini 的结果转换为你的数据格式
-  convertResult(result) {
-    return {
-      // 根据你的数据格式，从 Gemini 的结果中提取数据
-      history: result.contents,
-      // 其他数据...
-    };
+  async corvertContents(opts) {
+    return Promise.all(
+      opts.messages.map(async (item) => {
+        const parts = [];
+        await Promise.all(
+          item.parts.map(async (part) => {
+            if (part.type === 'text') {
+              parts.push(part.text);
+            }
+          }),
+        );
+        return { role: item.role, content: parts.join('\n') };
+      }),
+    );
+  }
+  convertResult(response, res) {
+    try {
+      if (res.type === 'message_start') {
+        const { message: m } = res;
+        const { input_tokens: prompt_tokens, output_tokens: completion_tokens } = m.usage;
+        response = {
+          id: m.id,
+          model: m.model,
+          choices: [],
+          usage: { prompt_tokens, completion_tokens, total_tokens: prompt_tokens + completion_tokens },
+        };
+      }
+      if (res.type === 'message_delta') {
+        const { output_tokens } = res.usage;
+        response.usage.completion_tokens = output_tokens;
+        response.usage.total_tokens = response.usage.prompt_tokens + output_tokens;
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+    return response;
+  }
+  convertChoices(res) {
+    const choices = [];
+    try {
+      if (res.type === 'content_block_start') {
+        const { index, content_block: c } = res;
+        choices.push({ index, role: 'assistant', parts: [{ type: 'text', text: c.text }], finish_reason: null });
+      }
+      if (res.type === 'content_block_delta') {
+        const { index, delta: d } = res;
+        choices.push({ index, role: 'assistant', parts: [{ type: 'text', text: d.text }], finish_reason: null });
+      }
+      if (res.type === 'content_block_stop') {
+        const { index } = res;
+        choices.push({ index, role: 'assistant', parts: [], finish_reason: 'stop' });
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+    return choices;
   }
 };
 
