@@ -359,11 +359,11 @@ var GoogleGeminiAPI = class extends ChatBaseAPI {
       generationConfig: {
         temperature: opts.temperature || 0.9,
         // gemini-pro:0.9, gemini-pro-vision:0.4
-        topP: opts.top_p || void 0,
+        topP: opts.top_p || 1,
         // gemini-pro:none, gemini-pro-vision:32
-        topK: opts.top_k || void 0,
+        topK: opts.top_k || 1,
         candidateCount: opts.n || 1,
-        maxOutputTokens: opts.max_tokens || 1e3,
+        maxOutputTokens: opts.max_tokens || 2048,
         // gemini-pro:2048, gemini-pro-vision:8192
         stopSequences: opts.stop_sequences || void 0,
       },
@@ -638,7 +638,7 @@ var AnthropicClaudeAPI = class extends ChatBaseAPI {
     this.provider = 'anthropic';
   }
   models() {
-    return ['claude-2.1', 'claude-2.0', 'claude-instant-1.2'];
+    return ['claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-2.1', 'claude-2.0', 'claude-instant-1.2'];
   }
   /**
    * Send message
