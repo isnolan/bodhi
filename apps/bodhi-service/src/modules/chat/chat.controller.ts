@@ -53,7 +53,11 @@ export class ChatController {
   @ApiOperation({ description: 'chat conversation', summary: 'chat conversation' })
   @ApiBody({ type: CreateConversationDto })
   @ApiResponse({ status: 200, description: 'success' })
-  @ApiResponse({ status: 400, description: 'exception' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 402, description: 'No active subscription or available quota' })
+  @ApiResponse({ status: 403, description: 'No valid supplier for model' })
+  @ApiResponse({ status: 429, description: 'Not enough quota' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async conversation(@Req() req: RequestWithUser, @Res() res: Response, @Body() payload: CreateConversationDto) {
     const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
     const { model, message, conversation_id = uuidv4(), message_id = uuidv4() } = payload;
@@ -81,7 +85,7 @@ export class ChatController {
         const code = err.getStatus();
         res.status(code).json({ error: { message: err.getResponse(), code } });
       } else {
-        res.status(500).json({ error: { message: err.message, code: 503 } });
+        res.status(500).json({ error: { message: err.message, code: 500 } });
       }
       // res.status(400).json({ error: { message: err.message, code: 400 } });
     }
@@ -119,7 +123,13 @@ export class ChatController {
       Object.assign(options, { messages, status: 0 });
       await this.service.completion(channel, conversation, options);
     } catch (err) {
-      res.status(400).json({ error: { message: err.message, code: 400 } });
+      if (err instanceof HttpException) {
+        const code = err.getStatus();
+        res.status(code).json({ error: { message: err.getResponse(), code } });
+      } else {
+        res.status(500).json({ error: { message: err.message, code: 500 } });
+      }
+      // res.status(400).json({ error: { message: err.message, code: 400 } });
     }
   }
 
@@ -156,7 +166,13 @@ export class ChatController {
       const options: SendMessageDto = { usages, provider_ids, messages, message_id: uuidv4() };
       await this.service.completion(channel, conversation, options);
     } catch (err) {
-      res.status(400).json({ error: { message: err.message, code: 400 } });
+      if (err instanceof HttpException) {
+        const code = err.getStatus();
+        res.status(code).json({ error: { message: err.getResponse(), code } });
+      } else {
+        res.status(500).json({ error: { message: err.message, code: 500 } });
+      }
+      // res.status(400).json({ error: { message: err.message, code: 400 } });
     }
   }
 
@@ -194,7 +210,7 @@ export class ChatController {
       if (kui > 0) {
         user_usage_id = kui;
       } else {
-        throw new HttpException(`Not enough quota for the key.`, 402);
+        throw new HttpException(`Not enough quota for the key.`, 429);
       }
     }
 
