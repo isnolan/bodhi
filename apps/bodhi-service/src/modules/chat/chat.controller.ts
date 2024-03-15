@@ -81,7 +81,7 @@ export class ChatController {
         const code = err.getStatus();
         res.status(code).json({ error: { message: err.getResponse(), code } });
       } else {
-        res.status(503).json({ error: { message: err.message, code: 503 } });
+        res.status(500).json({ error: { message: err.message, code: 503 } });
       }
       // res.status(400).json({ error: { message: err.message, code: 400 } });
     }
