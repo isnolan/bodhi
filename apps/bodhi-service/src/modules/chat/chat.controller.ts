@@ -77,7 +77,13 @@ export class ChatController {
       Object.assign(options, { messages: [message] });
       await this.service.completion(channel, conversation, options);
     } catch (err) {
-      res.status(400).json({ error: { message: err.message, code: 400 } });
+      if (err instanceof HttpException) {
+        const code = err.getStatus();
+        res.status(code).json({ error: { message: err.getResponse(), code } });
+      } else {
+        res.status(503).json({ error: { message: err.message, code: 503 } });
+      }
+      // res.status(400).json({ error: { message: err.message, code: 400 } });
     }
   }
 
@@ -171,14 +177,14 @@ export class ChatController {
     // validate subscription
     const usages = await this.subscription.findActiveUsageWithQuota(user_id, true);
     if (usages.length === 0) {
-      throw new Error(`No active subscription or available quota.`);
+      throw new HttpException(`No active subscription or available quota.`, 402);
     }
 
     // validate provider
     const ids = [...new Set(usages.flatMap((usage) => usage.quota.providers))];
     const provider_ids = await this.provider.filterProviderByModel(ids as [], model, abilities);
     if (provider_ids.length === 0) {
-      throw new Error(`No valid supplier for model:${model}`);
+      throw new HttpException(`No valid supplier for model:${model}`, 403);
     }
 
     // check keys limit
@@ -188,7 +194,7 @@ export class ChatController {
       if (kui > 0) {
         user_usage_id = kui;
       } else {
-        throw new Error(`Not enough quota for the key.`);
+        throw new HttpException(`Not enough quota for the key.`, 402);
       }
     }
 
