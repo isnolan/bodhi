@@ -475,7 +475,12 @@ var GoogleGeminiAPI = class extends ChatBaseAPI {
 // src/provider/google/vertex.ts
 var GoogleVertexAPI = class extends GoogleGeminiAPI {
   constructor(opts) {
-    const options = Object.assign({ baseURL: 'https://asia-southeast1-aiplatform.googleapis.com/v1' }, opts);
+    const options = Object.assign(
+      {
+        baseURL: 'https://asia-northeast1-aiplatform.googleapis.com/v1/projects/bodhi-415003/locations/asia-northeast1',
+      },
+      opts,
+    );
     super(options);
     this.provider = 'google';
   }
@@ -562,7 +567,10 @@ var import_https_proxy_agent5 = require('https-proxy-agent');
 var import_eventsource_parser4 = require('eventsource-parser');
 var GoogleClaudeAPI = class extends ChatBaseAPI {
   constructor(opts) {
-    const options = Object.assign({ baseURL: '' }, opts);
+    const options = Object.assign(
+      { baseURL: 'https://us-central1-aiplatform.googleapis.com/v1/projects/bodhi-415003/locations/us-central1' },
+      opts,
+    );
     super(options);
     this.provider = 'google';
   }

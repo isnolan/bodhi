@@ -12,7 +12,12 @@ export class GoogleVertexAPI extends GoogleGeminiAPI {
   protected provider: string = 'google';
 
   constructor(opts: types.chat.ChatOptions) {
-    const options = Object.assign({ baseURL: 'https://asia-southeast1-aiplatform.googleapis.com/v1' }, opts);
+    const options = Object.assign(
+      {
+        baseURL: 'https://asia-northeast1-aiplatform.googleapis.com/v1/projects/bodhi-415003/locations/asia-northeast1',
+      },
+      opts,
+    );
     super(options);
   }
 

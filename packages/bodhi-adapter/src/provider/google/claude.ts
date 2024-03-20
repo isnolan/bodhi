@@ -13,7 +13,10 @@ export class GoogleClaudeAPI extends ChatBaseAPI {
   constructor(opts: types.chat.ChatOptions) {
     // available models: claude-instant-1p2(100K tokens), claude-2p0(200K tokens)
     // available regions: us-central1(60QPM), asia-southeast1(60QPM)
-    const options = Object.assign({ baseURL: '' }, opts);
+    const options = Object.assign(
+      { baseURL: 'https://us-central1-aiplatform.googleapis.com/v1/projects/bodhi-415003/locations/us-central1' },
+      opts,
+    );
     super(options);
   }
 
