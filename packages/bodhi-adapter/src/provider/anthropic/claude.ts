@@ -98,15 +98,23 @@ export class AnthropicClaudeAPI extends ChatBaseAPI {
   protected async corvertContents(opts: types.chat.SendOptions): Promise<claude.Content[]> {
     return Promise.all(
       opts.messages.map(async (item) => {
-        const parts: string[] = [];
+        const parts: claude.Part[] = [];
         await Promise.all(
           item.parts.map(async (part: types.chat.Part) => {
             if (part.type === 'text') {
-              parts.push(part.text);
+              parts.push({ type: 'text', text: part.text });
+            }
+            if (['image', 'video'].includes(part.type)) {
+              try {
+                const { mime_type: media_type, data } = await this.fetchFile((part as types.chat.FilePart).url);
+                parts.push({ type: 'image', source: { type: 'base64', media_type, data } });
+              } catch (err) {
+                // console.warn(``);
+              }
             }
           }),
         );
-        return { role: item.role, content: parts.join('\n') } as claude.Content;
+        return { role: item.role, content: parts } as claude.Content;
       }),
     );
   }

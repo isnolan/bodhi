@@ -16,6 +16,7 @@ describe('chat', () => {
   });
 
   const api = new ChatAPI(Provider.GOOGLE_CLAUDE, {
+    baseURL: 'https://us-central1-aiplatform.googleapis.com/v1/projects/bodhi-415003/locations/us-central1',
     apiKey: credential.client_email,
     apiSecret: credential.private_key,
     agent: process.env.HTTP_PROXY as string,
@@ -24,7 +25,7 @@ describe('chat', () => {
   // 发送聊天消息
   it('text: streaming', async () => {
     const res = await api.sendMessage({
-      model: 'claude-instant-1p2',
+      model: 'claude-3-haiku-20240307',
       messages: [
         { role: 'user', parts: [{ type: 'text', text: '请写一篇关于我家小狗子的故事，要求字数不少于200字' }] },
       ],

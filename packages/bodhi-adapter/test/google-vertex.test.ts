@@ -16,6 +16,7 @@ describe('chat', () => {
   });
 
   const api = new ChatAPI(Provider.GOOGLE_VERTEX, {
+    baseURL: 'https://asia-northeast1-aiplatform.googleapis.com/v1/projects/bodhi-415003/locations/asia-northeast1',
     apiKey: credential.client_email,
     apiSecret: credential.private_key,
     agent: process.env.HTTP_PROXY as string,

@@ -15,12 +15,17 @@ export namespace claude {
     metadata?: any;
     stop_sequences: string[];
     stream: boolean;
+    anthropic_version?: string;
   };
 
   export type Content = {
     role: Role;
-    content: string;
+    content: string | Part[];
   };
+
+  export type Part = TextPart | ImagePart;
+  export type TextPart = { type: 'text'; text: string };
+  export type ImagePart = { type: 'image'; source: { type: 'base64'; media_type: string; data: string } };
 
   export type Role = 'user' | 'assistant';
 

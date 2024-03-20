@@ -509,7 +509,7 @@ var GoogleVertexAPI = class extends GoogleGeminiAPI {
         item.parts.some((part) => part.type === 'image' || part.type === 'video'),
       );
       const model = hasMedia ? 'gemini-pro-vision' : opts.model || 'gemini-pro';
-      const url = `${this.baseURL}/projects/darftai/locations/asia-southeast1/publishers/google/models/${model}:streamGenerateContent?alt=sse`;
+      const url = `${this.baseURL}/publishers/google/models/${model}:streamGenerateContent?alt=sse`;
       const params = await this.convertParams(options);
       const res = await (0, import_node_fetch4.default)(url, {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -557,18 +557,14 @@ var GoogleVertexAPI = class extends GoogleGeminiAPI {
 
 // src/provider/google/claude.ts
 var import_node_fetch5 = __toESM(require('node-fetch'), 1);
-var import_uuid4 = require('uuid');
 var import_google_auth_library2 = require('google-auth-library');
 var import_https_proxy_agent5 = require('https-proxy-agent');
 var import_eventsource_parser4 = require('eventsource-parser');
 var GoogleClaudeAPI = class extends ChatBaseAPI {
   constructor(opts) {
-    const options = Object.assign({ baseURL: 'https://us-central1-aiplatform.googleapis.com/v1' }, opts);
+    const options = Object.assign({ baseURL: '' }, opts);
     super(options);
     this.provider = 'google';
-  }
-  models() {
-    return ['claude-instant-1p2', 'claude-2p0'];
   }
   /**
    * 根据服务账号获取 access token
@@ -580,47 +576,45 @@ var GoogleClaudeAPI = class extends ChatBaseAPI {
     });
     return await auth.getAccessToken();
   }
+  models() {
+    return ['claude-3-sonnet@20240229', 'claude-3-haiku@20240307'];
+  }
   /**
-   * 发送消息
-   * @param opts <types.chat.SendOptions>
-   * Reference: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/GenerateContentResponse
-   * Reference: https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/gemini?hl=zh-cn
-   * Multi-modal: https://cloud.google.com/vertex-ai/docs/generative-ai/multimodal/send-multimodal-prompts?hl=zh-cn#gemini-send-multimodal-samples-drest
-   * Tools: https://cloud.google.com/vertex-ai/docs/generative-ai/multimodal/function-calling?hl=zh-cn
+   * Send message
+   * https://docs.anthropic.com/claude/reference/messages_post
+   * @param opts
    * @returns
    */
   async sendMessage(opts) {
     const { onProgress = () => {}, ...options } = opts;
     return new Promise(async (resolove, reject) => {
       const token = await this.getToken();
-      const hasMedia = opts.messages.some((item) =>
-        item.parts.some((part) => part.type === 'image' || part.type === 'video'),
-      );
-      const model = hasMedia ? 'gemini-pro-vision' : opts.model || 'gemini-pro';
-      const url = `${this.baseURL}/projects/darftai/locations/us-central1/publishers/anthropic/models/${model}:streamRawPredict?alt=sse`;
+      const url = `${this.baseURL}/publishers/anthropic/models/${opts.model}:streamRawPredict?alt=sse`;
       const params = await this.convertParams(options);
-      console.log(`[fetch]url`, url);
-      console.log(`[fetch]params`, JSON.stringify(params, null, 2));
+      console.log(`->url`, url, params);
       const res = await (0, import_node_fetch5.default)(url, {
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'content-type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(params),
         agent: this.agent ? new import_https_proxy_agent5.HttpsProxyAgent(this.agent) : void 0,
         method: 'POST',
       });
       if (!res.ok) {
         const reason = await res.json();
-        console.log(`->`, reason, res.status);
         reject(new chat.ChatError(reason.error?.message || 'request error', res.status));
       }
-      let response;
       const body = res.body;
       body.on('error', (err) => reject(new chat.ChatError(err.message, 500)));
+      let response;
       const choicesList = [];
-      const usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
       const parser = (0, import_eventsource_parser4.createParser)((event) => {
         if (event.type === 'event') {
           const res2 = JSON.parse(event.data);
-          console.log(`->`, res2);
+          response = this.convertResult(response, res2);
+          const choices = this.convertChoices(res2);
+          if (choices.length > 0) {
+            onProgress?.(choices);
+            choicesList.push(...choices);
+          }
         }
       });
       body.on('readable', async () => {
@@ -630,44 +624,92 @@ var GoogleClaudeAPI = class extends ChatBaseAPI {
         }
       });
       body.on('end', () => {
-        const choices = this.combineChoices(choicesList);
-        resolove({ id: (0, import_uuid4.v4)(), model: opts.model, choices, usage });
+        response.choices = this.combineChoices(choicesList);
+        resolove(response);
       });
     });
   }
   /**
-   * Claude docs
-   * https://docs.anthropic.com/claude/reference/messages_post
+   * https://docs.anthropic.com/claude/reference/messages-streaming
    * @returns
    */
   async convertParams(opts) {
     return {
-      system: '',
+      model: opts.model || 'claude-instant-1.2',
       messages: await this.corvertContents(opts),
+      system: '',
       temperature: opts.temperature || 0.8,
-      top_p: opts.top_p || 0,
-      top_k: opts.top_k || 0,
+      top_k: opts.top_k || 1,
+      top_p: opts.top_p || 1,
       max_tokens: opts.max_tokens || 1024,
+      // metadata:
       stop_sequences: opts.stop_sequences || [],
       stream: true,
       anthropic_version: 'vertex-2023-10-16',
-      anthropic_beta: ['private-messages-testing'],
     };
   }
   async corvertContents(opts) {
     return Promise.all(
       opts.messages.map(async (item) => {
-        const content = [];
+        const parts = [];
         await Promise.all(
           item.parts.map(async (part) => {
             if (part.type === 'text') {
-              content.push(part.text);
+              parts.push({ type: 'text', text: part.text });
+            }
+            if (['image', 'video'].includes(part.type)) {
+              try {
+                const { mime_type: media_type, data } = await this.fetchFile(part.url);
+                parts.push({ type: 'image', source: { type: 'base64', media_type, data } });
+              } catch (err) {}
             }
           }),
         );
-        return { role: item.role, content: content.join('\n') };
+        return { role: item.role, content: parts };
       }),
     );
+  }
+  convertResult(response, res) {
+    try {
+      if (res.type === 'message_start') {
+        const { message: m } = res;
+        const { input_tokens: prompt_tokens, output_tokens: completion_tokens } = m.usage;
+        response = {
+          id: m.id,
+          model: m.model,
+          choices: [],
+          usage: { prompt_tokens, completion_tokens, total_tokens: prompt_tokens + completion_tokens },
+        };
+      }
+      if (res.type === 'message_delta') {
+        const { output_tokens } = res.usage;
+        response.usage.completion_tokens = output_tokens;
+        response.usage.total_tokens = response.usage.prompt_tokens + output_tokens;
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+    return response;
+  }
+  convertChoices(res) {
+    const choices = [];
+    try {
+      if (res.type === 'content_block_start') {
+        const { index, content_block: c } = res;
+        choices.push({ index, role: 'assistant', parts: [{ type: 'text', text: c.text }], finish_reason: null });
+      }
+      if (res.type === 'content_block_delta') {
+        const { index, delta: d } = res;
+        choices.push({ index, role: 'assistant', parts: [{ type: 'text', text: d.text }], finish_reason: null });
+      }
+      if (res.type === 'content_block_stop') {
+        const { index } = res;
+        choices.push({ index, role: 'assistant', parts: [], finish_reason: 'stop' });
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+    return choices;
   }
 };
 
@@ -761,11 +803,17 @@ var AnthropicClaudeAPI = class extends ChatBaseAPI {
         await Promise.all(
           item.parts.map(async (part) => {
             if (part.type === 'text') {
-              parts.push(part.text);
+              parts.push({ type: 'text', text: part.text });
+            }
+            if (['image', 'video'].includes(part.type)) {
+              try {
+                const { mime_type: media_type, data } = await this.fetchFile(part.url);
+                parts.push({ type: 'image', source: { type: 'base64', media_type, data } });
+              } catch (err) {}
             }
           }),
         );
-        return { role: item.role, content: parts.join('\n') };
+        return { role: item.role, content: parts };
       }),
     );
   }
@@ -929,7 +977,7 @@ var AnthropicBedrockAPI = class extends ChatBaseAPI {
 
 // src/provider/aliyun/qwen.ts
 var import_node_fetch8 = __toESM(require('node-fetch'), 1);
-var import_uuid5 = require('uuid');
+var import_uuid4 = require('uuid');
 var import_https_proxy_agent8 = require('https-proxy-agent');
 var import_eventsource_parser7 = require('eventsource-parser');
 var AliyunQwenAPI = class extends ChatBaseAPI {
@@ -1011,7 +1059,7 @@ var AliyunQwenAPI = class extends ChatBaseAPI {
       });
       body.on('end', () => {
         const choices = this.combineChoices(choicesList);
-        resolove({ id: (0, import_uuid5.v4)(), model: opts.model, choices, usage });
+        resolove({ id: (0, import_uuid4.v4)(), model: opts.model, choices, usage });
       });
     });
   }
@@ -1185,7 +1233,7 @@ var AliyunWanxAPI = class extends ChatBaseAPI {
 };
 
 // src/provider/tencent/hunyuan.ts
-var import_uuid6 = require('uuid');
+var import_uuid5 = require('uuid');
 var tencentcloud = __toESM(require('tencentcloud-sdk-nodejs'), 1);
 var TencentHunyuanAPI = class extends ChatBaseAPI {
   constructor(opts) {
@@ -1217,7 +1265,7 @@ var TencentHunyuanAPI = class extends ChatBaseAPI {
       }
       const params = await this.convertParams(options);
       const response = await this.client[opts.model](params);
-      let id = (0, import_uuid6.v4)();
+      let id = (0, import_uuid5.v4)();
       const choicesList = [];
       const usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
       for await (let message of response) {

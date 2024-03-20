@@ -35,4 +35,30 @@ describe('chat', () => {
     console.log(`[anthropic]claude`, 'result', JSON.stringify(res));
     expect(res).toBeInstanceOf(Object);
   }, 30000);
+
+  // vision: image part, from inline data
+  it('text: streaming', async () => {
+    const res = await api.sendMessage({
+      // model: 'claude-instant-1.2',
+      model: 'claude-3-sonnet@20240229',
+      messages: [
+        {
+          role: 'user',
+          parts: [
+            {
+              type: 'image',
+              url: 'https://miro.medium.com/v2/resize:fit:720/format:jpeg/1*YMJDp-kqus7i-ktWtksNjg.jpeg',
+            },
+            { type: 'text', text: 'Describe this image' },
+          ],
+        },
+      ],
+      onProgress: (choices) => {
+        console.log(`[anthropic]claude:vision`, 'progress', JSON.stringify(choices));
+        expect(choices).toBeInstanceOf(Object);
+      },
+    });
+    console.log(`[anthropic]claude:vision`, 'result', JSON.stringify(res));
+    expect(res).toBeInstanceOf(Object);
+  }, 30000);
 });

@@ -1,11 +1,10 @@
 import fetchSSE from 'node-fetch';
-import { v4 as uuidv4 } from 'uuid';
 import { GoogleAuth } from 'google-auth-library';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { createParser, type ParseEvent, type ReconnectInterval } from 'eventsource-parser';
 
 import * as types from '@/types';
-import { claude } from './types';
+import { claude } from '../anthropic/types';
 import { ChatBaseAPI } from '../base';
 
 export class GoogleClaudeAPI extends ChatBaseAPI {
@@ -14,12 +13,8 @@ export class GoogleClaudeAPI extends ChatBaseAPI {
   constructor(opts: types.chat.ChatOptions) {
     // available models: claude-instant-1p2(100K tokens), claude-2p0(200K tokens)
     // available regions: us-central1(60QPM), asia-southeast1(60QPM)
-    const options = Object.assign({ baseURL: 'https://us-central1-aiplatform.googleapis.com/v1' }, opts);
+    const options = Object.assign({ baseURL: '' }, opts);
     super(options);
-  }
-
-  public models(): string[] {
-    return ['claude-instant-1p2', 'claude-2p0'];
   }
 
   /**
@@ -33,32 +28,25 @@ export class GoogleClaudeAPI extends ChatBaseAPI {
     return (await auth.getAccessToken()) as string;
   }
 
+  public models(): string[] {
+    return ['claude-3-sonnet@20240229', 'claude-3-haiku@20240307'];
+  }
+
   /**
-   * 发送消息
-   * @param opts <types.chat.SendOptions>
-   * Reference: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/GenerateContentResponse
-   * Reference: https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/gemini?hl=zh-cn
-   * Multi-modal: https://cloud.google.com/vertex-ai/docs/generative-ai/multimodal/send-multimodal-prompts?hl=zh-cn#gemini-send-multimodal-samples-drest
-   * Tools: https://cloud.google.com/vertex-ai/docs/generative-ai/multimodal/function-calling?hl=zh-cn
+   * Send message
+   * https://docs.anthropic.com/claude/reference/messages_post
+   * @param opts
    * @returns
    */
   public async sendMessage(opts: types.chat.SendOptions) {
     const { onProgress = () => {}, ...options } = opts;
-
     return new Promise(async (resolove, reject) => {
       const token = await this.getToken();
-      // if have media, use gemini-pro-vision
-      const hasMedia = opts.messages.some((item) =>
-        item.parts.some((part) => part.type === 'image' || part.type === 'video'),
-      );
-      const model = hasMedia ? 'gemini-pro-vision' : opts.model || 'gemini-pro';
-      const url = `${this.baseURL}/projects/darftai/locations/us-central1/publishers/anthropic/models/${model}:streamRawPredict?alt=sse`;
+      const url = `${this.baseURL}/publishers/anthropic/models/${opts.model}:streamRawPredict?alt=sse`;
       const params: claude.Request = await this.convertParams(options);
-      console.log(`[fetch]url`, url);
-      console.log(`[fetch]params`, JSON.stringify(params, null, 2));
-
+      console.log(`->url`, url, params);
       const res = await fetchSSE(url, {
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'content-type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(params),
         agent: this.agent ? new HttpsProxyAgent(this.agent) : undefined,
         method: 'POST',
@@ -66,33 +54,24 @@ export class GoogleClaudeAPI extends ChatBaseAPI {
 
       if (!res.ok) {
         const reason = await res.json();
-        console.log(`->`, reason, res.status);
         reject(new types.chat.ChatError(reason.error?.message || 'request error', res.status));
       }
 
       // only get content from node-fetch
-      let response: any;
       const body: NodeJS.ReadableStream = res.body;
       body.on('error', (err) => reject(new types.chat.ChatError(err.message, 500)));
 
-      // streaming
+      let response: types.chat.ChatResponse;
       const choicesList: types.chat.Choice[] = [];
-      const usage: types.chat.Usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
       const parser = createParser((event: ParseEvent | ReconnectInterval) => {
-        // console.log(`->`, event.type, event?.data);
         if (event.type === 'event') {
-          const res = JSON.parse(event.data);
-          console.log(`->`, res);
-          // const choices = this.convertChoices(res.candidates);
-          // if (res.usageMetadata) {
-          //   Object.assign(usage, {
-          //     prompt_tokens: res.usageMetadata.promptTokenCount,
-          //     completion_tokens: res.usageMetadata.candidatesTokenCount,
-          //     total_tokens: res.usageMetadata.totalTokenCount,
-          //   });
-          // }
-          // onProgress?.(choices);
-          // choicesList.push(...choices);
+          const res: claude.Response = JSON.parse(event.data);
+          response = this.convertResult(response, res);
+          const choices = this.convertChoices(res);
+          if (choices.length > 0) {
+            onProgress?.(choices);
+            choicesList.push(...choices);
+          }
         }
       });
       body.on('readable', async () => {
@@ -102,49 +81,101 @@ export class GoogleClaudeAPI extends ChatBaseAPI {
         }
       });
 
-      // finished
       body.on('end', () => {
-        const choices: types.chat.Choice[] = this.combineChoices(choicesList);
-        // TODO: Google AI Gemini not found usageMetadata, but vertex founded.
-        resolove({ id: uuidv4(), model: opts.model, choices, usage });
+        response.choices = this.combineChoices(choicesList);
+        resolove(response);
       });
     });
   }
 
   /**
-   * Claude docs
-   * https://docs.anthropic.com/claude/reference/messages_post
+   * https://docs.anthropic.com/claude/reference/messages-streaming
    * @returns
    */
-  protected async convertParams(opts: types.chat.SendOptions): Promise<claude.Request> {
+  private async convertParams(opts: types.chat.SendOptions): Promise<claude.Request> {
     return {
-      system: '',
+      model: opts.model || 'claude-instant-1.2',
       messages: await this.corvertContents(opts),
+      system: '',
       temperature: opts.temperature || 0.8,
-      top_p: opts.top_p || 0,
-      top_k: opts.top_k || 0,
+      top_k: opts.top_k || 1,
+      top_p: opts.top_p || 1,
       max_tokens: opts.max_tokens || 1024,
+      // metadata:
       stop_sequences: opts.stop_sequences || [],
       stream: true,
-
       anthropic_version: 'vertex-2023-10-16',
-      anthropic_beta: ['private-messages-testing'],
     };
   }
 
   protected async corvertContents(opts: types.chat.SendOptions): Promise<claude.Content[]> {
     return Promise.all(
       opts.messages.map(async (item) => {
-        const content: string[] = [];
+        const parts: claude.Part[] = [];
         await Promise.all(
           item.parts.map(async (part: types.chat.Part) => {
             if (part.type === 'text') {
-              content.push(part.text);
+              parts.push({ type: 'text', text: part.text });
+            }
+            if (['image', 'video'].includes(part.type)) {
+              try {
+                const { mime_type: media_type, data } = await this.fetchFile((part as types.chat.FilePart).url);
+                parts.push({ type: 'image', source: { type: 'base64', media_type, data } });
+              } catch (err) {
+                // console.warn(``);
+              }
             }
           }),
         );
-        return { role: item.role, content: content.join('\n') } as claude.Content;
+        return { role: item.role, content: parts } as claude.Content;
       }),
     );
+  }
+
+  private convertResult(response, res: claude.Response): types.chat.ChatResponse {
+    try {
+      if (res.type === 'message_start') {
+        const { message: m } = res;
+        const { input_tokens: prompt_tokens, output_tokens: completion_tokens } = m.usage;
+        response = {
+          id: m.id,
+          model: m.model,
+          choices: [],
+          usage: { prompt_tokens, completion_tokens, total_tokens: prompt_tokens + completion_tokens },
+        };
+      }
+
+      if (res.type === 'message_delta') {
+        const { output_tokens } = res.usage;
+        response.usage.completion_tokens = output_tokens;
+        response.usage.total_tokens = response.usage.prompt_tokens + output_tokens;
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+    return response;
+  }
+
+  private convertChoices(res: claude.Response): types.chat.Choice[] {
+    const choices: types.chat.Choice[] = [];
+    try {
+      if (res.type === 'content_block_start') {
+        const { index, content_block: c } = res;
+        choices.push({ index, role: 'assistant', parts: [{ type: 'text', text: c.text }], finish_reason: null });
+      }
+
+      if (res.type === 'content_block_delta') {
+        const { index, delta: d } = res;
+        choices.push({ index, role: 'assistant', parts: [{ type: 'text', text: d.text }], finish_reason: null });
+      }
+
+      if (res.type === 'content_block_stop') {
+        const { index } = res;
+        choices.push({ index, role: 'assistant', parts: [], finish_reason: 'stop' });
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+    return choices;
   }
 }
