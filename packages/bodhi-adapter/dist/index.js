@@ -555,7 +555,6 @@ var GoogleClaudeAPI = class extends ChatBaseAPI {
       const token = await this.getToken();
       const url = `${this.baseURL}/publishers/anthropic/models/${opts.model}:streamRawPredict?alt=sse`;
       const params = await this.convertParams(options);
-      console.log(`->url`, url, params);
       const res = await fetchSSE4(url, {
         headers: { 'content-type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(params),
@@ -599,9 +598,9 @@ var GoogleClaudeAPI = class extends ChatBaseAPI {
    */
   async convertParams(opts) {
     return {
-      model: opts.model || 'claude-instant-1.2',
+      // model: opts.model || 'claude-3-haiku@20240307',
       messages: await this.corvertContents(opts),
-      system: '',
+      // system: '',
       temperature: opts.temperature || 0.8,
       top_k: opts.top_k || 1,
       top_p: opts.top_p || 1,
@@ -688,7 +687,14 @@ var AnthropicClaudeAPI = class extends ChatBaseAPI {
     this.provider = 'anthropic';
   }
   models() {
-    return ['claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-2.1', 'claude-2.0', 'claude-instant-1.2'];
+    return [
+      'claude-3-opus-20240229',
+      'claude-3-sonnet-20240229',
+      'claude-3-haiku-20240307',
+      'claude-2.1',
+      'claude-2.0',
+      'claude-instant-1.2',
+    ];
   }
   /**
    * Send message
@@ -748,7 +754,7 @@ var AnthropicClaudeAPI = class extends ChatBaseAPI {
    */
   async convertParams(opts) {
     return {
-      model: opts.model || 'claude-instant-1.2',
+      model: opts.model || 'claude-3-haiku-20240307',
       messages: await this.corvertContents(opts),
       system: '',
       temperature: opts.temperature || 0.8,
