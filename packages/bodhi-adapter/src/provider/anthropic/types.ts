@@ -5,15 +5,15 @@ export namespace claude {
    * Request
    */
   export type Request = {
-    model: string;
+    model?: string;
     messages: Content[];
-    system: string;
-    temperature: number;
-    top_k: number;
-    top_p: number;
+    system?: string;
+    temperature?: number;
+    top_k?: number;
+    top_p?: number;
     max_tokens: number;
     metadata?: any;
-    stop_sequences: string[];
+    stop_sequences?: string[];
     stream: boolean;
     anthropic_version?: string;
   };

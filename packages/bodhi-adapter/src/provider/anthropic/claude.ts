@@ -15,7 +15,14 @@ export class AnthropicClaudeAPI extends ChatBaseAPI {
   }
 
   public models(): string[] {
-    return ['claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-2.1', 'claude-2.0', 'claude-instant-1.2'];
+    return [
+      'claude-3-opus-20240229',
+      'claude-3-sonnet-20240229',
+      'claude-3-haiku-20240307',
+      'claude-2.1',
+      'claude-2.0',
+      'claude-instant-1.2',
+    ];
   }
 
   /**
@@ -82,7 +89,7 @@ export class AnthropicClaudeAPI extends ChatBaseAPI {
    */
   private async convertParams(opts: types.chat.SendOptions): Promise<claude.Request> {
     return {
-      model: opts.model || 'claude-instant-1.2',
+      model: opts.model || 'claude-3-haiku-20240307',
       messages: await this.corvertContents(opts),
       system: '',
       temperature: opts.temperature || 0.8,

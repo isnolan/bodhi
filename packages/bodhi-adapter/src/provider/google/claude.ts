@@ -47,7 +47,7 @@ export class GoogleClaudeAPI extends ChatBaseAPI {
       const token = await this.getToken();
       const url = `${this.baseURL}/publishers/anthropic/models/${opts.model}:streamRawPredict?alt=sse`;
       const params: claude.Request = await this.convertParams(options);
-      console.log(`->url`, url, params);
+      // console.log(`->url`, url, JSON.stringify(params));
       const res = await fetchSSE(url, {
         headers: { 'content-type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(params),
@@ -97,9 +97,9 @@ export class GoogleClaudeAPI extends ChatBaseAPI {
    */
   private async convertParams(opts: types.chat.SendOptions): Promise<claude.Request> {
     return {
-      model: opts.model || 'claude-instant-1.2',
+      // model: opts.model || 'claude-3-haiku@20240307',
       messages: await this.corvertContents(opts),
-      system: '',
+      // system: '',
       temperature: opts.temperature || 0.8,
       top_k: opts.top_k || 1,
       top_p: opts.top_p || 1,

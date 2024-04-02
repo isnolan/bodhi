@@ -20,8 +20,7 @@ describe('chat', () => {
   // text: streaming
   it('text: streaming', async () => {
     const res = await api.sendMessage({
-      // model: 'claude-instant-1.2',
-      model: 'claude-3-sonnet-20240229',
+      model: 'claude-3-haiku-20240307',
       messages: [
         // { role: 'user', parts: [{ type: 'text', text: 'Hello, 我们家有两只狗' }] },
         // { role: 'assistant', parts: [{ type: 'text', text: 'Great to meet you. What would you like to know?' }] },

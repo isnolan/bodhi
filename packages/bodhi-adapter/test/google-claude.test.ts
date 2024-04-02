@@ -25,7 +25,7 @@ describe('chat', () => {
   // 发送聊天消息
   it('text: streaming', async () => {
     const res = await api.sendMessage({
-      model: 'claude-3-haiku-20240307',
+      model: 'claude-3-sonnet@20240229', //'claude-3-haiku@20240307',
       messages: [
         { role: 'user', parts: [{ type: 'text', text: '请写一篇关于我家小狗子的故事，要求字数不少于200字' }] },
       ],
