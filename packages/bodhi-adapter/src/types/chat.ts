@@ -1,5 +1,3 @@
-import { ParseEvent } from 'eventsource-parser';
-
 /**
  * Chat
  */

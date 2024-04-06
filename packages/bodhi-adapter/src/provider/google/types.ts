@@ -23,7 +23,7 @@ export namespace gemini {
     parts: Part[];
   };
 
-  export type Role = 'user' | 'model' | '';
+  export type Role = 'user' | 'model';
 
   export type Part = TextPart | FilePart | ToolPart;
   export type TextPart = { text: string };

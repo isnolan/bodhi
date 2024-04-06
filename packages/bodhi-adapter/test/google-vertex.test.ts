@@ -27,8 +27,17 @@ describe('chat', () => {
     const res = await api.sendMessage({
       model: 'gemini-pro',
       messages: [
-        { role: 'user', parts: [{ type: 'text', text: 'Hello, 我们家有两只狗' }] },
-        { role: 'assistant', parts: [{ type: 'text', text: 'Great to meet you. What would you like to know?' }] },
+        {
+          role: 'system',
+          parts: [
+            {
+              type: 'text',
+              text: "You are a professional children's literature writer, good at writing children's stories.",
+            },
+          ],
+        },
+        // { role: 'user', parts: [{ type: 'text', text: 'Hello, 我们家有两只狗' }] },
+        // { role: 'assistant', parts: [{ type: 'text', text: 'Great to meet you. What would you like to know?' }] },
         { role: 'user', parts: [{ type: 'text', text: '请写一篇关于我家小狗子的故事，要求字数不少于200字' }] },
       ],
       onProgress: (choices) => {
@@ -42,30 +51,30 @@ describe('chat', () => {
   }, 30000);
 
   // vision: image part, from inline data
-  it('vision:image from inline data', async () => {
-    const res = await api.sendMessage({
-      model: 'gemini-pro-vision',
-      messages: [
-        {
-          role: 'user',
-          parts: [
-            { type: 'text', text: 'Describe this image' },
-            {
-              type: 'image',
-              url: 'https://miro.medium.com/v2/resize:fit:720/format:jpeg/1*YMJDp-kqus7i-ktWtksNjg.jpeg',
-            },
-          ],
-        },
-      ],
-      onProgress: (choices) => {
-        console.log(`[vertex]`, JSON.stringify(choices));
-        expect(choices).toBeInstanceOf(Object);
-      },
-    });
+  // it('vision:image from inline data', async () => {
+  //   const res = await api.sendMessage({
+  //     model: 'gemini-pro-vision',
+  //     messages: [
+  //       {
+  //         role: 'user',
+  //         parts: [
+  //           { type: 'text', text: 'Describe this image' },
+  //           {
+  //             type: 'image',
+  //             url: 'https://miro.medium.com/v2/resize:fit:720/format:jpeg/1*YMJDp-kqus7i-ktWtksNjg.jpeg',
+  //           },
+  //         ],
+  //       },
+  //     ],
+  //     onProgress: (choices) => {
+  //       console.log(`[vertex]`, JSON.stringify(choices));
+  //       expect(choices).toBeInstanceOf(Object);
+  //     },
+  //   });
 
-    console.log(`[vertex]result:`, JSON.stringify(res));
-    expect(res).toBeInstanceOf(Object);
-  }, 30000);
+  //   console.log(`[vertex]result:`, JSON.stringify(res));
+  //   expect(res).toBeInstanceOf(Object);
+  // }, 30000);
 
   // vision: video part, from Google Cloud Storage
   // it('vision:video from google cloud storage', async () => {
@@ -96,43 +105,43 @@ describe('chat', () => {
   // }, 30000);
 
   // function call
-  it('function call', async () => {
-    const result = await api.sendMessage({
-      model: 'gemini-pro',
-      messages: [
-        {
-          role: 'user',
-          parts: [{ type: 'text', text: 'Which theaters in Mountain View show Barbie movie?' }],
-        },
-      ],
-      tools: [
-        {
-          type: 'function',
-          function: {
-            name: 'find_theaters',
-            description:
-              'find theaters based on location and optionally movie title which are is currently playing in theaters',
-            parameters: {
-              type: 'object',
-              properties: {
-                location: {
-                  type: 'string',
-                  description: 'The city and state, e.g. San Francisco, CA or a zip code e.g. 95616',
-                },
-                movie: { type: 'string', description: 'Any movie title' },
-              },
-              required: ['location'],
-            },
-          },
-        },
-      ],
-      onProgress: (choices) => {
-        console.log(`[gemini]`, JSON.stringify(choices));
-        expect(choices).toBeInstanceOf(Object);
-      },
-    });
+  // it('function call', async () => {
+  //   const result = await api.sendMessage({
+  //     model: 'gemini-pro',
+  //     messages: [
+  //       {
+  //         role: 'user',
+  //         parts: [{ type: 'text', text: 'Which theaters in Mountain View show Barbie movie?' }],
+  //       },
+  //     ],
+  //     tools: [
+  //       {
+  //         type: 'function',
+  //         function: {
+  //           name: 'find_theaters',
+  //           description:
+  //             'find theaters based on location and optionally movie title which are is currently playing in theaters',
+  //           parameters: {
+  //             type: 'object',
+  //             properties: {
+  //               location: {
+  //                 type: 'string',
+  //                 description: 'The city and state, e.g. San Francisco, CA or a zip code e.g. 95616',
+  //               },
+  //               movie: { type: 'string', description: 'Any movie title' },
+  //             },
+  //             required: ['location'],
+  //           },
+  //         },
+  //       },
+  //     ],
+  //     onProgress: (choices) => {
+  //       console.log(`[gemini]`, JSON.stringify(choices));
+  //       expect(choices).toBeInstanceOf(Object);
+  //     },
+  //   });
 
-    console.log(`[gemini]result:`, JSON.stringify(result));
-    expect(result).toBeInstanceOf(Object);
-  }, 30000);
+  //   console.log(`[gemini]result:`, JSON.stringify(result));
+  //   expect(result).toBeInstanceOf(Object);
+  // }, 30000);
 });

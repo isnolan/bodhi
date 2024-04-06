@@ -164,12 +164,12 @@ var OpenAICompletionsAPI = class extends ChatBaseAPI {
   models() {
     return [
       'gpt-3.5-turbo',
-      'gpt-3.5-turbo-1106',
+      'gpt-3.5-turbo-0125',
       'gpt-3.5-turbo-16k',
       'gpt-3.5-turbo-instruct',
       'gpt-4',
-      'gpt-4-1106-preview',
-      'gpt-4-vision-preview	',
+      'gpt-4-0125-preview',
+      'gpt-4-turbo-preview',
       'gpt-4-32k',
     ];
   }
@@ -215,7 +215,6 @@ var OpenAICompletionsAPI = class extends ChatBaseAPI {
             parser.feed(chunk.toString());
           }
         });
-        console.log(`->`, choicesList);
         body.on('end', async () => {
           const choices = this.combineChoices(choicesList);
           const usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
@@ -231,7 +230,7 @@ var OpenAICompletionsAPI = class extends ChatBaseAPI {
    */
   async convertParams(opts) {
     const params = {
-      model: opts.model || 'gpt-3.5-turbo-1106',
+      model: opts.model || 'gpt-3.5-turbo-0125',
       messages: await this.corvertContents(opts),
       temperature: opts?.temperature || 0.9,
       top_p: opts?.top_p || 1,
@@ -266,6 +265,9 @@ var OpenAICompletionsAPI = class extends ChatBaseAPI {
             }
           }),
         );
+        if (item.role === 'system') {
+          return { role: 'system', content: this.filterTextPartsToString(parts) };
+        }
         if (item.role === 'assistant') {
           return {
             role: 'assistant',
@@ -414,30 +416,46 @@ var GoogleGeminiAPI = class extends ChatBaseAPI {
     };
   }
   async corvertContents(opts) {
-    return Promise.all(
-      opts.messages.map(async (item) => {
-        const parts = [];
-        await Promise.all(
-          item.parts.map(async (part) => {
-            if (part.type === 'text') {
-              parts.push({ text: part.text });
-            }
-            if (['image', 'video'].includes(part.type)) {
-              try {
-                const inline_data = await this.fetchFile(part.url);
-                parts.push({ inline_data });
-              } catch (err) {}
-            }
-            if (part.type === 'function_call') {
-              const { name, args } = part.function_call;
-              parts.push({ functionCall: { name, args } });
-            }
-          }),
-        );
-        item.role = item.role === 'assistant' ? 'model' : item.role;
-        return { role: item.role, parts };
-      }),
+    const rows = await Promise.all(
+      opts.messages
+        .filter((item) => item.role !== 'system')
+        .map(async (item) => {
+          const parts = [];
+          await Promise.all(
+            item.parts.map(async (part) => {
+              if (part.type === 'text') {
+                parts.push({ text: part.text });
+              }
+              if (['image', 'video'].includes(part.type)) {
+                try {
+                  const inline_data = await this.fetchFile(part.url);
+                  parts.push({ inline_data });
+                } catch (err) {}
+              }
+              if (part.type === 'function_call') {
+                const { name, args } = part.function_call;
+                parts.push({ functionCall: { name, args } });
+              }
+            }),
+          );
+          item.role = item.role === 'assistant' ? 'model' : item.role;
+          return { role: item.role, parts };
+        }),
     );
+    const system = opts.messages.filter((item) => item.role === 'system');
+    if (system.length > 0) {
+      const textParts = system[0].parts.filter((part) => 'text' in part);
+      rows[0].parts.unshift(
+        ...textParts.map((part) => ({
+          text: `[instructions]
+${part.text}
+
+[user prompt]
+`,
+        })),
+      );
+    }
+    return rows;
   }
   corvertTools(opts) {
     const tools = [];

@@ -19,10 +19,10 @@ describe('chat', () => {
   // 发送聊天消息
   it('text: streaming', async () => {
     const res = await api.sendMessage({
-      model: 'gpt-3.5-turbo-1106',
+      model: 'gpt-3.5-turbo-0125',
       messages: [
-        { role: 'system', parts: [{ type: 'text', text: 'Hi，我是Jack' }] },
-        { role: 'user', parts: [{ type: 'text', text: '你可以讲个关于小王子的故事吗？' }] },
+        { role: 'system', parts: [{ type: 'text', text: '你是一个核物理专家' }] },
+        { role: 'user', parts: [{ type: 'text', text: '请写一个你擅长的小故事？' }] },
       ],
       onProgress: (choices) => {
         console.log(`[openai]process`, JSON.stringify(choices));

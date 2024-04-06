@@ -18,12 +18,12 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
   public models(): string[] {
     return [
       'gpt-3.5-turbo',
-      'gpt-3.5-turbo-1106',
+      'gpt-3.5-turbo-0125',
       'gpt-3.5-turbo-16k',
       'gpt-3.5-turbo-instruct',
       'gpt-4',
-      'gpt-4-1106-preview',
-      'gpt-4-vision-preview	',
+      'gpt-4-0125-preview',
+      'gpt-4-turbo-preview',
       'gpt-4-32k',
     ];
   }
@@ -80,7 +80,7 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
           }
         });
 
-        console.log(`->`, choicesList);
+        // console.log(`->`, choicesList);
         body.on('end', async () => {
           const choices: types.chat.Choice[] = this.combineChoices(choicesList);
           // TODO: Google AI Gemini not found usageMetadata, but vertex founded.
@@ -98,7 +98,7 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
    */
   private async convertParams(opts: types.chat.SendOptions): Promise<openai.Request> {
     const params: openai.Request = {
-      model: opts.model || 'gpt-3.5-turbo-1106',
+      model: opts.model || 'gpt-3.5-turbo-0125',
       messages: await this.corvertContents(opts),
       temperature: opts?.temperature || 0.9,
       top_p: opts?.top_p || 1,
@@ -136,9 +136,9 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
             }
           }),
         );
-        // if (item.role === 'system') {
-        //   return { role: 'system', content: this.filterTextPartsToString(parts) } as openai.Message;
-        // }
+        if (item.role === 'system') {
+          return { role: 'system', content: this.filterTextPartsToString(parts) } as openai.Message;
+        }
         if (item.role === 'assistant') {
           return {
             role: 'assistant',

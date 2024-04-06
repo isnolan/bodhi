@@ -104,34 +104,43 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
   }
 
   protected async corvertContents(opts: types.chat.SendOptions): Promise<gemini.Content[]> {
-    return Promise.all(
-      opts.messages.map(async (item) => {
-        const parts: gemini.Part[] = [];
-        await Promise.all(
-          item.parts.map(async (part: types.chat.Part) => {
-            if (part.type === 'text') {
-              parts.push({ text: part.text });
-            }
-            if (['image', 'video'].includes(part.type)) {
-              // TODO: fetch 下载图片并转化buffer为base64
-              try {
-                const inline_data = await this.fetchFile((part as types.chat.FilePart).url);
-                parts.push({ inline_data });
-              } catch (err) {
-                // console.warn(``);
+    // filter system role
+    const rows = await Promise.all(
+      opts.messages
+        .filter((item) => item.role !== 'system')
+        .map(async (item) => {
+          const parts: gemini.Part[] = [];
+          await Promise.all(
+            item.parts.map(async (part: types.chat.Part) => {
+              if (part.type === 'text') {
+                parts.push({ text: part.text });
               }
-            }
-            if (part.type === 'function_call') {
-              const { name, args } = part.function_call;
-              parts.push({ functionCall: { name, args } });
-            }
-          }),
-        );
-        item.role = item.role === 'assistant' ? 'model' : item.role;
-
-        return { role: item.role, parts } as gemini.Content;
-      }),
+              if (['image', 'video'].includes(part.type)) {
+                try {
+                  const inline_data = await this.fetchFile((part as types.chat.FilePart).url);
+                  parts.push({ inline_data });
+                } catch (err) {}
+              }
+              if (part.type === 'function_call') {
+                const { name, args } = part.function_call;
+                parts.push({ functionCall: { name, args } });
+              }
+            }),
+          );
+          item.role = item.role === 'assistant' ? 'model' : item.role;
+          return { role: item.role, parts } as gemini.Content;
+        }),
     );
+
+    // Compatible with system role
+    // insert system text part to rows's first user parts
+    const system = opts.messages.filter((item) => item.role === 'system');
+    if (system.length > 0) {
+      const textParts = system[0].parts.filter((part) => 'text' in part) as gemini.TextPart[];
+      rows[0].parts.unshift(...textParts.map((part) => ({ text: `[instructions]\n${part.text}\n\n[user prompt]\n` })));
+    }
+
+    return rows;
   }
 
   protected corvertTools(opts: types.chat.SendOptions): gemini.Tools[] {
