@@ -50,7 +50,7 @@ export class CreateCompletionsDto extends CreateChatDto {
 export class CreateConversationDto extends CreateChatDto {
   @ApiProperty({ default: [{ role: 'user', parts: [{ type: 'text', text: 'Hi' }] }] })
   @IsNotEmpty()
-  @IsObject()
+  @IsArray()
   messages: chat.Message[];
 
   // @ApiProperty({ default: 5 })
