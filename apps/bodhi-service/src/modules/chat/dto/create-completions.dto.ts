@@ -48,10 +48,10 @@ export class CreateCompletionsDto extends CreateChatDto {
 }
 
 export class CreateConversationDto extends CreateChatDto {
-  @ApiProperty({ default: { role: 'user', parts: [{ type: 'text', text: 'Hi' }] } })
+  @ApiProperty({ default: [{ role: 'user', parts: [{ type: 'text', text: 'Hi' }] }] })
   @IsNotEmpty()
   @IsObject()
-  message: chat.Message;
+  messages: chat.Message[];
 
   // @ApiProperty({ default: 5 })
   @IsOptional()
