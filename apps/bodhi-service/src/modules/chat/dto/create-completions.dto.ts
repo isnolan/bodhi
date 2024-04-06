@@ -5,7 +5,7 @@ import type { chat } from '@isnolan/bodhi-adapter';
 
 class CreateChatDto {
   /* 基本内容 */
-  @ApiProperty({ default: 'gemini-pro' })
+  @ApiProperty({ default: 'gemini-1.0-pro' })
   @IsNotEmpty()
   @IsString()
   model: string;
