@@ -3,13 +3,26 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { File, FileState } from '../entity/file.entity';
+import Hashids from 'hashids';
 
 @Injectable()
 export class FileService {
+  private readonly hashids: Hashids;
+
   constructor(
     @InjectRepository(File)
     private readonly repository: Repository<File>,
-  ) {}
+  ) {
+    this.hashids = new Hashids('bodhi-files', 10);
+  }
+
+  encodeId(id: number) {
+    return this.hashids.encode(id);
+  }
+
+  decodeId(id: string) {
+    return this.hashids.decode(id)[0];
+  }
 
   async findActiveByUserId(user_id: number, client_user_id?: string) {
     const query = { user_id, state: FileState.ACTIVE };

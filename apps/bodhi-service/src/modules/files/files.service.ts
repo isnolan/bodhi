@@ -54,8 +54,9 @@ export class FilesService {
 
     // 存在有效上传
     if (file) {
+      const id = this.file.encodeId(file.id);
       const url = `https://s.alidraft.com${file.path}`;
-      return { id: file.id, name, size, mimetype, hash, url, expires_at: file.expires_at };
+      return { id, name, size, mimetype, hash, url, expires_at: file.expires_at };
     }
 
     // 初次上传
@@ -67,8 +68,9 @@ export class FilesService {
         // 更新状态
         this.file.updateState(file.id, FileState.ACTIVE);
         const url = `https://s.alidraft.com${path}`;
+        const id = this.file.encodeId(file.id);
 
-        return { id: file.id, name, url, size, mimetype, hash, expires_at: file.expires_at } as FileDto;
+        return { id, name, url, size, mimetype, hash, expires_at: file.expires_at } as FileDto;
       }
 
       // 上传异常

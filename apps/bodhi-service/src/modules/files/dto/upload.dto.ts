@@ -1,13 +1,16 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UploadFileReq {
   @ApiProperty({ type: 'string', format: 'binary', required: true })
-  file: Express.Multer.File;
+  files: Express.Multer.File[];
+
+  @ApiPropertyOptional()
+  model: string;
 }
 
 export class FileDto {
   @ApiProperty()
-  id: number;
+  id: string;
 
   @ApiProperty()
   name: string;
