@@ -40,7 +40,7 @@ export namespace chat {
 
   export type Part = TextPart | FilePart | ToolPart;
   export type TextPart = { type: 'text'; text: string };
-  export type FilePart = { type: 'image' | 'video' | 'file'; url: string };
+  export type FilePart = { type: 'image' | 'video' | 'document'; url: string };
   export type ToolPart = FunctionCallTool | FunctionTool;
 
   /* Tools  */
