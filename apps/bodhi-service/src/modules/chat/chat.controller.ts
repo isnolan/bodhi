@@ -63,7 +63,6 @@ export class ChatController {
     const { model, messages, conversation_id = uuidv4(), message_id = uuidv4() } = payload;
     const { stream = true, parent_id, temperature, top_p, top_k, context_limit, n } = payload;
 
-    console.log(`->`, payload);
     try {
       // validate subscription
       const abilities = this.checkAbilities(messages);
