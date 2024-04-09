@@ -26,21 +26,24 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.use(compression());
 
-  // swagger
-  const options = new DocumentBuilder()
-    .setTitle('Bodhi API')
-    .setVersion('1.0')
-    // .addServer('http://127.0.0.1:3200', 'Local')
-    .addServer('https://api.zhangguiyi.cn/rest/bodhi', 'Dev')
-    .addServer('https://api.zhangguiyi.com/rest/bodhi', 'Stage')
-    .addBearerAuth()
-    .addApiKey(
-      { type: 'apiKey', name: 'x-api-key', in: 'header' },
-      'api-key', // This name will be used to refer to the scheme
-    )
-    .build();
-  const document = SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup('api', app, document, swaggerCustomOptions);
+  if (process.env.NODE_ENV !== 'production') {
+    // swagger
+    const options = new DocumentBuilder()
+      .setTitle('Bodhi API')
+      .setVersion('1.0')
+      // .addServer('http://127.0.0.1:3200', 'Local')
+      .addServer('https://api.zhangguiyi.cn/rest/bodhi', 'Dev')
+      .addServer('https://api.zhangguiyi.com/rest/bodhi', 'Stage')
+      .addServer('https://ep.draftai.cn/rest/bodhi', 'Production')
+      .addBearerAuth()
+      .addApiKey(
+        { type: 'apiKey', name: 'x-api-key', in: 'header' },
+        'api-key', // This name will be used to refer to the scheme
+      )
+      .build();
+    const document = SwaggerModule.createDocument(app, options);
+    SwaggerModule.setup('api', app, document, swaggerCustomOptions);
+  }
 
   // listen
   // await app.startAllMicroservices();
