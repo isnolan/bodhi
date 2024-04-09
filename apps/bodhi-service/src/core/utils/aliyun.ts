@@ -1,7 +1,7 @@
 import OSS from 'ali-oss';
 import * as dotenv from 'dotenv';
 import { Readable } from 'stream';
-dotenv.config();
+dotenv.config({ path: ['.env', '.env.development', '.env.production'] });
 
 /**
  *

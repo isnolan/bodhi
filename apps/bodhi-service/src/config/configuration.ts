@@ -10,9 +10,9 @@ export default () => {
       type: 'mysql',
       host: process.env.MYSQL_HOST,
       port: parseInt(process.env.MYSQL_PORT || '3306'),
-      username: process.env.MYSQL_USER,
+      username: process.env.MYSQL_USER || 'draft',
       password: process.env.MYSQL_PASSWORD,
-      database: process.env.MYSQL_DATABASE,
+      database: process.env.MYSQL_DATABASE || 'bodhi',
       autoLoadEntities: true,
       timezone: 'Z',
       synchronize: process.env.NODE_ENV == 'development', // only dev
@@ -31,6 +31,6 @@ export default () => {
       pass: process.env.SMTP_PASSWORD,
     },
 
-    proxy: process.env.PROXY_AGENT,
+    proxy: process.env.HTTP_PROXY,
   };
 };

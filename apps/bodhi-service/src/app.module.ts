@@ -17,7 +17,7 @@ import configuration from './config/configuration';
     // Instance Config
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: [`./.env.${process.env.NODE_ENV}`, `./.env`],
+      envFilePath: [`.env`, `.env.development`, `.env.production`],
       load: [configuration],
     }),
 

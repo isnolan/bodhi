@@ -7,4 +7,6 @@ apps/**/dist
 
 .credentials
 .env
+.env.production
+.env.development
 .turbo
