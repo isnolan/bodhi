@@ -74,19 +74,13 @@ export class ProviderService {
   }
 
   async filterProviderByModel(ids: number[], name: string, abilities: string[]): Promise<number[]> {
-    const providers = await this.repository.find({
-      select: ['id'],
-      where: {
-        id: In(ids),
-        slug: Equal(name),
-        model: {
-          is_tools: abilities.includes('tools') ? 1 : 0,
-          is_vision: abilities.includes('vision') ? 1 : 0,
-          is_docs: abilities.includes('docs') ? 1 : 0,
-        },
-      },
-      relations: ['model'],
-    });
+    const where = { id: In(ids), slug: Equal(name), model: { status: CredentialsState.ACTIVE } };
+    if (abilities.length > 0) {
+      abilities.includes('tools') && Object.assign(where.model, { is_tools: 1 });
+      abilities.includes('vision') && Object.assign(where.model, { is_vision: 1 });
+      abilities.includes('docs') && Object.assign(where.model, { is_docs: 1 });
+    }
+    const providers = await this.repository.find({ select: ['id'], where, relations: ['model'] });
     return providers.map((provider) => provider.id);
   }
 
