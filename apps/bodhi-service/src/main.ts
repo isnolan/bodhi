@@ -34,7 +34,7 @@ async function bootstrap() {
       // .addServer('http://127.0.0.1:3200', 'Local')
       .addServer('https://api.zhangguiyi.cn/rest/bodhi', 'Dev')
       .addServer('https://api.zhangguiyi.com/rest/bodhi', 'Stage')
-      .addServer('https://ep.draftai.cn/rest/bodhi', 'Production')
+      .addServer('https://ep.draftai.cn/rest/bodhi', 'Prod')
       .addBearerAuth()
       .addApiKey(
         { type: 'apiKey', name: 'x-api-key', in: 'header' },
