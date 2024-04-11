@@ -616,38 +616,49 @@ var GoogleClaudeAPI = class extends ChatBaseAPI {
    */
   async convertParams(opts) {
     return {
-      // model: opts.model || 'claude-3-haiku@20240307',
       messages: await this.corvertContents(opts),
-      // system: '',
+      system: this.corvertSystem(opts),
       temperature: opts.temperature || 0.8,
       top_k: opts.top_k || 1,
       top_p: opts.top_p || 1,
       max_tokens: opts.max_tokens || 1024,
-      // metadata:
       stop_sequences: opts.stop_sequences || [],
       stream: true,
       anthropic_version: 'vertex-2023-10-16',
     };
   }
+  corvertSystem(opts) {
+    return opts.messages
+      .filter((item) => item.role === 'system')
+      .map((item) =>
+        item.parts
+          .filter((p) => p.type === 'text')
+          .map((p) => p.text)
+          .join(''),
+      )
+      .join('\n');
+  }
   async corvertContents(opts) {
     return Promise.all(
-      opts.messages.map(async (item) => {
-        const parts = [];
-        await Promise.all(
-          item.parts.map(async (part) => {
-            if (part.type === 'text') {
-              parts.push({ type: 'text', text: part.text });
-            }
-            if (['image', 'video'].includes(part.type)) {
-              try {
-                const { mime_type: media_type, data } = await this.fetchFile(part.url);
-                parts.push({ type: 'image', source: { type: 'base64', media_type, data } });
-              } catch (err) {}
-            }
-          }),
-        );
-        return { role: item.role, content: parts };
-      }),
+      opts.messages
+        .filter((item) => item.role !== 'system')
+        .map(async (item) => {
+          const parts = [];
+          await Promise.all(
+            item.parts.map(async (part) => {
+              if (part.type === 'text') {
+                parts.push({ type: 'text', text: part.text });
+              }
+              if (['image', 'video'].includes(part.type)) {
+                try {
+                  const { mime_type: media_type, data } = await this.fetchFile(part.url);
+                  parts.push({ type: 'image', source: { type: 'base64', media_type, data } });
+                } catch (err) {}
+              }
+            }),
+          );
+          return { role: item.role, content: parts };
+        }),
     );
   }
   convertResult(response, res) {
@@ -774,7 +785,7 @@ var AnthropicClaudeAPI = class extends ChatBaseAPI {
     return {
       model: opts.model || 'claude-3-haiku-20240307',
       messages: await this.corvertContents(opts),
-      system: '',
+      system: this.corvertSystem(opts),
       temperature: opts.temperature || 0.8,
       top_k: opts.top_k || 1,
       top_p: opts.top_p || 1,
@@ -784,25 +795,38 @@ var AnthropicClaudeAPI = class extends ChatBaseAPI {
       stream: true,
     };
   }
+  corvertSystem(opts) {
+    return opts.messages
+      .filter((item) => item.role === 'system')
+      .map((item) =>
+        item.parts
+          .filter((p) => p.type === 'text')
+          .map((p) => p.text)
+          .join(''),
+      )
+      .join('\n');
+  }
   async corvertContents(opts) {
     return Promise.all(
-      opts.messages.map(async (item) => {
-        const parts = [];
-        await Promise.all(
-          item.parts.map(async (part) => {
-            if (part.type === 'text') {
-              parts.push({ type: 'text', text: part.text });
-            }
-            if (['image', 'video'].includes(part.type)) {
-              try {
-                const { mime_type: media_type, data } = await this.fetchFile(part.url);
-                parts.push({ type: 'image', source: { type: 'base64', media_type, data } });
-              } catch (err) {}
-            }
-          }),
-        );
-        return { role: item.role, content: parts };
-      }),
+      opts.messages
+        .filter((item) => item.role !== 'system')
+        .map(async (item) => {
+          const parts = [];
+          await Promise.all(
+            item.parts.map(async (part) => {
+              if (part.type === 'text') {
+                parts.push({ type: 'text', text: part.text });
+              }
+              if (['image', 'video'].includes(part.type)) {
+                try {
+                  const { mime_type: media_type, data } = await this.fetchFile(part.url);
+                  parts.push({ type: 'image', source: { type: 'base64', media_type, data } });
+                } catch (err) {}
+              }
+            }),
+          );
+          return { role: item.role, content: parts };
+        }),
     );
   }
   convertResult(response, res) {

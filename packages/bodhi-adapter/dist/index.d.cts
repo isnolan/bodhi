@@ -52,7 +52,7 @@ declare namespace chat {
     text: string;
   };
   type FilePart = {
-    type: 'image' | 'video' | 'file';
+    type: 'image' | 'video' | 'document';
     url: string;
   };
   type ToolPart = FunctionCallTool | FunctionTool;

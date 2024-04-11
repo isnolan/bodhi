@@ -97,41 +97,53 @@ export class GoogleClaudeAPI extends ChatBaseAPI {
    */
   private async convertParams(opts: types.chat.SendOptions): Promise<claude.Request> {
     return {
-      // model: opts.model || 'claude-3-haiku@20240307',
       messages: await this.corvertContents(opts),
-      // system: '',
+      system: this.corvertSystem(opts),
       temperature: opts.temperature || 0.8,
       top_k: opts.top_k || 1,
       top_p: opts.top_p || 1,
       max_tokens: opts.max_tokens || 1024,
-      // metadata:
       stop_sequences: opts.stop_sequences || [],
       stream: true,
       anthropic_version: 'vertex-2023-10-16',
     };
   }
 
+  protected corvertSystem(opts: types.chat.SendOptions): string {
+    return opts.messages
+      .filter((item) => item.role === 'system')
+      .map((item) =>
+        item.parts
+          .filter((p: types.chat.Part) => p.type === 'text')
+          .map((p) => (p as types.chat.TextPart).text)
+          .join(''),
+      )
+      .join('\n');
+  }
+
   protected async corvertContents(opts: types.chat.SendOptions): Promise<claude.Content[]> {
     return Promise.all(
-      opts.messages.map(async (item) => {
-        const parts: claude.Part[] = [];
-        await Promise.all(
-          item.parts.map(async (part: types.chat.Part) => {
-            if (part.type === 'text') {
-              parts.push({ type: 'text', text: part.text });
-            }
-            if (['image', 'video'].includes(part.type)) {
-              try {
-                const { mime_type: media_type, data } = await this.fetchFile((part as types.chat.FilePart).url);
-                parts.push({ type: 'image', source: { type: 'base64', media_type, data } });
-              } catch (err) {
-                // console.warn(``);
+      opts.messages
+        .filter((item) => item.role !== 'system')
+        .map(async (item) => {
+          const parts: claude.Part[] = [];
+          await Promise.all(
+            item.parts.map(async (part: types.chat.Part) => {
+              if (part.type === 'text') {
+                parts.push({ type: 'text', text: part.text });
               }
-            }
-          }),
-        );
-        return { role: item.role, content: parts } as claude.Content;
-      }),
+              if (['image', 'video'].includes(part.type)) {
+                try {
+                  const { mime_type: media_type, data } = await this.fetchFile((part as types.chat.FilePart).url);
+                  parts.push({ type: 'image', source: { type: 'base64', media_type, data } });
+                } catch (err) {
+                  // console.warn(``);
+                }
+              }
+            }),
+          );
+          return { role: item.role, content: parts } as claude.Content;
+        }),
     );
   }
 
