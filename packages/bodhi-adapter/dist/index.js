@@ -10,6 +10,7 @@ var Provider = /* @__PURE__ */ ((Provider2) => {
   Provider2['ALIYUN_QWEN'] = 'aliyun-qwen';
   Provider2['ALIYUN_WANX'] = 'aliyun-wanx';
   Provider2['TENCENT_HUNYUAN'] = 'tencent-hunyuan';
+  Provider2['MOONSHOT_KIMI'] = 'moonshot-kimi';
   return Provider2;
 })(Provider || {});
 
@@ -1239,8 +1240,149 @@ var AliyunWanxAPI = class extends ChatBaseAPI {
   }
 };
 
-// src/provider/tencent/hunyuan.ts
+// src/provider/moonshot/kimi.ts
+import fetchSSE9 from 'node-fetch';
 import { v4 as uuidv45 } from 'uuid';
+import { HttpsProxyAgent as HttpsProxyAgent10 } from 'https-proxy-agent';
+import { createParser as createParser8 } from 'eventsource-parser';
+var MoonshotKimiAPI = class extends ChatBaseAPI {
+  constructor(opts) {
+    const options = Object.assign({ baseURL: 'https://api.moonshot.cn/v1' }, opts);
+    super(options);
+    this.provider = 'moonshot';
+  }
+  models() {
+    return ['moonshot-v1-8k', 'moonshot-v1-32k', 'moonshot-v1-128k'];
+  }
+  async sendMessage(opts) {
+    const { onProgress = () => {}, ...options } = opts;
+    return new Promise(async (resolove, reject) => {
+      const url = `${this.baseURL}/chat/completions`;
+      const params = await this.convertParams(options);
+      console.log(`[fetch]params`, JSON.stringify(params, null, 2));
+      const res = await fetchSSE9(url, {
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.apiKey}` },
+        body: JSON.stringify(params),
+        agent: this.agent ? new HttpsProxyAgent10(this.agent) : void 0,
+        method: 'POST',
+      });
+      if (!res.ok) {
+        const reason = await res.json();
+        reject(new chat.ChatError(reason.error?.message || 'request error', res.status));
+      }
+      if (params.stream === false) {
+        const result = await res.json();
+        const choices = this.convertChoices(result.choices);
+        const usage = result?.usage;
+        resolove({ id: uuidv45(), model: opts.model, choices, usage });
+      } else {
+        const body = res.body;
+        body.on('error', (err) => reject(new chat.ChatError(err.message, 500)));
+        const choicesList = [];
+        const parser = createParser8((event) => {
+          if (event.type === 'event') {
+            if (event.data !== '[DONE]') {
+              try {
+                const res2 = JSON.parse(event.data);
+                const choices = this.convertChoices(res2.choices);
+                onProgress?.(choices);
+                choicesList.push(...choices);
+              } catch (e) {}
+            }
+          }
+        });
+        body.on('readable', async () => {
+          let chunk;
+          while ((chunk = body.read())) {
+            parser.feed(chunk.toString());
+          }
+        });
+        body.on('end', async () => {
+          const choices = this.combineChoices(choicesList);
+          const usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+          resolove({ id: uuidv45(), model: opts.model, choices, usage });
+        });
+      }
+    });
+  }
+  /**
+   * 转换为 Gemini 要求的请求参数
+   * https://platform.openai.com/docs/api-reference/chat/create
+   * @returns
+   */
+  async convertParams(opts) {
+    const params = {
+      model: opts.model || 'moonshot-v1-8k',
+      messages: await this.corvertContents(opts),
+      temperature: opts?.temperature || 0.9,
+      top_p: opts?.top_p || 1,
+      // frequency_penalty: 0,
+      // presence_penalty: 0,
+      max_tokens: opts?.max_tokens || 1e3,
+      n: opts.n || 1,
+      stop: opts?.stop_sequences || void 0,
+      stream: true,
+    };
+    if (opts.tools && opts.tools.length > 0) {
+      Object.assign(params, { tools: opts.tools, stream: false });
+    }
+    return params;
+  }
+  async corvertContents(opts) {
+    return Promise.all(
+      opts.messages.map(async (item) => {
+        const parts = [];
+        const tool_calls = [];
+        await Promise.all(
+          item.parts.map(async (part) => {
+            if (part.type === 'text') {
+              parts.push({ type: 'text', text: part.text });
+            }
+          }),
+        );
+        if (item.role === 'system') {
+          return { role: 'system', content: this.filterTextPartsToString(parts) };
+        }
+        if (item.role === 'assistant') {
+          return {
+            role: 'assistant',
+            content: parts,
+            // tool_calls: tool_calls.length > 0 ? tool_calls : undefined,
+          };
+        }
+        return { role: 'user', content: parts };
+      }),
+    );
+  }
+  filterTextPartsToString(parts) {
+    return parts
+      .filter((p) => p.type === 'text')
+      .map((p) => p.text)
+      .join('');
+  }
+  convertChoices(candidates) {
+    const choices = [];
+    try {
+      candidates.map(({ index, delta, message, finish_reason }) => {
+        const parts = [];
+        let { content, tool_calls } = message || delta;
+        if (delta) {
+          content = delta.content;
+        }
+        if (content) {
+          parts.push({ type: 'text', text: content });
+        }
+        choices.push({ index, role: 'assistant', parts, finish_reason });
+      });
+    } catch (err) {
+      console.warn(err);
+    }
+    return choices;
+  }
+};
+
+// src/provider/tencent/hunyuan.ts
+import { v4 as uuidv46 } from 'uuid';
 import * as tencentcloud from 'tencentcloud-sdk-nodejs';
 var TencentHunyuanAPI = class extends ChatBaseAPI {
   constructor(opts) {
@@ -1272,7 +1414,7 @@ var TencentHunyuanAPI = class extends ChatBaseAPI {
       }
       const params = await this.convertParams(options);
       const response = await this.client[opts.model](params);
-      let id = uuidv45();
+      let id = uuidv46();
       const choicesList = [];
       const usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
       for await (let message of response) {
@@ -1368,6 +1510,9 @@ var ChatAPI = class {
         break;
       case 'tencent-hunyuan' /* TENCENT_HUNYUAN */:
         this.provider = new TencentHunyuanAPI(opts);
+        break;
+      case 'moonshot-kimi' /* MOONSHOT_KIMI */:
+        this.provider = new MoonshotKimiAPI(opts);
         break;
       default:
         throw new Error(`Unsupported supplier: ${provider}`);

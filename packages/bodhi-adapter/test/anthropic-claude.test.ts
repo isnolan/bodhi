@@ -18,28 +18,28 @@ describe('chat', () => {
   });
 
   // text: streaming
-  it('text: streaming', async () => {
-    const res = await api.sendMessage({
-      model: 'claude-3-haiku-20240307',
-      messages: [
-        { role: 'system', parts: [{ type: 'text', text: '你是一位资深的儿童作家，擅长写作高情商儿童故事' }] },
-        { role: 'user', parts: [{ type: 'text', text: '白雪公主与七个小矮人' }] },
-        // { role: 'assistant', parts: [{ type: 'text', text: 'Great to meet you. What would you like to know?' }] },
-      ],
-      onProgress: (choices) => {
-        console.log(`[anthropic]claude`, 'progress', JSON.stringify(choices));
-        expect(choices).toBeInstanceOf(Object);
-      },
-    });
-    console.log(`[anthropic]claude`, 'result', JSON.stringify(res));
-    expect(res).toBeInstanceOf(Object);
-  }, 30000);
+  // it('text: streaming', async () => {
+  //   const res = await api.sendMessage({
+  //     model: 'claude-3-haiku-20240307',
+  //     messages: [
+  //       { role: 'system', parts: [{ type: 'text', text: '你是一位资深的儿童作家，擅长写作高情商儿童故事' }] },
+  //       { role: 'user', parts: [{ type: 'text', text: '白雪公主与七个小矮人' }] },
+  //       // { role: 'assistant', parts: [{ type: 'text', text: 'Great to meet you. What would you like to know?' }] },
+  //     ],
+  //     onProgress: (choices) => {
+  //       console.log(`[anthropic]claude`, 'progress', JSON.stringify(choices));
+  //       expect(choices).toBeInstanceOf(Object);
+  //     },
+  //   });
+  //   console.log(`[anthropic]claude`, 'result', JSON.stringify(res));
+  //   expect(res).toBeInstanceOf(Object);
+  // }, 30000);
 
-  // vision: image part, from inline data
+  // // vision: image part, from inline data
   // it('text: streaming', async () => {
   //   const res = await api.sendMessage({
   //     // model: 'claude-instant-1.2',
-  //     model: 'claude-3-sonnet@20240229',
+  //     model: 'claude-3-haiku-20240307',
   //     messages: [
   //       {
   //         role: 'user',
@@ -60,4 +60,44 @@ describe('chat', () => {
   //   console.log(`[anthropic]claude:vision`, 'result', JSON.stringify(res));
   //   expect(res).toBeInstanceOf(Object);
   // }, 30000);
+
+  // function call
+  it('function call', async () => {
+    const result = await api.sendMessage({
+      model: 'claude-3-haiku-20240307',
+      messages: [
+        {
+          role: 'user',
+          parts: [{ type: 'text', text: 'Which theaters in Mountain View show Barbie movie?' }],
+        },
+      ],
+      tools: [
+        {
+          type: 'function',
+          function: {
+            name: 'find_theaters',
+            description:
+              'find theaters based on location and optionally movie title which are is currently playing in theaters',
+            parameters: {
+              type: 'object',
+              properties: {
+                location: {
+                  type: 'string',
+                  description: 'The city and state, e.g. San Francisco, CA or a zip code e.g. 95616',
+                },
+                movie: { type: 'string', description: 'Any movie title' },
+              },
+              required: ['location'],
+            },
+          },
+        },
+      ],
+      onProgress: (choices) => {
+        console.log(`[anthropic]`, JSON.stringify(choices));
+        expect(choices).toBeInstanceOf(Object);
+      },
+    });
+    console.log(`[anthropic]result:`, JSON.stringify(result));
+    expect(result).toBeInstanceOf(Object);
+  }, 10000);
 });

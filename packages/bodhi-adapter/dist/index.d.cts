@@ -9,6 +9,7 @@ declare enum Provider {
   ALIYUN_QWEN = 'aliyun-qwen',
   ALIYUN_WANX = 'aliyun-wanx',
   TENCENT_HUNYUAN = 'tencent-hunyuan',
+  MOONSHOT_KIMI = 'moonshot-kimi',
 }
 
 /**

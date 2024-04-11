@@ -1,4 +1,4 @@
-import { OpenAICompletionsAPI, OpenAIAssistantsAPI, GoogleClaudeAPI } from '@/provider';
+import { OpenAICompletionsAPI, OpenAIAssistantsAPI, GoogleClaudeAPI, MoonshotKimiAPI } from '@/provider';
 import { GoogleVertexAPI, GoogleGeminiAPI } from '@/provider';
 import { AnthropicClaudeAPI, AnthropicBedrockAPI } from '@/provider';
 import { AliyunQwenAPI, AliyunWanxAPI } from '@/provider';
@@ -41,6 +41,9 @@ export class ChatAPI {
         break;
       case types.Provider.TENCENT_HUNYUAN:
         this.provider = new TencentHunyuanAPI(opts);
+        break;
+      case types.Provider.MOONSHOT_KIMI:
+        this.provider = new MoonshotKimiAPI(opts);
         break;
       default:
         throw new Error(`Unsupported supplier: ${provider}`);
