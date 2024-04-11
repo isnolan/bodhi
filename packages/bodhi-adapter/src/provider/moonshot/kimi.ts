@@ -25,7 +25,7 @@ export class MoonshotKimiAPI extends ChatBaseAPI {
     return new Promise(async (resolove, reject) => {
       const url = `${this.baseURL}/chat/completions`;
       const params: kimi.Request = await this.convertParams(options);
-      console.log(`[fetch]params`, JSON.stringify(params, null, 2));
+      // console.log(`[fetch]params`, JSON.stringify(params, null, 2));
 
       const res = await fetchSSE(url, {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.apiKey}` },
@@ -111,43 +111,18 @@ export class MoonshotKimiAPI extends ChatBaseAPI {
   private async corvertContents(opts: types.chat.SendOptions): Promise<kimi.Message[]> {
     return Promise.all(
       opts.messages.map(async (item) => {
-        const parts: kimi.Part[] = [];
-        const tool_calls: kimi.ToolCallPart[] = [];
+        const parts: string[] = [];
         await Promise.all(
           item.parts.map(async (part: types.chat.Part) => {
             if (part.type === 'text') {
-              parts.push({ type: 'text', text: part.text });
+              parts.push(part.text);
             }
-            // if (['image', 'video'].includes(part.type)) {
-            //   // TODO: fetch 下载图片并转化buffer为base64
-            //   parts.push({ type: 'image_url', image_url: (part as types.chat.FilePart).url });
-            // }
-            // if (part.type === 'function_call' && part.id) {
-            //   const { name, args } = part.function_call;
-            //   tool_calls.push({ id: part.id, type: 'function', function: { name, arguments: args } });
-            // }
           }),
         );
-        if (item.role === 'system') {
-          return { role: 'system', content: this.filterTextPartsToString(parts) } as kimi.Message;
-        }
-        if (item.role === 'assistant') {
-          return {
-            role: 'assistant',
-            content: parts,
-            // tool_calls: tool_calls.length > 0 ? tool_calls : undefined,
-          } as kimi.Message;
-        }
-        return { role: 'user', content: parts } as kimi.Message;
+
+        return { role: item.role, content: parts.join('\n') } as kimi.Message;
       }),
     );
-  }
-
-  private filterTextPartsToString(parts: kimi.Part[]): string {
-    return parts
-      .filter((p) => p.type === 'text')
-      .map((p) => (p as kimi.TextPart).text)
-      .join('');
   }
 
   protected convertChoices(candidates: kimi.Choice[]): types.chat.Choice[] {
@@ -155,20 +130,13 @@ export class MoonshotKimiAPI extends ChatBaseAPI {
     try {
       candidates.map(({ index, delta, message, finish_reason }: kimi.Choice) => {
         const parts: types.chat.Part[] = [];
-        let { content, tool_calls } = message || delta;
+        let { content } = message || delta;
         if (delta) {
           content = delta.content;
-          // tool_calls = delta.tool_calls;
         }
         if (content) {
           parts.push({ type: 'text', text: content });
         }
-        // if (tool_calls) {
-        //   tool_calls.map((call: any) => {
-        //     const { name, arguments: args } = call.function;
-        //     parts.push({ type: 'function_call', function_call: { name, args }, id: call.id });
-        //   });
-        // }
 
         choices.push({ index, role: 'assistant', parts, finish_reason });
       });

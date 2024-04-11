@@ -1308,7 +1308,6 @@ var MoonshotKimiAPI = class extends ChatBaseAPI {
     return new Promise(async (resolove, reject) => {
       const url = `${this.baseURL}/chat/completions`;
       const params = await this.convertParams(options);
-      console.log(`[fetch]params`, JSON.stringify(params, null, 2));
       const res = await (0, import_node_fetch10.default)(url, {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.apiKey}` },
         body: JSON.stringify(params),
@@ -1381,40 +1380,23 @@ var MoonshotKimiAPI = class extends ChatBaseAPI {
     return Promise.all(
       opts.messages.map(async (item) => {
         const parts = [];
-        const tool_calls = [];
         await Promise.all(
           item.parts.map(async (part) => {
             if (part.type === 'text') {
-              parts.push({ type: 'text', text: part.text });
+              parts.push(part.text);
             }
           }),
         );
-        if (item.role === 'system') {
-          return { role: 'system', content: this.filterTextPartsToString(parts) };
-        }
-        if (item.role === 'assistant') {
-          return {
-            role: 'assistant',
-            content: parts,
-            // tool_calls: tool_calls.length > 0 ? tool_calls : undefined,
-          };
-        }
-        return { role: 'user', content: parts };
+        return { role: item.role, content: parts.join('\n') };
       }),
     );
-  }
-  filterTextPartsToString(parts) {
-    return parts
-      .filter((p) => p.type === 'text')
-      .map((p) => p.text)
-      .join('');
   }
   convertChoices(candidates) {
     const choices = [];
     try {
       candidates.map(({ index, delta, message, finish_reason }) => {
         const parts = [];
-        let { content, tool_calls } = message || delta;
+        let { content } = message || delta;
         if (delta) {
           content = delta.content;
         }
