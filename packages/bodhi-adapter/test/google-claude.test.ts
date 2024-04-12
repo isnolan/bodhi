@@ -25,9 +25,10 @@ describe('chat', () => {
   // 发送聊天消息
   it('text: streaming', async () => {
     const res = await api.sendMessage({
-      model: 'claude-3-sonnet@20240229', //'claude-3-haiku@20240307',
+      model: 'claude-3-haiku@20240307',
       messages: [
-        { role: 'user', parts: [{ type: 'text', text: '请写一篇关于我家小狗子的故事，要求字数不少于200字' }] },
+        { role: 'system', parts: [{ type: 'text', text: '你是一位资深的儿童作家，擅长写作高情商儿童故事' }] },
+        { role: 'user', parts: [{ type: 'text', text: '白雪公主与七个小矮人' }] },
       ],
       onProgress: (choices) => {
         console.log(`[claude]progress:`, JSON.stringify(choices));
@@ -36,6 +37,30 @@ describe('chat', () => {
     });
 
     console.log(`[claude]result:`, JSON.stringify(res));
+    expect(res).toBeInstanceOf(Object);
+  }, 30000);
+
+  it('text: vision', async () => {
+    const res = await api.sendMessage({
+      model: 'claude-3-haiku@20240307',
+      messages: [
+        {
+          role: 'user',
+          parts: [
+            {
+              type: 'image',
+              url: 'https://miro.medium.com/v2/resize:fit:720/format:jpeg/1*YMJDp-kqus7i-ktWtksNjg.jpeg',
+            },
+            { type: 'text', text: 'Describe this image' },
+          ],
+        },
+      ],
+      onProgress: (choices) => {
+        console.log(`[google]claude:vision`, 'progress', JSON.stringify(choices));
+        expect(choices).toBeInstanceOf(Object);
+      },
+    });
+    console.log(`[google]claude:vision`, 'result', JSON.stringify(res));
     expect(res).toBeInstanceOf(Object);
   }, 30000);
 });
