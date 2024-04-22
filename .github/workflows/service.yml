@@ -1,0 +1,73 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4.0.2
+        with:
+          node-version: '21'
+      - name: Cache Node.js modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Install dependencies
+        run: |
+          npm i pnpm -g
+          pnpm -v
+          pnpm config set store-dir .pnpm-store
+          cd apps/bodhi-service
+          pnpm i
+
+      - name: Build
+        run: |
+          pnpm run build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4.3.0
+        with:
+          name: web-dist
+          path: apps/web/dist
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: apps/web
+          file: apps/web/Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ghcr.io/draftai/chatonce:${{ github.run_id }}
+
+      - name: Docker logout
+        run: docker logout
+
+      - name: Deploy to Kubernetes
+        run: |
+          curl -X PUT -H "content-type:application/json" -H "Cookie:KuboardUsername=${KuboardUsername};KuboardAccessKey=${KuboardAccessKey}" -d '{"kind":"deployments","namespace":"draft","name":"bodhi-service","images":{"ghcr.io/draftai/bodhi":"ghcr.io/draftai/chatonce:${{ github.run_id }}"}}' https://kuboard.devflow.ltd/kuboard-api/cluster/Test/kind/CICDApi/admin/resource/updateImageTag
+        env:
+          KuboardUsername: ${{ secrets.KUBOARD_USER }}
+          KuboardAccessKey: ${{ secrets.KUBOARD_KEY }}
