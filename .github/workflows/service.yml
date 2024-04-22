@@ -39,12 +39,6 @@ jobs:
           cd apps/bodhi-service
           pnpm run build
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4.3.0
-        with:
-          name: web-dist
-          path: apps/bodhi-service/dist
-
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v2
 
