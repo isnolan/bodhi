@@ -101,7 +101,7 @@ export class ChatController {
   @ApiResponse({ status: 400, description: 'exception' })
   async agent(@Req() req: RequestWithUser, @Res() res: Response, @Body() payload: CreateAgentDto) {
     const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
-    const { model = 'gemini-pro', conversation_id, prompt = '' } = payload;
+    const { model = 'gpt-3.5-turbo', conversation_id, prompt = '' } = payload;
 
     try {
       // validate subscription
