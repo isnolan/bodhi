@@ -56,14 +56,14 @@ jobs:
           file: apps/bodhi-service/Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/draftai/chatonce:${{ github.run_id }}
+          tags: ghcr.io/isnolan/bodhi:${{ github.run_id }}
 
       - name: Docker logout
         run: docker logout
 
       - name: Deploy to Kubernetes
         run: |
-          curl -X PUT -H "content-type:application/json" -H "Cookie:KuboardUsername=${KuboardUsername};KuboardAccessKey=${KuboardAccessKey}" -d '{"kind":"deployments","namespace":"draft","name":"bodhi-service","images":{"ghcr.io/draftai/bodhi":"ghcr.io/draftai/chatonce:${{ github.run_id }}"}}' https://kuboard.devflow.ltd/kuboard-api/cluster/Test/kind/CICDApi/admin/resource/updateImageTag
+          curl -X PUT -H "content-type:application/json" -H "Cookie:KuboardUsername=${KuboardUsername};KuboardAccessKey=${KuboardAccessKey}" -d '{"kind":"deployments","namespace":"draft","name":"bodhi-service","images":{"ghcr.io/isnolan/bodhi":"ghcr.io/isnolan/bodhi:${{ github.run_id }}"}}' https://kuboard.devflow.ltd/kuboard-api/cluster/Test/kind/CICDApi/admin/resource/updateImageTag
         env:
           KuboardUsername: ${{ secrets.KUBOARD_USER }}
           KuboardAccessKey: ${{ secrets.KUBOARD_KEY }}
