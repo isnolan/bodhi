@@ -36,6 +36,7 @@ jobs:
 
       - name: Build
         run: |
+          cd apps/bodhi-service
           pnpm run build
 
       - name: Upload artifact
