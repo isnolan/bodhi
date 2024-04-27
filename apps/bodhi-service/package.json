@@ -1,6 +1,6 @@
 {
   "name": "bodhi-service",
-  "description": "The ChatBot Service for Node.js",
+  "description": "The Bodhi Service",
   "version": "0.1.0",
   "private": true,
   "scripts": {
