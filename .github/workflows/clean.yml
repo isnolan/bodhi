@@ -22,6 +22,6 @@ jobs:
       - name: Prune
         uses: actions/delete-package-versions@v5
         with:
-          package-name: 'chatonce'
+          package-name: 'bodhi'
           package-type: 'container'
           min-versions-to-keep: 3
