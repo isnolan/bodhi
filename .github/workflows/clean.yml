@@ -1,0 +1,27 @@
+name: Cleanup Untagged Images
+
+on:
+  # every day at 00:00
+  schedule:
+    - cron: '0 0 * * *'
+  # or manually
+  workflow_dispatch:
+
+jobs:
+  delete-untagged-images:
+    name: Delete Untagged Images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prune
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: 'chatonce'
+          package-type: 'container'
+          min-versions-to-keep: 3
