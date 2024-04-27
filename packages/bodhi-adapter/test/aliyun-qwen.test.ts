@@ -28,18 +28,18 @@ describe('chat', () => {
         { role: 'user', parts: [{ type: 'text', text: '请写一篇关于我家小狗子的故事，要求字数不少于200字' }] },
       ],
       onProgress: (choices) => {
-        console.log(`[aliyun]`, JSON.stringify(choices));
+        console.log(`[qwen]streaming`, JSON.stringify(choices));
         expect(choices).toBeInstanceOf(Object);
       },
     });
-    console.log(`[aliyun]`, JSON.stringify(res));
+    console.log(`[qwen]`, JSON.stringify(res));
     expect(res).toBeInstanceOf(Object);
   }, 30000);
 
   // image, from url
   it('image: from url', async () => {
     const res = await api.sendMessage({
-      model: 'qwen-vl-plus',
+      model: 'qwen-plus',
       messages: [
         {
           role: 'system',
@@ -57,12 +57,12 @@ describe('chat', () => {
         },
       ],
       onProgress: (choices) => {
-        console.log(`[aliyun]progress`, JSON.stringify(choices));
+        console.log(`[qwen]muliti`, JSON.stringify(choices));
         expect(choices).toBeInstanceOf(Object);
       },
     });
 
-    console.log(`[aliyun]result`, JSON.stringify(res));
+    console.log(`[qwen]muliti`, JSON.stringify(res));
     expect(res).toBeInstanceOf(Object);
   }, 30000);
 });

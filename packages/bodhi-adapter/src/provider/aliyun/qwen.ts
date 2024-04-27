@@ -15,20 +15,7 @@ export class AliyunQwenAPI extends ChatBaseAPI {
   }
 
   public models(): string[] {
-    return [
-      // free
-      'qwen-vl-chat-v1',
-
-      // cheap
-      'qwen-turbo',
-      'qwen-max',
-      'qwen-max-1201',
-      'qwen-max-longcontext',
-
-      // paid
-      'qwen-plus',
-      'qwen-vl-plus',
-    ];
+    return ['qwen-turbo', 'qwen-plus', 'qwen-max'];
   }
 
   /**
@@ -40,10 +27,14 @@ export class AliyunQwenAPI extends ChatBaseAPI {
   public async sendMessage(opts: types.chat.SendOptions) {
     const { onProgress = () => {}, ...options } = opts;
     return new Promise(async (resolove, reject) => {
-      const isMultimodal = opts.model === 'qwen-vl-plus';
-      const url = `${this.baseURL}/services/aigc/${isMultimodal ? 'multimodal' : 'text'}-generation/generation`;
-      const params: types.aliyun.Request = await this.convertParams(options);
-      // console.log(`[fetch]params`, JSON.stringify(params, null, 2));
+      // 如果消息存在图片, 则自动切换到 multimodal
+      const isMulti =
+        opts.model !== 'qwen-turbo' &&
+        opts.messages.some((item) => item.parts.some((part) => ['image'].includes(part.type)));
+      const model = isMulti ? opts.model.replace('-', '-vl-') : opts.model;
+      const url = `${this.baseURL}/services/aigc/${isMulti ? 'multimodal' : 'text'}-generation/generation`;
+      const params: types.aliyun.Request = await this.convertParams(model, options);
+      console.log(`[fetch]params`, JSON.stringify(params, null, 2));
 
       const res = await fetchSSE(url, {
         headers: {
@@ -113,9 +104,9 @@ export class AliyunQwenAPI extends ChatBaseAPI {
    * https://help.aliyun.com/zh/dashscope/developer-reference/api-details
    * @returns
    */
-  private async convertParams(opts: types.chat.SendOptions): Promise<types.aliyun.Request> {
+  private async convertParams(model, opts: types.chat.SendOptions): Promise<types.aliyun.Request> {
     const params = {
-      model: opts.model || 'qwen-turbo',
+      model: model || 'qwen-turbo',
       input: {
         messages: await this.corvertContents(opts),
       },
