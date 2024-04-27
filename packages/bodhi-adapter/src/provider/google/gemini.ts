@@ -95,7 +95,7 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
       generationConfig: {
         temperature: opts.temperature || 0.9, // gemini-pro:0.9, gemini-pro-vision:0.4
         topP: opts.top_p || 1, // gemini-pro:none, gemini-pro-vision:32
-        topK: opts.top_k || 1,
+        // topK: Math.round((opts.top_k || 0.025) * 40) || 32,
         candidateCount: opts.n || 1,
         maxOutputTokens: opts.max_tokens || 2048, // gemini-pro:2048, gemini-pro-vision:8192
         stopSequences: opts.stop_sequences || undefined,

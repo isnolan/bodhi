@@ -408,7 +408,7 @@ var GoogleGeminiAPI = class extends ChatBaseAPI {
         // gemini-pro:0.9, gemini-pro-vision:0.4
         topP: opts.top_p || 1,
         // gemini-pro:none, gemini-pro-vision:32
-        topK: opts.top_k || 1,
+        // topK: Math.round((opts.top_k || 0.025) * 40) || 32,
         candidateCount: opts.n || 1,
         maxOutputTokens: opts.max_tokens || 2048,
         // gemini-pro:2048, gemini-pro-vision:8192
@@ -1044,18 +1044,7 @@ var AliyunQwenAPI = class extends ChatBaseAPI {
     this.provider = 'google';
   }
   models() {
-    return [
-      // free
-      'qwen-vl-chat-v1',
-      // cheap
-      'qwen-turbo',
-      'qwen-max',
-      'qwen-max-1201',
-      'qwen-max-longcontext',
-      // paid
-      'qwen-plus',
-      'qwen-vl-plus',
-    ];
+    return ['qwen-turbo', 'qwen-plus', 'qwen-max'];
   }
   /**
    *
@@ -1066,9 +1055,13 @@ var AliyunQwenAPI = class extends ChatBaseAPI {
   async sendMessage(opts) {
     const { onProgress = () => {}, ...options } = opts;
     return new Promise(async (resolove, reject) => {
-      const isMultimodal = opts.model === 'qwen-vl-plus';
-      const url = `${this.baseURL}/services/aigc/${isMultimodal ? 'multimodal' : 'text'}-generation/generation`;
-      const params = await this.convertParams(options);
+      const isMulti =
+        opts.model !== 'qwen-turbo' &&
+        opts.messages.some((item) => item.parts.some((part) => ['image'].includes(part.type)));
+      const model = isMulti ? opts.model.replace('-', '-vl-') : opts.model;
+      const url = `${this.baseURL}/services/aigc/${isMulti ? 'multimodal' : 'text'}-generation/generation`;
+      const params = await this.convertParams(model, options);
+      console.log(`[fetch]params`, JSON.stringify(params, null, 2));
       const res = await (0, import_node_fetch8.default)(url, {
         headers: {
           'Content-Type': 'application/json',
@@ -1125,15 +1118,17 @@ var AliyunQwenAPI = class extends ChatBaseAPI {
    * https://help.aliyun.com/zh/dashscope/developer-reference/api-details
    * @returns
    */
-  async convertParams(opts) {
+  async convertParams(model, opts) {
     const params = {
-      model: opts.model || 'qwen-turbo',
+      model: model || 'qwen-turbo',
       input: {
         messages: await this.corvertContents(opts),
       },
       parameters: {
-        top_p: opts.top_p || void 0,
-        top_k: opts.top_k || void 0,
+        temperature: (opts.temperature || 0.85) * 2 - 0.1,
+        top_p: opts.top_p || 0.8,
+        // top_k: Math.round((opts.top_k || 0.025) * 100) || undefined,
+        max_tokens: opts.max_tokens || 1500,
         incremental_output: true,
       },
     };
@@ -1146,6 +1141,7 @@ var AliyunQwenAPI = class extends ChatBaseAPI {
         result_format: 'message',
       });
     }
+    console.log(`->params`, params);
     return params;
   }
   async corvertContents(opts) {

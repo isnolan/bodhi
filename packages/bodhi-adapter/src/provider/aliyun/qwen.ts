@@ -111,8 +111,10 @@ export class AliyunQwenAPI extends ChatBaseAPI {
         messages: await this.corvertContents(opts),
       },
       parameters: {
-        top_p: opts.top_p || undefined,
-        top_k: opts.top_k || undefined,
+        temperature: (opts.temperature || 0.85) * 2 - 0.1,
+        top_p: opts.top_p || 0.8,
+        // top_k: Math.round((opts.top_k || 0.025) * 100) || undefined,
+        max_tokens: opts.max_tokens || 1500,
         incremental_output: true,
       },
     };
@@ -126,6 +128,7 @@ export class AliyunQwenAPI extends ChatBaseAPI {
         result_format: 'message',
       });
     }
+    console.log(`->params`, params);
     return params;
   }
 

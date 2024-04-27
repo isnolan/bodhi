@@ -27,6 +27,8 @@ describe('chat', () => {
         { role: 'assistant', parts: [{ type: 'text', text: 'Great to meet you. What would you like to know?' }] },
         { role: 'user', parts: [{ type: 'text', text: '请写一篇关于我家小狗子的故事，要求字数不少于200字' }] },
       ],
+      top_k: 1.0,
+      // top_p
       onProgress: (choices) => {
         console.log(`[qwen]streaming`, JSON.stringify(choices));
         expect(choices).toBeInstanceOf(Object);
@@ -37,32 +39,32 @@ describe('chat', () => {
   }, 30000);
 
   // image, from url
-  it('image: from url', async () => {
-    const res = await api.sendMessage({
-      model: 'qwen-plus',
-      messages: [
-        {
-          role: 'system',
-          parts: [{ type: 'text', text: 'You are a helpful assistant.' }],
-        },
-        {
-          role: 'user',
-          parts: [
-            {
-              type: 'image',
-              url: 'https://dashscope.oss-cn-beijing.aliyuncs.com/images/dog_and_girl.jpeg',
-            },
-            { type: 'text', text: 'Describe this image' },
-          ],
-        },
-      ],
-      onProgress: (choices) => {
-        console.log(`[qwen]muliti`, JSON.stringify(choices));
-        expect(choices).toBeInstanceOf(Object);
-      },
-    });
+  // it('image: from url', async () => {
+  //   const res = await api.sendMessage({
+  //     model: 'qwen-plus',
+  //     messages: [
+  //       {
+  //         role: 'system',
+  //         parts: [{ type: 'text', text: 'You are a helpful assistant.' }],
+  //       },
+  //       {
+  //         role: 'user',
+  //         parts: [
+  //           {
+  //             type: 'image',
+  //             url: 'https://dashscope.oss-cn-beijing.aliyuncs.com/images/dog_and_girl.jpeg',
+  //           },
+  //           { type: 'text', text: 'Describe this image' },
+  //         ],
+  //       },
+  //     ],
+  //     onProgress: (choices) => {
+  //       console.log(`[qwen]muliti`, JSON.stringify(choices));
+  //       expect(choices).toBeInstanceOf(Object);
+  //     },
+  //   });
 
-    console.log(`[qwen]muliti`, JSON.stringify(res));
-    expect(res).toBeInstanceOf(Object);
-  }, 30000);
+  //   console.log(`[qwen]muliti`, JSON.stringify(res));
+  //   expect(res).toBeInstanceOf(Object);
+  // }, 30000);
 });

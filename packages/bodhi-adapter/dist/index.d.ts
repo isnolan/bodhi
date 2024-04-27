@@ -118,9 +118,9 @@ declare namespace aliyun {
       messages: Content[];
     };
     parameters: {
-      temperature?: number;
+      temperature: number;
       top_p: number | undefined;
-      top_k: number | undefined;
+      top_k?: number | undefined;
       max_tokens?: number;
       stop?: string[] | undefined;
       enable_search?: boolean;
