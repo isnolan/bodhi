@@ -61,6 +61,11 @@ jobs:
       - name: Docker logout
         run: docker logout
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Deploy to Kubernetes
         run: |
           curl -X PUT -H "content-type:application/json" -H "Cookie:KuboardUsername=${KuboardUsername};KuboardAccessKey=${KuboardAccessKey}" -d '{"kind":"deployments","namespace":"draft","name":"bodhi-service","images":{"ghcr.io/isnolan/bodhi":"ghcr.io/isnolan/bodhi:service-${{ github.run_id }}"}}' https://kuboard.devflow.ltd/kuboard-api/cluster/Test/kind/CICDApi/admin/resource/updateImageTag
