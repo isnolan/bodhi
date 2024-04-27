@@ -23,9 +23,10 @@ describe('chat', () => {
       messages: [
         // { role: 'system', content: 'You are a helpful assistant.' },
         // { role: 'user', content: '你好，哪个公园距离我最近？' },
-        { role: 'user', parts: [{ type: 'text', text: 'Hello, 我们家有两只狗' }] },
-        { role: 'assistant', parts: [{ type: 'text', text: 'Great to meet you. What would you like to know?' }] },
-        { role: 'user', parts: [{ type: 'text', text: '请写一篇关于我家小狗子的故事，要求字数不少于200字' }] },
+        // { role: 'user', parts: [{ type: 'text', text: 'Hello, 我们家有两只狗' }] },
+        // { role: 'assistant', parts: [{ type: 'text', text: 'Great to meet you. What would you like to know?' }] },
+        // { role: 'user', parts: [{ type: 'text', text: '请写一篇关于我家小狗子的故事，要求字数不少于200字' }] },
+        { role: 'user', parts: [{ type: 'text', text: '今天最新AI科技新闻是什么？' }] },
       ],
       top_k: 1.0,
       // top_p

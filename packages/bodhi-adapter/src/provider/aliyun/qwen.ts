@@ -116,10 +116,11 @@ export class AliyunQwenAPI extends ChatBaseAPI {
         // top_k: Math.round((opts.top_k || 0.025) * 100) || undefined,
         max_tokens: opts.max_tokens || 1500,
         incremental_output: true,
+        enable_search: true,
       },
     };
     // fix different model
-    if (opts.model !== 'qwen-vl-plus') {
+    if (model.indexOf('vl') === -1) {
       Object.assign(params.parameters, {
         temperature: opts.temperature || 1,
         max_tokens: opts.max_tokens || 1500,
@@ -128,7 +129,6 @@ export class AliyunQwenAPI extends ChatBaseAPI {
         result_format: 'message',
       });
     }
-    console.log(`->params`, params);
     return params;
   }
 

@@ -1,6 +1,6 @@
 {
   "name": "@isnolan/bodhi-adapter",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "llms adapter api for bodhi",
   "main": "index.js",
   "scripts": {
