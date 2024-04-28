@@ -21,6 +21,7 @@ describe('chat', () => {
   it('text: streaming', async () => {
     const res = await api.sendMessage({
       model: 'hunyuan-lite',
+      top_p: 0.9,
       messages: [
         // { role: 'user', parts: [{ type: 'text', text: 'Hello, 我们家有两只狗' }] },
         // { role: 'assistant', parts: [{ type: 'text', text: 'Great to meet you. What would you like to know?' }] },

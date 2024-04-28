@@ -1469,8 +1469,8 @@ var QcloudHunyuanAPI = class extends ChatBaseAPI {
   async convertParams(opts) {
     return {
       Model: opts.model,
-      TopP: (opts.top_p || 0.5) * 2,
-      Temperature: opts.temperature || 0,
+      TopP: opts.top_p || 1,
+      Temperature: opts.temperature || 1,
       Messages: await this.corvertContents(opts),
       Stream: true,
     };

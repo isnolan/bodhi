@@ -77,8 +77,8 @@ export class QcloudHunyuanAPI extends ChatBaseAPI {
   private async convertParams(opts: types.chat.SendOptions) {
     return {
       Model: opts.model,
-      TopP: (opts.top_p || 0.5) * 2,
-      Temperature: opts.temperature || 0,
+      TopP: opts.top_p || 1.0,
+      Temperature: opts.temperature || 1.0,
       Messages: await this.corvertContents(opts),
       Stream: true,
     };
