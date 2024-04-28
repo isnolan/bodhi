@@ -1,10 +1,14 @@
-import { OpenAICompletionsAPI, OpenAIAssistantsAPI, GoogleClaudeAPI, MoonshotKimiAPI } from '@/provider';
+import {
+  OpenAICompletionsAPI,
+  OpenAIAssistantsAPI,
+  GoogleClaudeAPI,
+  MoonshotKimiAPI,
+  QcloudHunyuanAPI,
+} from '@/provider';
 import { GoogleVertexAPI, GoogleGeminiAPI } from '@/provider';
 import { AnthropicClaudeAPI, AnthropicBedrockAPI } from '@/provider';
 import { AliyunQwenAPI, AliyunWanxAPI } from '@/provider';
 import { ChatBaseAPI } from '@/provider/base';
-import { TencentHunyuanAPI } from '@/provider/tencent';
-
 import * as types from '@/types';
 
 export class ChatAPI {
@@ -39,8 +43,8 @@ export class ChatAPI {
       case types.Provider.ANTHROPIC_BEDROCK:
         this.provider = new AnthropicBedrockAPI(opts);
         break;
-      case types.Provider.TENCENT_HUNYUAN:
-        this.provider = new TencentHunyuanAPI(opts);
+      case types.Provider.QCLOUD_HUNYUAN:
+        this.provider = new QcloudHunyuanAPI(opts);
         break;
       case types.Provider.MOONSHOT_KIMI:
         this.provider = new MoonshotKimiAPI(opts);

@@ -9,7 +9,7 @@ var Provider = /* @__PURE__ */ ((Provider2) => {
   Provider2['ANTHROPIC_BEDROCK'] = 'anthropic-bedrock';
   Provider2['ALIYUN_QWEN'] = 'aliyun-qwen';
   Provider2['ALIYUN_WANX'] = 'aliyun-wanx';
-  Provider2['TENCENT_HUNYUAN'] = 'tencent-hunyuan';
+  Provider2['QCLOUD_HUNYUAN'] = 'qcloud-hunyuan';
   Provider2['MOONSHOT_KIMI'] = 'moonshot-kimi';
   return Provider2;
 })(Provider || {});
@@ -1359,10 +1359,10 @@ var MoonshotKimiAPI = class extends ChatBaseAPI {
   }
 };
 
-// src/provider/tencent/hunyuan.ts
+// src/provider/qcloud/hunyuan.ts
 import { v4 as uuidv46 } from 'uuid';
 import * as tencentcloud from 'tencentcloud-sdk-nodejs';
-var TencentHunyuanAPI = class extends ChatBaseAPI {
+var QcloudHunyuanAPI = class extends ChatBaseAPI {
   constructor(opts) {
     const options = Object.assign({ baseURL: 'https://hunyuan.tencentcloudapi.com' }, opts);
     super(options);
@@ -1376,7 +1376,7 @@ var TencentHunyuanAPI = class extends ChatBaseAPI {
     });
   }
   models() {
-    return ['ChatStd', 'ChatPro'];
+    return ['hunyuan-lite', 'hunyuan-standard', 'hunyuan-pro'];
   }
   /**
    * tencent hunyuan
@@ -1391,7 +1391,7 @@ var TencentHunyuanAPI = class extends ChatBaseAPI {
         reject(new Error(`model ${opts.model} is not supported`));
       }
       const params = await this.convertParams(options);
-      const response = await this.client[opts.model](params);
+      const response = await this.client.ChatCompletions(params);
       let id = uuidv46();
       const choicesList = [];
       const usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
@@ -1419,9 +1419,11 @@ var TencentHunyuanAPI = class extends ChatBaseAPI {
    */
   async convertParams(opts) {
     return {
-      TopP: opts.top_p || 0,
+      Model: opts.model,
+      TopP: (opts.top_p || 0.5) * 2,
       Temperature: opts.temperature || 0,
       Messages: await this.corvertContents(opts),
+      Stream: true,
     };
   }
   async corvertContents(opts) {
@@ -1486,8 +1488,8 @@ var ChatAPI = class {
       case 'anthropic-bedrock' /* ANTHROPIC_BEDROCK */:
         this.provider = new AnthropicBedrockAPI(opts);
         break;
-      case 'tencent-hunyuan' /* TENCENT_HUNYUAN */:
-        this.provider = new TencentHunyuanAPI(opts);
+      case 'qcloud-hunyuan' /* QCLOUD_HUNYUAN */:
+        this.provider = new QcloudHunyuanAPI(opts);
         break;
       case 'moonshot-kimi' /* MOONSHOT_KIMI */:
         this.provider = new MoonshotKimiAPI(opts);

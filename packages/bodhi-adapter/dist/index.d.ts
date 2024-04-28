@@ -8,7 +8,7 @@ declare enum Provider {
   ANTHROPIC_BEDROCK = 'anthropic-bedrock',
   ALIYUN_QWEN = 'aliyun-qwen',
   ALIYUN_WANX = 'aliyun-wanx',
-  TENCENT_HUNYUAN = 'tencent-hunyuan',
+  QCLOUD_HUNYUAN = 'qcloud-hunyuan',
   MOONSHOT_KIMI = 'moonshot-kimi',
 }
 
@@ -108,58 +108,6 @@ declare namespace image {
   };
 }
 
-declare namespace aliyun {
-  /**
-   * Request
-   */
-  type Request = {
-    model: string;
-    input: {
-      messages: Content[];
-    };
-    parameters: {
-      temperature: number;
-      top_p: number | undefined;
-      top_k?: number | undefined;
-      max_tokens?: number;
-      stop?: string[] | undefined;
-      enable_search?: boolean;
-      incremental_output: boolean;
-      result_format?: 'text' | 'message';
-    };
-  };
-  type Content = {
-    role: Role;
-    content: Part[] | string;
-  };
-  type Role = 'system' | 'user' | 'model' | '';
-  type Part = TextPart | FilePart;
-  type TextPart = {
-    text: string;
-  };
-  type FilePart = {
-    image: string;
-  };
-  type Usage = {
-    output_tokens: number;
-    input_tokens: number;
-  };
-  /**
-   * Response
-   */
-  type Response = {
-    output: {
-      choices: Choice[];
-      finish_reason?: string;
-    };
-    usage: Usage;
-  };
-  type Choice = {
-    message: Content;
-    finish_reason?: string;
-  };
-}
-
 declare class ChatAPI {
   private provider;
   constructor(provider: string, opts: chat.ChatOptions);
@@ -173,4 +121,4 @@ declare class ImageAPI {
   getTaskResult(task_id: string): Promise<any>;
 }
 
-export { ChatAPI, ImageAPI, Provider, aliyun, chat, image };
+export { ChatAPI, ImageAPI, Provider, chat, image };

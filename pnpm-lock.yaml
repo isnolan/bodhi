@@ -282,8 +282,8 @@ importers:
         specifier: ^0.0.2
         version: 0.0.2
       tencentcloud-sdk-nodejs:
-        specifier: ^4.0.780
-        version: 4.0.780
+        specifier: ^4.0.843
+        version: 4.0.843
       tiktoken:
         specifier: ^1.0.11
         version: 1.0.11
@@ -17423,9 +17423,9 @@ packages:
       unique-string: 3.0.0
     dev: false
 
-  /tencentcloud-sdk-nodejs@4.0.780:
+  /tencentcloud-sdk-nodejs@4.0.843:
     resolution:
-      { integrity: sha512-xx9I6qKS5qelROjFay+yT9xtx2YimwoGGrOn5ZnXcGQdiXeQYRovfwumD0QdqoIGDpMdX377jxLvF5sM4vhgPQ== }
+      { integrity: sha512-/p13VcubT09nNASy2bZgbLqkGA1F/oC3a4BKJ76Ybl+JR5JmR2LVQYK3QqTRS6UTliacgLYEgtGc+WcbXhN+aQ== }
     engines: { node: '>=10' }
     dependencies:
       form-data: 3.0.1
@@ -17435,6 +17435,7 @@ packages:
       json-bigint: 1.0.0
       node-fetch: 2.7.0
       tslib: 1.13.0
+      uuid: 9.0.1
     transitivePeerDependencies:
       - encoding
       - supports-color

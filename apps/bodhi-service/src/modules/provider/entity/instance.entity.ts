@@ -17,7 +17,8 @@ export enum InstanceName {
   ANTHROPIC_BEDROCK = 'anthropic-bedrock',
   ALIYUN_QWEN = 'aliyun-qwen',
   ALIYUN_WANX = 'aliyun-wanx',
-  TENCENT_HUNYUAN = 'tencent-hunyuan',
+  QCLOUD_HUNYUAN = 'qcloud-hunyuan',
+  MOONSHOT_KIMI = 'moonshot-kimi',
 
   // SESSION
   OPENAI_CHATGPT = 'openai-chatgpt',

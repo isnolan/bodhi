@@ -11,7 +11,7 @@ describe('chat', () => {
     }
   });
 
-  const api = new ChatAPI(Provider.TENCENT_HUNYUAN, {
+  const api = new ChatAPI(Provider.QCLOUD_HUNYUAN, {
     apiKey: process.env?.QCLOUD_SECRET_ID as string,
     apiSecret: process.env?.QCLOUD_SECRET_KEY as string,
     agent: process.env.HTTP_PROXY as string,
@@ -20,18 +20,18 @@ describe('chat', () => {
   // 发送聊天消息
   it('text: streaming', async () => {
     const res = await api.sendMessage({
-      model: 'ChatStd',
+      model: 'hunyuan-lite',
       messages: [
         // { role: 'user', parts: [{ type: 'text', text: 'Hello, 我们家有两只狗' }] },
         // { role: 'assistant', parts: [{ type: 'text', text: 'Great to meet you. What would you like to know?' }] },
         { role: 'user', parts: [{ type: 'text', text: '请写一篇关于我家小狗子的故事，要求字数不少于200字' }] },
       ],
       onProgress: (choices: any) => {
-        console.log(`[gemini]progress:`, JSON.stringify(choices));
+        // console.log(`[hunyuan]progress:`, JSON.stringify(choices));
         expect(choices).toBeInstanceOf(Object);
       },
     });
-    console.log(`[gemini]result:`, JSON.stringify(res));
+    console.log(`[hunyuan]result:`, JSON.stringify(res));
     expect(res).toBeInstanceOf(Object);
   }, 30000);
 });

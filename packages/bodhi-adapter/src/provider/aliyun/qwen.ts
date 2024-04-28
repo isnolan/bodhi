@@ -5,6 +5,7 @@ import { createParser, type ParseEvent, type ReconnectInterval } from 'eventsour
 
 import * as types from '@/types';
 import { ChatBaseAPI } from '../base';
+import { aliyun } from './types';
 
 export class AliyunQwenAPI extends ChatBaseAPI {
   protected provider: string = 'google';
@@ -33,7 +34,7 @@ export class AliyunQwenAPI extends ChatBaseAPI {
         opts.messages.some((item) => item.parts.some((part) => ['image'].includes(part.type)));
       const model = isMulti ? opts.model.replace('-', '-vl-') : opts.model;
       const url = `${this.baseURL}/services/aigc/${isMulti ? 'multimodal' : 'text'}-generation/generation`;
-      const params: types.aliyun.Request = await this.convertParams(model, options);
+      const params: aliyun.Request = await this.convertParams(model, options);
       console.log(`[fetch]params`, JSON.stringify(params, null, 2));
 
       const res = await fetchSSE(url, {
@@ -104,7 +105,7 @@ export class AliyunQwenAPI extends ChatBaseAPI {
    * https://help.aliyun.com/zh/dashscope/developer-reference/api-details
    * @returns
    */
-  private async convertParams(model, opts: types.chat.SendOptions): Promise<types.aliyun.Request> {
+  private async convertParams(model, opts: types.chat.SendOptions): Promise<aliyun.Request> {
     const params = {
       model: model || 'qwen-turbo',
       input: {
@@ -132,10 +133,10 @@ export class AliyunQwenAPI extends ChatBaseAPI {
     return params;
   }
 
-  private async corvertContents(opts: types.chat.SendOptions): Promise<types.aliyun.Content[]> {
+  private async corvertContents(opts: types.chat.SendOptions): Promise<aliyun.Content[]> {
     return Promise.all(
       opts.messages.map(async (item) => {
-        const parts: types.aliyun.Part[] = [];
+        const parts: aliyun.Part[] = [];
         await Promise.all(
           item.parts.map(async (part: types.chat.Part) => {
             if (part.type === 'text') {
@@ -147,7 +148,7 @@ export class AliyunQwenAPI extends ChatBaseAPI {
           }),
         );
         // fix different model
-        let content: string | types.aliyun.Part[] = parts;
+        let content: string | aliyun.Part[] = parts;
         if (!['qwen-vl-plus'].includes(opts.model)) {
           content = parts
             .map((item: any) => {
@@ -155,15 +156,15 @@ export class AliyunQwenAPI extends ChatBaseAPI {
             })
             .join('\n');
         }
-        return { role: item.role, content: parts } as types.aliyun.Content;
+        return { role: item.role, content: parts } as aliyun.Content;
       }),
     );
   }
 
-  protected convertChoices(candidates: types.aliyun.Choice[]): types.chat.Choice[] {
+  protected convertChoices(candidates: aliyun.Choice[]): types.chat.Choice[] {
     const choices: types.chat.Choice[] = [];
     try {
-      candidates.map(({ message, finish_reason }: types.aliyun.Choice) => {
+      candidates.map(({ message, finish_reason }: aliyun.Choice) => {
         const parts: types.chat.Part[] = [];
         // for text
         if (typeof message.content === 'string') {

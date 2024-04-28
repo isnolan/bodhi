@@ -7,7 +7,7 @@ import * as types from '@/types';
 import { ChatBaseAPI } from '../base';
 import { hunyuan } from './types';
 
-export class TencentHunyuanAPI extends ChatBaseAPI {
+export class QcloudHunyuanAPI extends ChatBaseAPI {
   protected provider: string = 'tencent';
   private client: any;
 
@@ -26,7 +26,7 @@ export class TencentHunyuanAPI extends ChatBaseAPI {
   }
 
   public models(): string[] {
-    return ['ChatStd', 'ChatPro'];
+    return ['hunyuan-lite', 'hunyuan-standard', 'hunyuan-pro'];
   }
 
   /**
@@ -43,7 +43,7 @@ export class TencentHunyuanAPI extends ChatBaseAPI {
       }
 
       const params = await this.convertParams(options);
-      const response = await this.client[opts.model](params);
+      const response = await this.client.ChatCompletions(params);
 
       // streaming
       let id = uuidv4();
@@ -76,9 +76,11 @@ export class TencentHunyuanAPI extends ChatBaseAPI {
    */
   private async convertParams(opts: types.chat.SendOptions) {
     return {
-      TopP: opts.top_p || 0,
+      Model: opts.model,
+      TopP: (opts.top_p || 0.5) * 2,
       Temperature: opts.temperature || 0,
       Messages: await this.corvertContents(opts),
+      Stream: true,
     };
   }
 
