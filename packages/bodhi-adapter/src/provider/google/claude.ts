@@ -101,7 +101,7 @@ export class GoogleClaudeAPI extends ChatBaseAPI {
       system: this.corvertSystem(opts),
       temperature: opts.temperature || 0.8,
       top_k: opts.top_k || 1,
-      top_p: opts.top_p || 1,
+      // top_p: opts.top_p || 1,
       max_tokens: opts.max_tokens || 1024,
       stop_sequences: opts.stop_sequences || [],
       stream: true,
