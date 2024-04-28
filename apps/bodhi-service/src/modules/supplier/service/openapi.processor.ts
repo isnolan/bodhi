@@ -62,7 +62,7 @@ export class SupplierOpenAPIProcessor {
           messages: [...messages],
           temperature: Number(conversation.temperature),
           top_p: Number(conversation.top_p),
-          top_k: Number(conversation.top_k),
+          // top_k: Number(conversation.top_k),
           n: conversation.n,
           max_tokens: 1000,
           onProgress: (choices) => {

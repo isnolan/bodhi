@@ -93,8 +93,8 @@ export class AnthropicClaudeAPI extends ChatBaseAPI {
       messages: await this.corvertContents(opts),
       system: this.corvertSystem(opts),
       temperature: opts.temperature || 0.8,
-      top_k: opts.top_k || 1,
-      // top_p: opts.top_p || 1,
+      top_p: opts.top_p || 1,
+      // top_k: opts.top_k || 1,
       max_tokens: opts.max_tokens || 1024,
       // metadata:
       stop_sequences: opts.stop_sequences || [],
