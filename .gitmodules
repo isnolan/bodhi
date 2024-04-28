@@ -1,5 +1,5 @@
-[submodule "packages/bodhi-unofficial"]
-	path = packages/bodhi-unofficial
+[submodule "packages/bodhi-puppet"]
+	path = packages/bodhi-puppet
 	url = git@github.com:isnolan/chatbot-puppet.git
 [submodule "packages/bodhi-puppet"]
 	path = packages/bodhi-puppet
