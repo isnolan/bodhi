@@ -25,3 +25,6 @@ jobs:
           package-name: 'bodhi'
           package-type: 'container'
           min-versions-to-keep: 3
+
+      - name: Docker logout
+        run: docker logout
