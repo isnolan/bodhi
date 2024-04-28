@@ -35,7 +35,7 @@ export class AliyunQwenAPI extends ChatBaseAPI {
       const model = isMulti ? opts.model.replace('-', '-vl-') : opts.model;
       const url = `${this.baseURL}/services/aigc/${isMulti ? 'multimodal' : 'text'}-generation/generation`;
       const params: aliyun.Request = await this.convertParams(model, options);
-      console.log(`[fetch]params`, JSON.stringify(params, null, 2));
+      // console.log(`[fetch]params`, JSON.stringify(params, null, 2));
 
       const res = await fetchSSE(url, {
         headers: {
