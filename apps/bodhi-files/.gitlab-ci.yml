@@ -1,0 +1,57 @@
+image: 'node:21.6.1-alpine'
+
+cache:
+  key:
+    files:
+      - pnpm-lock.yaml
+  paths:
+    - .pnpm-store/
+    - node_modules/
+
+stages:
+  - build
+  - deploy
+  - publish
+
+build:
+  stage: build
+  image: 'node:21.6.1-alpine'
+  tags:
+    - node.js
+  before_script:
+    - npm i pnpm -g
+    - pnpm -v
+    - pnpm config set store-dir .pnpm-store
+  script:
+    - export PUPPETEER_SKIP_DOWNLOAD=true
+    - pnpm recursive install
+    - cd apps/bodhi-files
+    - pnpm link @isnolan/bodhi-adapter
+    - pnpm list @isnolan/bodhi-adapter
+    - pnpm run build
+  artifacts:
+    paths:
+      - apps/bodhi-files/dist
+
+deploy:
+  stage: deploy
+  image: docker:20.10.17-dind
+  tags:
+    - node.js
+  variables:
+    REGISTRY_PATH: $CI_REGISTRY_IMAGE:$CI_PIPELINE_ID
+  script:
+    - echo "$REGISTRY_PWD" | docker login --username $REGISTRY_USER $CI_REGISTRY --password-stdin
+    - cd apps/bodhi-files
+    - docker buildx create --use default
+    - docker buildx build --platform linux/amd64,linux/arm64 --push -t $REGISTRY_PATH .
+    - docker logout
+
+publish:
+  stage: publish
+  tags:
+    - shell
+  variables:
+    REGISTRY_PATH: $CI_REGISTRY_IMAGE:$CI_PIPELINE_ID
+  script:
+    - curl -X PUT -H "content-type:application/json" -H "Cookie:KuboardUsername=${KuboardUsername};KuboardAccessKey=${KuboardAccessKey}" -d '{"kind":"deployments","namespace":"draft","name":"bodhi-files","images":{"'${CI_REGISTRY_IMAGE}'":"'${REGISTRY_PATH}'"}}' https://kuboard.devflow.ltd/kuboard-api/cluster/Test/kind/CICDApi/admin/resource/updateImageTag
