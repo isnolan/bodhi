@@ -5,7 +5,7 @@ export class UploadFileReq {
   files: Express.Multer.File[];
 
   @ApiPropertyOptional()
-  model: string;
+  purpose: string;
 }
 
 export class FileDto {

@@ -1,7 +1,9 @@
-import { FileProcessor } from './file.processor';
 import { FileService } from './file.service';
+import { ExtractProcessor } from './extract.processor';
+import { DownloadProcessor } from './download.processor';
 
 export * from './file.service';
-export * from './file.processor';
+export * from './extract.processor';
+export * from './download.processor';
 
-export default [FileService, FileProcessor];
+export default [FileService, DownloadProcessor, ExtractProcessor];

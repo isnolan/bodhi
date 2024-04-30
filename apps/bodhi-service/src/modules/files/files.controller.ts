@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
-import { AnyFilesInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { UseInterceptors, UploadedFile, Put, UseGuards, Req, Query, UploadedFiles } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { UseInterceptors, Put, UseGuards, Req, Query, UploadedFiles, Body } from '@nestjs/common';
 import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 import { ApiOperation, ApiResponse, ApiBody, ApiConsumes } from '@nestjs/swagger';
@@ -63,7 +63,14 @@ export class FilesController {
   @ApiBody({ type: UploadFileReq })
   @ApiResponse({ status: 200, description: 'success', type: [FileDto] })
   @UseInterceptors(FilesInterceptor('files'))
-  async upload(@Req() req: RequestWithUser, @UploadedFiles() files: Array<Express.Multer.File>) {
+  async upload(
+    @Req() req: RequestWithUser,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+    @Body() body: UploadFileReq,
+  ) {
+    const { user_id } = req.user; // from jwt or apikey
+    const { purpose } = body;
+
     try {
       // 计算并检查hash
       return Promise.all(
@@ -76,7 +83,7 @@ export class FilesController {
           const name = Buffer.from(upload.originalname, 'latin1').toString('utf8');
 
           console.log(`[file]upload`, hash, name, mimetype, size);
-          return await this.service.uploadFile(upload, { hash, name, mimetype, size });
+          return await this.service.uploadFile(upload, { hash, name, mimetype, size, user_id }, purpose);
         }),
       );
     } catch (err) {

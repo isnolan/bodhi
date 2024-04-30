@@ -43,8 +43,8 @@ export class FilesService {
   //   return await this.repository.find({ where: { id: In(ids) } });
   // }
 
-  async uploadFile(upload: any, opts: Partial<File>): Promise<FileDto> {
-    const { hash, name, mimetype, size }: any = opts;
+  async uploadFile(upload: any, opts: Partial<File>, purpose: string): Promise<FileDto> {
+    const { hash, name, mimetype, size, user_id }: any = opts;
     const ext = mime.extension(mimetype as string);
     const path = `/attachments/${moment.tz('Asia/Shanghai').format('YYYYMM')}/${uuidv4()}.${ext}`;
     Object.assign(opts, { path });

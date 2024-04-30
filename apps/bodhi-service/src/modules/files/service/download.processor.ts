@@ -15,7 +15,7 @@ import { FileService } from './file.service';
 import { FileState } from '../entity/file.entity';
 
 @Processor('bodhi')
-export class FileProcessor {
+export class DownloadProcessor {
   constructor(private readonly config: ConfigService, private readonly file: FileService) {}
 
   @Process('download')
