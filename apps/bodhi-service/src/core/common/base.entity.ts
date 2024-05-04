@@ -1,4 +1,4 @@
-import { PrimaryColumn, PrimaryGeneratedColumn, Column, VersionColumn } from 'typeorm';
+import { Column, PrimaryColumn, PrimaryGeneratedColumn, VersionColumn } from 'typeorm';
 
 export abstract class Base {
   @PrimaryGeneratedColumn()

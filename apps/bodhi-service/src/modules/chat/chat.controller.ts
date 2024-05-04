@@ -1,18 +1,18 @@
+import { Body, Controller, Get, HttpException, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { Controller, Res, Post, Req, Body, Get, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags, ApiBody, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 
-import { ChatService } from './chat.service';
-import { SendMessageDto } from './dto/send-message.dto';
+import { RequestWithUser } from '@/core/common/request.interface';
 
 import { JwtOrApiKeyGuard } from '../auth/guard/mixed.guard';
-import { ChatConversationService } from './service';
 import { ProviderService } from '../provider/service';
-import { UsersService } from '../users/users.service';
 import { SubscriptionService } from '../subscription/subscription.service';
-import { CreateCompletionsDto, CreateConversationDto, CreateAgentDto } from './dto/create-completions.dto';
-import { RequestWithUser } from '@/core/common/request.interface';
+import { UsersService } from '../users/users.service';
+import { ChatService } from './chat.service';
+import { CreateAgentDto, CreateCompletionsDto, CreateConversationDto } from './dto/create-completions.dto';
+import { SendMessageDto } from './dto/send-message.dto';
+import { ChatConversationService } from './service';
 
 @ApiTags('chat')
 @ApiBearerAuth()

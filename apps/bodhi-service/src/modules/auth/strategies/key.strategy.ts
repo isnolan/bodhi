@@ -1,7 +1,8 @@
-import { UsersService } from '@/modules/users/users.service';
-import { Injectable, UnauthorizedException, HttpException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { HeaderAPIKeyStrategy } from 'passport-headerapikey';
+
+import { UsersService } from '@/modules/users/users.service';
 
 @Injectable()
 export class ApiKeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy, 'api-key') {
@@ -11,7 +12,7 @@ export class ApiKeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy, 'api-
     });
   }
 
-  public async validate(apiKey: string, done: (error: Error, data) => {}) {
+  public async validate(apiKey: string, done: (error: Error, data) => void) {
     const key = await this.users.validateKey(apiKey);
     if (key) {
       // if (key.quota < 1) {

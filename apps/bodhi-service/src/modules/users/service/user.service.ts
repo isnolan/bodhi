@@ -1,7 +1,8 @@
-import Hashids from 'hashids/cjs';
-import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import Hashids from 'hashids/cjs';
+import { Repository } from 'typeorm';
+
 import { Users } from '../entity/users.entity';
 
 @Injectable()

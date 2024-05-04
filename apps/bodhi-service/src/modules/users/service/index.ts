@@ -1,6 +1,6 @@
 export * from './keys.service';
-export * from './user.service';
 export * from './usage.service';
+export * from './user.service';
 export * from './webhook.service';
 
 import { UserKeyService } from './keys.service';

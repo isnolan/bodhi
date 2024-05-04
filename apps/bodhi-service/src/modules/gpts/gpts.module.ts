@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Gpts } from './entity/gpts';
+
 import { GptsCategory } from './entity/category';
+import { Gpts } from './entity/gpts';
 
 @Module({
   imports: [

@@ -1,13 +1,11 @@
+import { OnGlobalQueueCompleted, Process, Processor } from '@nestjs/bull';
+import { forwardRef, Inject } from '@nestjs/common';
 import { Job } from 'bull';
-import { Inject, forwardRef } from '@nestjs/common';
-import { Process, Processor, OnGlobalQueueCompleted } from '@nestjs/bull';
 
-import { UsersService } from '@/modules/users/users.service';
+import { ChatService } from '@/modules/chat/chat.service';
 import { CreateMessageDto } from '@/modules/chat/dto/create-message.dto';
 import { SubscriptionService } from '@/modules/subscription/subscription.service';
-import { ChatService } from '@/modules/chat/chat.service';
-
-const importDynamic = new Function('modulePath', 'return import(modulePath)');
+import { UsersService } from '@/modules/users/users.service';
 
 @Processor('bodhi')
 export class SupplierArchivesProcessor {
@@ -27,6 +25,7 @@ export class SupplierArchivesProcessor {
     const { conversation_id, role, parts, message_id }: CreateMessageDto = job.data; // 必备
     const { parent_conversation_id, parent_id, status }: any = job.data; // 可选
     let { tokens } = job.data;
+    /* eslint no-async-promise-executor: */
     return new Promise(async (resolve) => {
       const conversation = await this.chat.findConversation(conversation_id);
       const { user_id, usage_id, provider_id, user_usage_id } = conversation;

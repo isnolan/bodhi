@@ -1,20 +1,19 @@
-import Redis from 'ioredis';
-import { Queue } from 'bull';
-import { v4 as uuidv4 } from 'uuid';
-import { InjectQueue } from '@nestjs/bull';
-import { ConfigService } from '@nestjs/config';
+/* eslint max-params: */
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
-import { Injectable, Inject, forwardRef } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bull';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Queue } from 'bull';
+import Redis from 'ioredis';
 
+import { InstanceType } from '../provider/entity';
+import { QueueMessageDto } from '../supplier/dto/queue-message.dto';
+import { SupplierService } from '../supplier/supplier.service';
+import { CreateMessageDto } from './dto/create-message.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 import { ChatConversation } from './entity/conversation.entity';
-import { QueueMessageDto } from '../supplier/dto/queue-message.dto';
-import { ChatConversationService, ChatMessageService } from './service';
-import { CreateMessageDto } from './dto/create-message.dto';
-import { InstanceType } from '../provider/entity';
-import { QueueAgentDto } from '../supplier/dto/queue-agent.dto';
-import { SupplierService } from '../supplier/supplier.service';
 import { ChatMessage } from './entity/message.entity';
+import { ChatConversationService, ChatMessageService } from './service';
 
 @Injectable()
 export class ChatService {

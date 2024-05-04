@@ -1,13 +1,13 @@
-import { Job } from 'bull';
-import moment from 'moment-timezone';
-import { Injectable } from '@nestjs/common';
 import { Process, Processor } from '@nestjs/bull';
+import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import moment from 'moment-timezone';
+
+import { UsersService } from '@/modules/users/users.service';
 
 import { SubscribedState } from '../entity';
 import { SubscriptionPlanService, SubscriptionQuotaService } from '../service';
 import { SubscriptionSubscribedService, SubscriptionUsageService } from '../service';
-import { UsersService } from '@/modules/users/users.service';
 
 const Expression = process.env.NODE_ENV === 'production' ? CronExpression.EVERY_HOUR : CronExpression.EVERY_5_MINUTES;
 
@@ -29,7 +29,7 @@ export class SubscriptionProcessService {
   }
 
   @Process('subscribed')
-  async handleSubscribedProcess(job: Job<any>) {
+  async handleSubscribedProcess() {
     this.allocateQuotas(true);
   }
 

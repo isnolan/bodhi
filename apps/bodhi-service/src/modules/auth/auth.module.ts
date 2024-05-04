@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
-import Strategy from './strategies';
+import { NoticeModule } from '../notice/notice.module';
+import { UsersModule } from '../users/users.module';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
 import { AuthSession } from './entity';
 import { AuthVerification } from './entity/verification.entity';
-import { AuthController } from './auth.controller';
-import { NoticeModule } from '../notice/notice.module';
-import { AuthService } from './auth.service';
 import { AuthSessionService, AuthVerificationsService } from './service';
-import { UsersModule } from '../users/users.module';
+import Strategy from './strategies';
 
 @Module({
   imports: [

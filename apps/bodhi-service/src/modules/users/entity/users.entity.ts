@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Entity, Column } from 'typeorm';
+import { Column, Entity } from 'typeorm';
+
 import { Base } from '@/core/common/base.entity';
 
 @Entity('bodhi_users')

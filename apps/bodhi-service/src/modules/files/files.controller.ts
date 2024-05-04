@@ -1,14 +1,15 @@
-import { createHash } from 'crypto';
-import { FilesInterceptor } from '@nestjs/platform-express';
-import { UseInterceptors, UseGuards, Req, UploadedFiles, Body, Param, Delete, Post } from '@nestjs/common';
+import { Body, Delete, Param, Post, Req, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
-import { ApiOperation, ApiResponse, ApiBody, ApiConsumes } from '@nestjs/swagger';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { createHash } from 'crypto';
 
-import { FilesService } from './files.service';
-import { UploadFileReq, FileDto } from './dto/upload.dto';
-import { JwtOrApiKeyGuard } from '../auth/guard/mixed.guard';
 import { RequestWithUser } from '@/core/common/request.interface';
+
+import { JwtOrApiKeyGuard } from '../auth/guard/mixed.guard';
+import { FileDto, UploadFileReq } from './dto/upload.dto';
+import { FilesService } from './files.service';
 import { FileService } from './service';
 
 @ApiTags('files')
@@ -17,7 +18,10 @@ import { FileService } from './service';
 @ApiSecurity('api-key', [])
 @Controller('files')
 export class FilesController {
-  constructor(private readonly file: FileService, private readonly service: FilesService) {}
+  constructor(
+    private readonly file: FileService,
+    private readonly service: FilesService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get Files', description: 'Get Files' })

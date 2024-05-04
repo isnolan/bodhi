@@ -1,14 +1,14 @@
+import { Storage } from '@google-cloud/storage';
+import { InjectQueue } from '@nestjs/bull';
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bull';
 import * as mime from 'mime-types';
-import { Injectable } from '@nestjs/common';
 import * as moment from 'moment-timezone';
-import { InjectQueue } from '@nestjs/bull';
-import { File, FileState } from './entity/file.entity';
-import { FileDto } from './dto/upload.dto';
-import { FileService } from './service';
 
-import { Storage } from '@google-cloud/storage';
-import { ConfigService } from '@nestjs/config';
+import { FileDto } from './dto/upload.dto';
+import { File, FileState } from './entity/file.entity';
+import { FileService } from './service';
 
 @Injectable()
 export class FilesService {

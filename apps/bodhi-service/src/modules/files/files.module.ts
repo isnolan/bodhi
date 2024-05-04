@@ -1,13 +1,13 @@
-import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { FilesService } from './files.service';
-import { FilesController } from './files.controller';
 import { File } from './entity/file.entity';
-import Service from './service';
+import { FilesController } from './files.controller';
+import { FilesService } from './files.service';
 import Process from './process';
+import Service from './service';
 
 @Module({
   imports: [

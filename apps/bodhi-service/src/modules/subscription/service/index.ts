@@ -1,7 +1,7 @@
 export * from './plan.service';
 export * from './quota.service';
-export * from './usage.service';
 export * from './subscribed.service';
+export * from './usage.service';
 
 import { SubscriptionPlanService } from './plan.service';
 import { SubscriptionQuotaService } from './quota.service';

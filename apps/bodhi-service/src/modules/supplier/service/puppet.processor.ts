@@ -1,16 +1,18 @@
-import Redis from 'ioredis';
-import { Queue } from 'bull';
-import { v4 as uuidv4 } from 'uuid';
+/* eslint max-params: */
 import { InjectQueue } from '@nestjs/bull';
+import { forwardRef, Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Injectable, OnModuleInit, Inject, forwardRef } from '@nestjs/common';
+import { Queue } from 'bull';
+import Redis from 'ioredis';
+import { v4 as uuidv4 } from 'uuid';
+
+import { ChatService } from '@/modules/chat/chat.service';
+import { FileSimpleDto } from '@/modules/files/dto/upload.dto';
+import { FilesService } from '@/modules/files/files.service';
+import { CredentialsState } from '@/modules/provider/entity';
+import { ProviderCredentialsService, ProviderService } from '@/modules/provider/service';
 
 import { QueueMessageDto } from '../dto/queue-message.dto';
-import { FilesService } from '@/modules/files/files.service';
-import { FileSimpleDto } from '@/modules/files/dto/upload.dto';
-import { ChatService } from '@/modules/chat/chat.service';
-import { ProviderCredentialsService, ProviderService } from '@/modules/provider/service';
-import { CredentialsState } from '@/modules/provider/entity';
 import { SupplierService } from '../supplier.service';
 
 const importDynamic = new Function('modulePath', 'return import(modulePath)');
@@ -83,7 +85,7 @@ export class SupplierPuppetProcessor implements OnModuleInit {
     for (const supplier of services) {
       // 解析账号授权信息
       // const { username, password, cookies } = JSON.parse(supplier?.authorisation);
-      const opts = { pageId: `chat${supplier.id}`, sessionToken: '', accessToken: '' };
+      // const opts = { pageId: `chat${supplier.id}`, sessionToken: '', accessToken: '' };
       // const opts = { pageId: `chat${supplier.id}` };
       const page = new ChatAPI(puppet, supplier.instance.name, {
         pageId: supplier.id,
@@ -93,7 +95,7 @@ export class SupplierPuppetProcessor implements OnModuleInit {
       this.apis[supplier.id] = page;
 
       // 准备就绪:允许流量接入
-      page.on('active', async ({ pageId, cookies }: any) => {
+      page.on('active', async ({ pageId }: any) => {
         console.log(`[puppet]active`, pageId);
         // 保存cookies
         // const newAuth = JSON.stringify({ username, password, cookies });
@@ -183,17 +185,17 @@ export class SupplierPuppetProcessor implements OnModuleInit {
           console.log(`->1`, JSON.stringify(choices));
           // try {
           // multiple choice
-          const c = choices.map((row: any, idx: number) => {
-            // const { attachments = [] } = row.message;
-            // if (attachments && attachments.length > 0 && this.files[conversation_id]) {
-            //   attachments.map((file: any) => this.transformFile(conversation_id, file));
-            // }
-            // row.message.attachments = Object.values(this.files[conversation_id]);
+          // const c = choices.map((row: any, idx: number) => {
+          // const { attachments = [] } = row.message;
+          // if (attachments && attachments.length > 0 && this.files[conversation_id]) {
+          //   attachments.map((file: any) => this.transformFile(conversation_id, file));
+          // }
+          // row.message.attachments = Object.values(this.files[conversation_id]);
 
-            console.log(`->idx:`, idx, row.parts);
+          // console.log(`->idx:`, idx, row.parts);
 
-            // return row;
-          });
+          // return row;
+          // });
           this.chat.reply(channel, choices);
           //   console.log(`->2`);
           // } catch (err) {

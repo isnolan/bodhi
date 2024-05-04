@@ -1,18 +1,18 @@
-import validator from 'validator';
-import { AuthGuard } from '@nestjs/passport';
-import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { Controller, Req, Ip, Post, Body, Get, Query, Request } from '@nestjs/common';
+import { Body, Controller, Get, Ip, Post, Query, Req, Request } from '@nestjs/common';
 import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import validator from 'validator';
 
-import { AuthService } from './auth.service';
-import { MailService } from '../notice/mail.service';
-import { AuthResponse } from './interface/user.interface';
-import { VerificationState, VerificationType } from './entity';
-import { captchaDto, loginDto } from './dto/auth.dto';
 import { ErrorDto } from '../../core/common/base.dto';
-import { AuthVerificationsService } from './service';
-import { UsersService } from '../users/users.service';
 import { RequestWithUser } from '../../core/common/request.interface';
+import { MailService } from '../notice/mail.service';
+import { UsersService } from '../users/users.service';
+import { AuthService } from './auth.service';
+import { captchaDto, loginDto } from './dto/auth.dto';
+import { VerificationState, VerificationType } from './entity';
+import { AuthResponse } from './interface/user.interface';
+import { AuthVerificationsService } from './service';
 
 @ApiTags('auth')
 @Controller('auth')

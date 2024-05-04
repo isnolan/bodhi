@@ -1,24 +1,21 @@
+import { Process, Processor } from '@nestjs/bull';
+import { ConfigService } from '@nestjs/config';
 import { Job } from 'bull';
-import fetch from 'node-fetch';
-import * as mime from 'mime-types';
-import { v4 as uuidv4 } from 'uuid';
 import { GoogleAuth } from 'google-auth-library';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import { createHash } from 'crypto';
-import * as moment from 'moment-timezone';
-import { Process, Processor } from '@nestjs/bull';
+import fetch from 'node-fetch';
 
-import { ExtractQueueDto, FileQuqueDto } from '../dto/queue.dto';
-import { FilesService } from '../files.service';
-import { ConfigService } from '@nestjs/config';
+import { ExtractQueueDto } from '../dto/queue.dto';
 import { FileService } from '../service/file.service';
-import { FileState } from '../entity/file.entity';
 
 @Processor('bodhi')
 export class ExtractProcessor {
   private readonly auth: GoogleAuth;
 
-  constructor(private readonly config: ConfigService, private readonly file: FileService) {
+  constructor(
+    private readonly config: ConfigService,
+    private readonly file: FileService,
+  ) {
     this.auth = new GoogleAuth({
       credentials: config.get('gcloud'),
       scopes: 'https://www.googleapis.com/auth/cloud-platform',
@@ -27,8 +24,8 @@ export class ExtractProcessor {
 
   @Process('extract')
   async extract(job: Job<ExtractQueueDto>) {
-    console.log(`[file]extract`, job.data);
     const { id, mimetype: mimeType, file: content } = job.data;
+    console.log(`[file]extract`, id, job.data);
 
     const { processor } = this.config.get('gcloud');
     const token = await this.auth.getAccessToken();

@@ -1,22 +1,24 @@
-import validator from 'validator';
-import { AuthGuard } from '@nestjs/passport';
-import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { Controller, Req, Ip, Post, Body, Get, Query, Request, Delete } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Request } from '@nestjs/common';
 import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { UsersService } from './users.service';
 import { CreateKeysDto } from './dto/create-keys.dto';
-import { GetKeysDto } from './dto/get-keys.dto';
 import { DeleteKeysDto } from './dto/delete-keys.dto';
+import { GetKeysDto } from './dto/get-keys.dto';
 import { LimitKeysDto } from './dto/limit-keys.dto';
 import { UserKeyService } from './service';
+import { UsersService } from './users.service';
 
 @ApiTags('users')
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 @Controller('users')
 export class UsersController {
-  constructor(private readonly users: UsersService, private readonly keys: UserKeyService) {}
+  constructor(
+    private readonly users: UsersService,
+    private readonly keys: UserKeyService,
+  ) {}
 
   @Get('keys')
   @ApiOperation({ summary: 'Get API Keys', description: 'Get API Keys' })

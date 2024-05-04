@@ -1,7 +1,7 @@
-import { v4 as uuidv4 } from 'uuid';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString } from 'class-validator';
 import type { chat } from '@isnolan/bodhi-adapter';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsArray, IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { v4 as uuidv4 } from 'uuid';
 
 class CreateChatDto {
   /* 基本内容 */

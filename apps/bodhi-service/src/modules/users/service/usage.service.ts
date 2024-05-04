@@ -18,7 +18,7 @@ export class UserUsageService {
    * @returns
    */
   async checkAvailable(client_user_id: string, model: string): Promise<number> {
-    const query = { client_user_id, models: Like(`%\"${model}\"%`), state: KeyUsageState.VALID };
+    const query = { client_user_id, models: Like(`%"${model}"%`), state: KeyUsageState.VALID };
     const row = await this.repository.findOne({
       where: [
         { expires_at: MoreThan(new Date()), ...query },

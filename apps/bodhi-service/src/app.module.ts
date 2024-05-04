@@ -1,16 +1,17 @@
-import * as winston from 'winston';
 import 'winston-daily-rotate-file';
-import { Module } from '@nestjs/common';
-import { WinstonModule } from 'nest-winston';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ScheduleModule } from '@nestjs/schedule';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { RedisModule, RedisModuleOptions } from '@liaoliaots/nestjs-redis';
 
-import Modules from './modules';
-import { AppService } from './app.service';
+import { RedisModule, RedisModuleOptions } from '@liaoliaots/nestjs-redis';
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { WinstonModule } from 'nest-winston';
+import * as winston from 'winston';
+
 import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import configuration from './config/configuration';
+import Modules from './modules';
 
 @Module({
   imports: [

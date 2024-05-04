@@ -1,8 +1,10 @@
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+
 import { Base } from '@/core/common/base.entity';
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { ProviderModels } from './models.entity';
-import { ProviderInstance } from './instance.entity';
+
 import { ProviderCredentials } from './credentials.entity';
+import { ProviderInstance } from './instance.entity';
+import { ProviderModels } from './models.entity';
 
 export enum ProductState {
   ACTIVE = 1,

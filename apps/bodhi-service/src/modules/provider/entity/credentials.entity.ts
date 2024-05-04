@@ -1,5 +1,7 @@
+import { Column, Entity } from 'typeorm';
+
 import { Base } from '@/core/common/base.entity';
-import { Entity, Column } from 'typeorm';
+
 import { InstanceType } from './instance.entity';
 
 export enum CredentialsState {

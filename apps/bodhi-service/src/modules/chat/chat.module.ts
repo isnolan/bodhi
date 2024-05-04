@@ -1,17 +1,17 @@
-import { Module, forwardRef } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { ChatService } from './chat.service';
-import { ChatController } from './chat.controller';
+import { ProviderModule } from '../provider/provider.module';
+import { SubscriptionModule } from '../subscription/subscription.module';
 import { SupplierModule } from '../supplier/supplier.module';
+import { UsersModule } from '../users/users.module';
+import { ChatController } from './chat.controller';
+import { ChatService } from './chat.service';
 import { ChatConversation } from './entity/conversation.entity';
 import { ChatMessage } from './entity/message.entity';
 import Service from './service';
-import { ProviderModule } from '../provider/provider.module';
-import { SubscriptionModule } from '../subscription/subscription.module';
-import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [

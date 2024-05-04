@@ -1,15 +1,15 @@
-import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { UsersModule } from '../users/users.module';
 import Entity from './entity';
+import { SubscriptionGuard } from './guards/subscription.guard';
+import { SubscriptionProcessService } from './process/subscription.process';
 import Service from './service';
 import { SubscriptionController } from './subscription.controller';
-import { SubscriptionGuard } from './guards/subscription.guard';
-import { UsersModule } from '../users/users.module';
 import { SubscriptionService } from './subscription.service';
-import { SubscriptionProcessService } from './process/subscription.process';
 @Module({
   imports: [
     TypeOrmModule.forFeature([...Entity]),

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Repository, MoreThan, In } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { In, MoreThan, Repository } from 'typeorm';
+
 import { ProviderModels } from '../entity';
 
 @Injectable()

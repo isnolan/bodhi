@@ -1,10 +1,10 @@
-import Redis from 'ioredis';
-import { Injectable } from '@nestjs/common';
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
+import { Injectable } from '@nestjs/common';
+import Redis from 'ioredis';
 
-import { ProviderService } from '@/modules/provider/service';
-import { InstanceType } from '@/modules/provider/entity';
 import { ProviderWithRelations } from '@/modules/provider/dto/find-provider.dto';
+import { InstanceType } from '@/modules/provider/entity';
+import { ProviderService } from '@/modules/provider/service';
 
 @Injectable()
 export class SupplierService {

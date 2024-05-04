@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
+
+import { UserUsage } from './entity';
 import { Users } from './entity/users.entity';
 import { UserKeyService, UserUsageService, UserWebhookService } from './service';
 import { UsersUserService } from './service/user.service';
-import { UserUsage } from './entity';
 
 @Injectable()
 export class UsersService {

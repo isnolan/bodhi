@@ -1,26 +1,28 @@
-import { Job } from 'bull';
-import fetch from 'node-fetch';
-import * as mime from 'mime-types';
-import { v4 as uuidv4 } from 'uuid';
-import { createHash } from 'crypto';
-import * as moment from 'moment-timezone';
 import { Process, Processor } from '@nestjs/bull';
+import { ConfigService } from '@nestjs/config';
+import { Job } from 'bull';
+import { createHash } from 'crypto';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import * as mime from 'mime-types';
+import * as moment from 'moment-timezone';
+import fetch from 'node-fetch';
+import { v4 as uuidv4 } from 'uuid';
 
 import { FileQuqueDto } from '../dto/queue.dto';
-import { FilesService } from '../files.service';
-import { ConfigService } from '@nestjs/config';
 import { FileService } from '../service/file.service';
-import { FileState } from '../entity/file.entity';
 
 @Processor('bodhi')
 export class DownloadProcessor {
-  constructor(private readonly config: ConfigService, private readonly file: FileService) {}
+  constructor(
+    private readonly config: ConfigService,
+    private readonly file: FileService,
+  ) {}
 
   @Process('download')
   async expired(job: Job<FileQuqueDto>) {
     console.log(`[file]process`, job.data);
     const { id, url } = job.data;
+    /* eslint no-async-promise-executor: */
     return new Promise(async (resolve, reject) => {
       try {
         // download & upload

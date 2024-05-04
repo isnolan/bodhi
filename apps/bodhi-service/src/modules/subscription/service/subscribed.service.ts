@@ -1,7 +1,7 @@
-import moment from 'moment-timezone';
-import { Repository, In, MoreThan } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import moment from 'moment-timezone';
+import { In, MoreThan, Repository } from 'typeorm';
 
 import { SubscribedState, SubscriptionSubscribed } from '../entity';
 
@@ -20,7 +20,7 @@ export class SubscriptionSubscribedService {
     });
   }
 
-  public async findActiveWithPlanAndUsage(user_id: number, relations?: string[]): Promise<SubscriptionSubscribed[]> {
+  public async findActiveWithPlanAndUsage(user_id: number): Promise<SubscriptionSubscribed[]> {
     return this.repository.find({
       where: { user_id, state: In([SubscribedState.ACTIVE, SubscribedState.PENDING]) },
       relations: ['usage'],

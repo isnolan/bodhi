@@ -1,13 +1,13 @@
-import { Job, Queue } from 'bull';
 import { InjectQueue } from '@nestjs/bull';
 import { Process, Processor } from '@nestjs/bull';
+import { forwardRef, Inject } from '@nestjs/common';
+import { Job, Queue } from 'bull';
+
+import { ChatService } from '@/modules/chat/chat.service';
+import { KeyAuthorisation } from '@/modules/provider/entity';
+import { ProviderService } from '@/modules/provider/service';
 
 import { QueueMessageDto } from '../dto/queue-message.dto';
-import { ChatService } from '@/modules/chat/chat.service';
-import { ChatMessageService } from '@/modules/chat/service';
-import { Inject, forwardRef } from '@nestjs/common';
-import { ProviderService } from '@/modules/provider/service';
-import { KeyAuthorisation } from '@/modules/provider/entity';
 
 const importDynamic = new Function('modulePath', 'return import(modulePath)');
 
@@ -42,6 +42,7 @@ export class SupplierOpenAPIProcessor {
     console.log(`[api]job:`, job.data);
 
     const { channel, provider_id, conversation_id, parent_id, status = 1 } = job.data;
+    /* eslint no-async-promise-executor: */
     return new Promise(async (resolve) => {
       try {
         const provider = (await this.provider.findActive([provider_id]))[0];

@@ -1,8 +1,8 @@
-import { join } from 'path';
+import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-import { Module } from '@nestjs/common';
+import { join } from 'path';
 
 import { MailService } from './mail.service';
 
@@ -11,7 +11,7 @@ import { MailService } from './mail.service';
     MailerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
-        const { host, port, user, pass } = config.get('mail');
+        const { host, user, pass } = config.get('mail');
         return {
           transport: { host, secure: true, auth: { user, pass } },
           defaults: { from: `"Bodhi" <${user}>` },

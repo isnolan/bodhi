@@ -1,14 +1,14 @@
 import { BullModule } from '@nestjs/bull';
-import { Module, forwardRef } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
-import Service from './service/';
 import { ChatModule } from '../chat/chat.module';
 import { FilesModule } from '../files/files.module';
-import { SupplierService } from './supplier.service';
 import { ProviderModule } from '../provider/provider.module';
-import { UsersModule } from '../users/users.module';
 import { SubscriptionModule } from '../subscription/subscription.module';
+import { UsersModule } from '../users/users.module';
+import Service from './service/';
+import { SupplierService } from './supplier.service';
 @Module({
   imports: [
     // Redis Queue

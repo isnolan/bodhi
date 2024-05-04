@@ -1,5 +1,7 @@
-import { Entity, Column, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+
 import { Base } from '@/core/common/base.entity';
+
 import { SubscriptionPlan } from './plan.entity';
 export enum QuotaPeriod {
   DAILY = 'daily',

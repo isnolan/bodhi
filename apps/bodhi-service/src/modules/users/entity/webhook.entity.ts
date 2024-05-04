@@ -1,4 +1,5 @@
-import { Entity, Column, OneToMany } from 'typeorm';
+import { Column, Entity } from 'typeorm';
+
 import { Base } from '@/core/common/base.entity';
 
 export enum WebhookState {

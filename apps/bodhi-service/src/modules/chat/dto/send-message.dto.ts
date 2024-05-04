@@ -1,5 +1,6 @@
-import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { chat } from '@isnolan/bodhi-adapter';
+import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+
 import { UsageWithQuota } from '@/modules/subscription/dto/find-useage.dto';
 
 export class SendMessageDto {

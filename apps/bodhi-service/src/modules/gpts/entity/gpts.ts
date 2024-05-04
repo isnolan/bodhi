@@ -1,5 +1,6 @@
+import { Column, Entity } from 'typeorm';
+
 import { Base } from '@/core/common/base.entity';
-import { Entity, Column } from 'typeorm';
 
 @Entity('bodhi_gpts')
 export class Gpts extends Base {

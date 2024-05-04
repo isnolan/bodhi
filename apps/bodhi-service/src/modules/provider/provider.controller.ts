@@ -1,16 +1,20 @@
-import { AuthGuard } from '@nestjs/passport';
-import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { Controller, Get, Request } from '@nestjs/common';
 import { UseGuards } from '@nestjs/common';
-import { ProviderCredentialsService } from './service/credentials.service';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+
 import { ProviderService } from './service';
+import { ProviderCredentialsService } from './service/credentials.service';
 
 @ApiTags('provider')
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
 @Controller('provider')
 export class ProviderController {
-  constructor(private readonly provider: ProviderService, private readonly credential: ProviderCredentialsService) {}
+  constructor(
+    private readonly provider: ProviderService,
+    private readonly credential: ProviderCredentialsService,
+  ) {}
 
   @Get('product')
   @ApiOperation({ summary: 'Get product list', description: 'Get product list' })

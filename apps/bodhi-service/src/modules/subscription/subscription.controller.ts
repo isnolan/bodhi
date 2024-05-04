@@ -1,11 +1,12 @@
+import { Controller, Get, HttpException, HttpStatus, Post, Request, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { Controller, Request, Get, UseGuards, Req, Post, HttpException, HttpStatus } from '@nestjs/common';
-import { SubscriptionSubscribedService } from './service';
-import { SubscriptionGuard } from './guards/subscription.guard';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+
 import { RequestWithUser } from '@/core/common/request.interface';
-import { SubscriptionService } from './subscription.service';
+
 import { PlanListDto } from './dto/plans.dto';
+import { SubscriptionSubscribedService } from './service';
+import { SubscriptionService } from './subscription.service';
 
 @ApiTags('subscription')
 @ApiBearerAuth()
