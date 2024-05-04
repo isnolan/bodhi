@@ -7,6 +7,7 @@ import { FilesService } from './files.service';
 import { FilesController } from './files.controller';
 import { File } from './entity/file.entity';
 import Service from './service';
+import Process from './process';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import Service from './service';
     }),
   ],
   controllers: [FilesController],
-  providers: [FilesService, ...Service],
+  providers: [FilesService, ...Service, ...Process],
   exports: [FilesService],
 })
 export class FilesModule {}

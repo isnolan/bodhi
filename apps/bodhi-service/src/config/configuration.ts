@@ -31,6 +31,12 @@ export default () => {
       pass: process.env.SMTP_PASSWORD,
     },
 
+    gcloud: {
+      client_email: process.env.GCP_CLIENT_EMAIL,
+      private_key: process.env.GCP_PRIVATE_KEY,
+      processor: process.env.GCP_PROCESSOR,
+    },
+
     proxy: process.env.HTTP_PROXY,
   };
 };

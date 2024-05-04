@@ -5,7 +5,7 @@ export class UploadFileReq {
   files: Express.Multer.File[];
 
   @ApiPropertyOptional()
-  purpose: string;
+  purpose: undefined | 'file-extract' | 'fine-tune';
 }
 
 export class FileDto {

@@ -23,7 +23,34 @@ describe('chat', () => {
   });
 
   // 发送聊天消息
-  it('text: streaming', async () => {
+  // it('text: streaming', async () => {
+  //   const res = await api.sendMessage({
+  //     model: 'gemini-pro',
+  //     messages: [
+  //       {
+  //         role: 'system',
+  //         parts: [
+  //           {
+  //             type: 'text',
+  //             text: "You are a professional children's literature writer, good at writing children's stories.",
+  //           },
+  //         ],
+  //       },
+  //       // { role: 'user', parts: [{ type: 'text', text: 'Hello, 我们家有两只狗' }] },
+  //       // { role: 'assistant', parts: [{ type: 'text', text: 'Great to meet you. What would you like to know?' }] },
+  //       { role: 'user', parts: [{ type: 'text', text: '请写一篇关于我家小狗子的故事，要求字数不少于200字' }] },
+  //     ],
+  //     onProgress: (choices) => {
+  //       console.log(`[vertex]progress:`, JSON.stringify(choices));
+  //       expect(choices).toBeInstanceOf(Object);
+  //     },
+  //   });
+
+  //   console.log(`[vertex]result:`, JSON.stringify(res));
+  //   expect(res).toBeInstanceOf(Object);
+  // }, 30000);
+
+  it('document: streaming', async () => {
     const res = await api.sendMessage({
       model: 'gemini-pro',
       messages: [
@@ -32,13 +59,26 @@ describe('chat', () => {
           parts: [
             {
               type: 'text',
-              text: "You are a professional children's literature writer, good at writing children's stories.",
+              text: 'You are a very professional document summarization specialist. Please summarize the given document.',
+            },
+          ],
+        },
+        {
+          role: 'user',
+          parts: [
+            {
+              type: 'document',
+              url: 'gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf',
+            },
+            {
+              type: 'text',
+              text: '这里都讲了什么？',
             },
           ],
         },
         // { role: 'user', parts: [{ type: 'text', text: 'Hello, 我们家有两只狗' }] },
         // { role: 'assistant', parts: [{ type: 'text', text: 'Great to meet you. What would you like to know?' }] },
-        { role: 'user', parts: [{ type: 'text', text: '请写一篇关于我家小狗子的故事，要求字数不少于200字' }] },
+        // { role: 'user', parts: [{ type: 'text', text: '请写一篇关于我家小狗子的故事，要求字数不少于200字' }] },
       ],
       onProgress: (choices) => {
         console.log(`[vertex]progress:`, JSON.stringify(choices));
@@ -48,7 +88,7 @@ describe('chat', () => {
 
     console.log(`[vertex]result:`, JSON.stringify(res));
     expect(res).toBeInstanceOf(Object);
-  }, 30000);
+  }, 60000);
 
   // vision: image part, from inline data
   // it('vision:image from inline data', async () => {

@@ -20,6 +20,7 @@
     "precommit": "lint-staged && npm run lint && npm run test"
   },
   "dependencies": {
+    "@google-cloud/storage": "^7.10.2",
     "@isnolan/bodhi-adapter": "workspace:^",
     "@isnolan/bodhi-puppet": "workspace:^",
     "@liaoliaots/nestjs-redis": "^9.0.5",
@@ -45,6 +46,7 @@
     "class-validator": "0.13.2",
     "compression": "^1.7.4",
     "dotenv": "^16.4.2",
+    "google-auth-library": "^9.4.1",
     "hashids": "^2.3.0",
     "https-proxy-agent": "^7.0.2",
     "ioredis": "^5.3.2",

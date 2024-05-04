@@ -12,3 +12,14 @@ export class FilePuppetDto extends FileQuqueDto {
   @ApiProperty()
   model: string;
 }
+
+export class ExtractQueueDto {
+  @ApiProperty()
+  id: number;
+
+  @ApiProperty()
+  mimetype: string;
+
+  @ApiProperty()
+  file: Express.Multer.File;
+}

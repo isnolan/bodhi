@@ -7,11 +7,10 @@ import * as moment from 'moment-timezone';
 import { Process, Processor } from '@nestjs/bull';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 
-import { FileQuqueDto } from '../dto/queue-file.dto';
+import { FileQuqueDto } from '../dto/queue.dto';
 import { FilesService } from '../files.service';
 import { ConfigService } from '@nestjs/config';
-import { putStream } from '@/core/utils/aliyun';
-import { FileService } from './file.service';
+import { FileService } from '../service/file.service';
 import { FileState } from '../entity/file.entity';
 
 @Processor('bodhi')
@@ -48,13 +47,13 @@ export class DownloadProcessor {
         const path = `/attachments/${moment.tz('Asia/Shanghai').format('YYYYMM')}/${uuidv4()}.${ext}`;
         this.file.updateAttr(id, { hash, path, size, mimetype });
 
-        const { res }: any = await putStream(path, { buffer, size });
-        console.log(`[file]process`, res.statusMessage);
-        if (res.statusMessage === 'OK') {
-          this.file.updateState(id, FileState.ACTIVE);
-          resolve(res);
-        }
-        reject(res.statusMessage);
+        // const { res }: any = await putStream(path, { buffer, size });
+        // console.log(`[file]process`, res.statusMessage);
+        // if (res.statusMessage === 'OK') {
+        //   this.file.updateState(id, FileState.ACTIVE);
+        //   resolve(res);
+        // }
+        // reject(res.statusMessage);
       } catch (err) {
         console.warn(`[file]process`, err.message);
         reject(err);

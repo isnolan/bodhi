@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { UseInterceptors, Put, UseGuards, Req, Query, UploadedFiles, Body } from '@nestjs/common';
+import { UseInterceptors, Put, UseGuards, Req, Query, UploadedFiles, Body, Param, Delete, Post } from '@nestjs/common';
 import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 import { ApiOperation, ApiResponse, ApiBody, ApiConsumes } from '@nestjs/swagger';
@@ -26,7 +26,6 @@ export class FilesController {
     const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
 
     try {
-      // const files = this.service.getFiles();
       const rows = await this.service.findActiveFilesByUserId(user_id, client_user_id);
       return rows.map((item) => {
         const url = `https://s.alidraft.com${item.path}`;
@@ -39,35 +38,13 @@ export class FilesController {
     }
   }
 
-  @Get('detail')
-  @ApiOperation({ summary: 'Get file detail', description: 'Get file detail' })
-  @ApiResponse({ status: 200, description: 'success', type: FileDto })
-  async get(@Req() req: RequestWithUser, @Query('id') id: number): Promise<FileDto> {
-    const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
-
-    try {
-      const file = await this.service.findActiveFilesById(id, user_id, client_user_id);
-      const url = `https://s.alidraft.com${file.path}`;
-      delete file.path;
-
-      const file_id = this.file.encodeId(file.id);
-      return { ...file, id: file_id, url };
-    } catch (err) {
-      throw new HttpException(err.message, HttpStatus.FORBIDDEN);
-    }
-  }
-
-  @Put('upload')
-  @ApiOperation({ summary: 'Upload File', description: 'Upload File' })
+  @Post('upload')
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UploadFileReq })
+  @ApiOperation({ summary: 'Upload File', description: 'Upload File' })
   @ApiResponse({ status: 200, description: 'success', type: [FileDto] })
   @UseInterceptors(FilesInterceptor('files'))
-  async upload(
-    @Req() req: RequestWithUser,
-    @UploadedFiles() files: Array<Express.Multer.File>,
-    @Body() body: UploadFileReq,
-  ) {
+  async upload(@Req() req: RequestWithUser, @UploadedFiles() files, @Body() body: UploadFileReq) {
     const { user_id } = req.user; // from jwt or apikey
     const { purpose } = body;
 
@@ -86,6 +63,37 @@ export class FilesController {
           return await this.service.uploadFile(upload, { hash, name, mimetype, size, user_id }, purpose);
         }),
       );
+    } catch (err) {
+      throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get file detail', description: 'Get file detail' })
+  @ApiResponse({ status: 200, description: 'success', type: FileDto })
+  async get(@Req() req: RequestWithUser, @Param('id') id: number): Promise<FileDto> {
+    const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
+
+    try {
+      const file = await this.service.findActiveFilesById(id, user_id, client_user_id);
+      const url = `https://s.alidraft.com${file.path}`;
+      delete file.path;
+
+      const file_id = this.file.encodeId(file.id);
+      return { ...file, id: file_id, url };
+    } catch (err) {
+      throw new HttpException(err.message, HttpStatus.FORBIDDEN);
+    }
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete File', description: 'Delete File' })
+  @ApiResponse({ status: 200, description: 'success' })
+  async delete(@Req() req: RequestWithUser, @Param('id') id: number) {
+    const { user_id } = req.user; // from jwt or apikey
+
+    try {
+      // await this.service.deleteFile(id, user_id);
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
     }

@@ -72,7 +72,6 @@ export class GoogleVertexAPI extends GoogleGeminiAPI {
       }
 
       // only get content from node-fetch
-      let response: any;
       const body: NodeJS.ReadableStream = res.body;
       body.on('error', (err) => reject(new types.chat.ChatError(err.message, 500)));
 
@@ -80,7 +79,6 @@ export class GoogleVertexAPI extends GoogleGeminiAPI {
       const choicesList: types.chat.Choice[] = [];
       const usage: types.chat.Usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
       const parser = createParser((event: ParseEvent | ReconnectInterval) => {
-        // console.log(`->`, event.type, event?.data);
         if (event.type === 'event') {
           const res = JSON.parse(event.data);
           const choices = this.convertChoices(res.candidates);
