@@ -4,10 +4,18 @@
   "terminal.integrated.defaultProfile.osx": "zsh",
   "eslint.alwaysShowStatus": true,
   "editor.formatOnSave": true,
+
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+
   "[json]": {
     "editor.defaultFormatter": "vscode.json-language-features"
   },
+
   "files.associations": {
-    "*.env*": "properties"
+    "*.env*": "properties",
+    "*.css": "tailwindcss",
+    "*.svg": "html"
   }
 }

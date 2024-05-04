@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { UseInterceptors, Put, UseGuards, Req, Query, UploadedFiles, Body, Param, Delete, Post } from '@nestjs/common';
+import { UseInterceptors, UseGuards, Req, UploadedFiles, Body, Param, Delete, Post } from '@nestjs/common';
 import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiSecurity } from '@nestjs/swagger';
 import { ApiOperation, ApiResponse, ApiBody, ApiConsumes } from '@nestjs/swagger';

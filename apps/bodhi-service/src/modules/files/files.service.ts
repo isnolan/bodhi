@@ -1,14 +1,11 @@
 import { Queue } from 'bull';
 import * as mime from 'mime-types';
-import { v4 as uuidv4 } from 'uuid';
-import { Repository, In } from 'typeorm';
-import * as moment from 'moment-timezone';
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import * as moment from 'moment-timezone';
+import { InjectQueue } from '@nestjs/bull';
 import { File, FileState } from './entity/file.entity';
 import { FileDto } from './dto/upload.dto';
 import { FileService } from './service';
-import { InjectQueue } from '@nestjs/bull';
 
 import { Storage } from '@google-cloud/storage';
 import { ConfigService } from '@nestjs/config';
@@ -23,8 +20,7 @@ export class FilesService {
     private readonly file: FileService,
     private readonly config: ConfigService,
   ) {
-    const { client_email, private_key } = this.config.get('gcloud');
-    this.storage = new Storage({ credentials: { client_email, private_key } });
+    this.storage = new Storage({ credentials: this.config.get('gcloud') });
   }
 
   async findActiveFilesByUserId(user_id: number, client_user_id?: string) {
@@ -55,7 +51,7 @@ export class FilesService {
   async uploadFile(file: Express.Multer.File, opts: Partial<File>, purpose: string): Promise<FileDto> {
     const { hash, name, mimetype, size, user_id }: any = opts;
     const ext = mime.extension(mimetype as string);
-    const path = `uploads/${moment.tz('Asia/Shanghai').format('YYYYMM')}/${uuidv4()}.${ext}`;
+    const path = `uploads/${moment.tz('Asia/Shanghai').format('YYYYMM')}/${hash}.${ext}`;
     Object.assign(opts, { path });
 
     // 检查是否已经上传
@@ -64,7 +60,7 @@ export class FilesService {
     // 存在有效上传
     if (f) {
       const id = this.file.encodeId(f.id);
-      const url = `https://s.alidraft.com${file.path}`;
+      const url = `https://s.alidraft.com${f.path}`;
       return { id, name, size, mimetype, hash, url, expires_at: f.expires_at };
     }
 

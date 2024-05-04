@@ -16,21 +16,24 @@ import { FileState } from '../entity/file.entity';
 
 @Processor('bodhi')
 export class ExtractProcessor {
-  constructor(private readonly config: ConfigService, private readonly file: FileService) {}
+  private readonly auth: GoogleAuth;
+
+  constructor(private readonly config: ConfigService, private readonly file: FileService) {
+    this.auth = new GoogleAuth({
+      credentials: config.get('gcloud'),
+      scopes: 'https://www.googleapis.com/auth/cloud-platform',
+    });
+  }
 
   @Process('extract')
   async extract(job: Job<ExtractQueueDto>) {
     console.log(`[file]extract`, job.data);
     const { id, mimetype: mimeType, file: content } = job.data;
 
-    const { processor, client_email, private_key } = this.config.get('gcloud');
-    const auth: GoogleAuth = new GoogleAuth({
-      credentials: { client_email, private_key },
-      scopes: 'https://www.googleapis.com/auth/cloud-platform',
-    });
-
+    const { processor } = this.config.get('gcloud');
+    const token = await this.auth.getAccessToken();
     const res = await fetch(`${processor}:process`, {
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${await auth.getAccessToken()}` },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       agent: new HttpsProxyAgent(process.env.HTTP_PROXY as string),
       body: JSON.stringify({
         skipHumanReview: true,
