@@ -49,7 +49,7 @@ export class FilesService {
   // }
 
   async uploadFile(file: Express.Multer.File, opts: Partial<File>, purpose: string): Promise<FileDto> {
-    const { hash, name, mimetype, size, user_id }: any = opts;
+    const { hash, name, mimetype, size }: any = opts;
     const ext = mime.extension(mimetype as string);
     const path = `uploads/${moment.tz('Asia/Shanghai').format('YYYYMM')}/${hash}.${ext}`;
     Object.assign(opts, { path });
@@ -67,30 +67,22 @@ export class FilesService {
     // 初次上传
     f = await this.file.create({ ...opts, state: FileState.CREATED });
     if (f.state === FileState.CREATED) {
-      const options = { destination: path };
-      const res = await this.storage.bucket('bodhi-storage').file(path).save(file.buffer);
-      console.log(`-> uploaded to bodhi-storage`, res);
+      try {
+        await this.storage.bucket('bodhi-storage').file(path).save(file.buffer);
+        const id = this.file.encodeId(f.id);
 
-      const id = this.file.encodeId(f.id);
-      return { id, name, url: path, size, mimetype, hash, expires_at: f.expires_at } as FileDto;
-      // const { res }: any = await putStream(f.path, file);
-      // console.log(`[file]upload, oss`, res.status);
-      // if (res.statusMessage === 'OK') {
-      //   // 更新状态
-      //   this.file.updateState(f.id, FileState.ACTIVE);
-      //   const url = `https://s.alidraft.com${path}`;
-      //   const id = this.file.encodeId(f.id);
+        // file extract
+        if (mimetype.includes('pdf') && purpose === 'file-extract') {
+          this.queue.add('extract', { id: f.id, mimetype, file });
+        }
 
-      //   if (purpose === 'file-extract' && mimetype.includes('pdf')) {
-      //     this.queue.add('extract', { id: f.id, mimetype, file });
-      //   }
+        return { id, name, url: path, size, mimetype, hash, expires_at: f.expires_at } as FileDto;
+      } catch (err) {
+        console.warn(err);
 
-      //   return { id, name, url, size, mimetype, hash, expires_at: f.expires_at } as FileDto;
-      // }
-
-      // 上传异常
-      // this.file.updateState(f.id, FileState.DELETED);
-      // throw new Error(res.statusMessage);
+        this.file.updateState(f.id, FileState.DELETED);
+        throw err;
+      }
     }
 
     throw new Error('file state error');

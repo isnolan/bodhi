@@ -95,6 +95,7 @@ export class FilesController {
   @ApiResponse({ status: 200, description: 'success' })
   async delete(@Req() req: RequestWithUser, @Param('id') id: number) {
     const { user_id } = req.user; // from jwt or apikey
+    console.log(`->`, user_id, id);
 
     try {
       // await this.service.deleteFile(id, user_id);
