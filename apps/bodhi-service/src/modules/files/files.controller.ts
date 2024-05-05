@@ -48,7 +48,7 @@ export class FilesController {
   async upload(@Req() req: RequestWithUser, @UploadedFiles() files, @Body() body: UploadFileReq) {
     const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
     const { purpose } = body;
-    const expires_at = new Date(Date.now() + 1000 * 60 * 60 * 24 * 15); // 15 days
+    const expires_at = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 15 days
 
     try {
       // 计算并检查hash

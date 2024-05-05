@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, IsNull, MoreThan, Repository } from 'typeorm';
+import moment from 'moment-timezone';
+import { IsNull, MoreThan, Repository } from 'typeorm';
 
 import { File, FileState } from '../entity/file.entity';
 
@@ -79,7 +80,8 @@ export class FileService {
     return this.repository.findOne({ where: { file_id, state: FileState.ACTIVE } });
   }
 
-  async findExpired() {
-    return this.repository.find({ where: { state: FileState.EXPIRED } });
+  async findExpired7Days() {
+    const expires_at = moment.utc().add(7, 'days').toDate();
+    return this.repository.find({ where: { expires_at: MoreThan(expires_at), state: FileState.EXPIRED } });
   }
 }

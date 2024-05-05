@@ -26,7 +26,7 @@ export class CleanProcessor {
    */
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async handleDailyCleanExpired() {
-    const files = await this.file.findExpired();
+    const files = await this.file.findExpired7Days();
     for (const file of files) {
       this.queue.add('file-clean', { id: file.id });
     }
