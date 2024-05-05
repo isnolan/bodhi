@@ -34,6 +34,7 @@ export default () => {
     gcloud: {
       client_email: process.env.GCP_CLIENT_EMAIL,
       private_key: process.env.GCP_PRIVATE_KEY,
+      bucket: 'bodhi-storage',
       processor: process.env.GCP_PROCESSOR,
     },
 

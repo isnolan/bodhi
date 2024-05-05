@@ -21,5 +21,16 @@ export class ExtractQueueDto {
   mimetype: string;
 
   @ApiProperty()
-  file: Express.Multer.File;
+  folderPath: string;
+
+  @ApiProperty()
+  filePath: string;
+}
+
+export class CleanQueueDto {
+  @ApiProperty()
+  id: number;
+
+  @ApiProperty()
+  path: string;
 }

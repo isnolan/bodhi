@@ -22,9 +22,6 @@ export class FileDto {
   mimetype: string;
 
   @ApiProperty()
-  hash: string;
-
-  @ApiProperty()
   expires_at: Date;
 
   @ApiProperty()

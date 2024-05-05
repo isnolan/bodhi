@@ -33,9 +33,9 @@ export class FilesController {
       const rows = await this.service.findActiveFilesByUserId(user_id, client_user_id);
       return rows.map((item) => {
         const url = `https://s.alidraft.com${item.path}`;
-        const { name, size, mimetype, hash, expires_at } = item;
+        const { name, size, mimetype, expires_at } = item;
         const id = this.file.encodeId(item.id);
-        return { id, name, size, mimetype, hash, url, expires_at };
+        return { id, name, size, mimetype, url, expires_at };
       });
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.FORBIDDEN);
@@ -49,22 +49,21 @@ export class FilesController {
   @ApiResponse({ status: 200, description: 'success', type: [FileDto] })
   @UseInterceptors(FilesInterceptor('files'))
   async upload(@Req() req: RequestWithUser, @UploadedFiles() files, @Body() body: UploadFileReq) {
-    const { user_id } = req.user; // from jwt or apikey
+    const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
     const { purpose } = body;
 
     try {
       // 计算并检查hash
       return Promise.all(
-        files.map(async (upload) => {
+        files.map((file) => {
           const hashhex = createHash('md5');
-          hashhex.update(upload.buffer);
-          const mimetype = upload.mimetype;
+          hashhex.update(file.buffer);
           const hash = hashhex.digest('hex');
-          const size = upload.size;
-          const name = Buffer.from(upload.originalname, 'latin1').toString('utf8');
+          const mimetype = file.mimetype;
+          const size = file.size;
+          const name = Buffer.from(file.originalname, 'latin1').toString('utf8');
 
-          console.log(`[file]upload`, hash, name, mimetype, size);
-          return await this.service.uploadFile(upload, { hash, name, mimetype, size, user_id }, purpose);
+          return this.service.uploadFile(file, { hash, name, mimetype, size, user_id, client_user_id }, purpose);
         }),
       );
     } catch (err) {
@@ -94,11 +93,10 @@ export class FilesController {
   @ApiOperation({ summary: 'Delete File', description: 'Delete File' })
   @ApiResponse({ status: 200, description: 'success' })
   async delete(@Req() req: RequestWithUser, @Param('id') id: number) {
-    const { user_id } = req.user; // from jwt or apikey
-    console.log(`->`, user_id, id);
+    const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
 
     try {
-      // await this.service.deleteFile(id, user_id);
+      await this.service.delete(id, user_id, client_user_id);
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
     }

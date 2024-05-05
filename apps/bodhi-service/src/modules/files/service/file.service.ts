@@ -24,6 +24,17 @@ export class FileService {
     return this.hashids.decode(id)[0];
   }
 
+  async create(opts: Partial<File>) {
+    return this.repository.save(this.repository.create(opts));
+  }
+
+  async delete(id: number, user_id: number, client_user_id?: string) {
+    const query = { id, user_id };
+    client_user_id && (query['client_user_id'] = client_user_id);
+
+    return this.repository.update(query, { state: FileState.DELETED });
+  }
+
   async findActiveByUserId(user_id: number, client_user_id?: string) {
     const query = { user_id, state: FileState.ACTIVE };
     client_user_id && (query['client_user_id'] = client_user_id);
@@ -71,9 +82,5 @@ export class FileService {
 
   async findActiveByFileID(file_id: string) {
     return this.repository.findOne({ where: { file_id, state: FileState.ACTIVE } });
-  }
-
-  async create(opts: Partial<File>) {
-    return this.repository.save(this.repository.create(opts));
   }
 }

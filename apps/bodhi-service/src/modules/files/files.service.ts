@@ -31,61 +31,48 @@ export class FilesService {
     return this.file.findActiveById(id, user_id, client_user_id);
   }
 
-  // async update(id: number, opts: Partial<File>) {
-  //   await this.repository.update(id, { ...opts });
-  // }
-
-  // async get(id: number): Promise<File> {
-  //   return await this.repository.findOne({ where: { id } });
-  // }
-
-  // async findByIds(ids: number[]): Promise<File[]> {
-  //   return await this.repository.find({ where: { id: In(ids) } });
-  // }
-
-  // async findFilesByIds(file_ids: string[]): Promise<File[]> {
-  //   const ids = file_ids.map((id) => this.decodeId(id));
-  //   return await this.repository.find({ where: { id: In(ids) } });
-  // }
+  async delete(id: number, user_id: number, client_user_id?: string) {
+    return this.file.delete(id, user_id, client_user_id);
+  }
 
   async uploadFile(file: Express.Multer.File, opts: Partial<File>, purpose: string): Promise<FileDto> {
-    const { hash, name, mimetype, size }: any = opts;
-    const ext = mime.extension(mimetype as string);
-    const path = `uploads/${moment.tz('Asia/Shanghai').format('YYYYMM')}/${hash}.${ext}`;
-    Object.assign(opts, { path });
-
+    const { hash, name, mimetype, size } = opts;
     // 检查是否已经上传
     let f = await this.file.findActiveByHash(hash);
-
-    // 存在有效上传
     if (f) {
       const id = this.file.encodeId(f.id);
       const url = `https://s.alidraft.com${f.path}`;
-      return { id, name, size, mimetype, hash, url, expires_at: f.expires_at };
+      return { id, name, size, mimetype, url, expires_at: f.expires_at };
     }
 
     // 初次上传
     f = await this.file.create({ ...opts, state: FileState.CREATED });
-    if (f.state === FileState.CREATED) {
-      try {
-        await this.storage.bucket('bodhi-storage').file(path).save(file.buffer);
-        const id = this.file.encodeId(f.id);
 
-        // file extract
-        if (mimetype.includes('pdf') && purpose === 'file-extract') {
-          this.queue.add('extract', { id: f.id, mimetype, file });
-        }
+    try {
+      const ext = mime.extension(mimetype as string);
+      const folderPath = `uploads/${moment.tz('Asia/Shanghai').format('YYYYMM')}/${hash}`;
+      const filePath = `${folderPath}/0.${ext}`;
 
-        return { id, name, url: path, size, mimetype, hash, expires_at: f.expires_at } as FileDto;
-      } catch (err) {
-        console.warn(err);
+      const { bucket } = this.config.get('gcloud');
+      await this.storage.bucket(bucket).file(filePath).save(file.buffer);
+      const id = this.file.encodeId(f.id);
 
-        this.file.updateState(f.id, FileState.DELETED);
-        throw err;
+      // file extract
+      if (mimetype.includes('pdf') && purpose === 'file-extract') {
+        this.queue.add('extract', { id: f.id, mimetype, folderPath, filePath });
       }
-    }
 
-    throw new Error('file state error');
+      // 更新文件
+      this.file.updateAttr(f.id, { path: filePath, state: FileState.ACTIVE });
+
+      const url = `https://s.alidraft.com/${filePath}`;
+      return { id, name, url, size, mimetype, expires_at: f.expires_at } as FileDto;
+    } catch (err) {
+      console.warn(err);
+
+      this.file.updateState(f.id, FileState.DELETED);
+      throw err;
+    }
   }
 
   /**
