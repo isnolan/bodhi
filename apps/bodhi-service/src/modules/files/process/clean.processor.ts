@@ -3,6 +3,7 @@ import { Process, Processor } from '@nestjs/bull';
 import { ConfigService } from '@nestjs/config';
 import { Job } from 'bull';
 import { GoogleAuth } from 'google-auth-library';
+import path from 'path';
 
 import { CleanQueueDto } from '../dto/queue.dto';
 import { FileService } from '../service/file.service';
@@ -22,12 +23,17 @@ export class CleanProcessor {
   @Process('clean')
   async clean(job: Job<CleanQueueDto>) {
     console.log(`[file]progress:clean`, job.data);
-
-    const { id, path } = job.data;
+    const { id, user_id } = job.data;
+    const file = await this.file.findActive(id, user_id);
     try {
-      await this.storage.bucket('bodhi-storage').file(path).delete();
+      if (file.mimetype === 'application/pdf') {
+        const { bucket } = this.config.get('gcloud');
+        const prefix = path.dirname(file.path);
+        this.storage.bucket(bucket).deleteFiles({ prefix, force: true });
+        console.log(`->deleted`, prefix);
+      }
     } catch (err) {
-      console.warn(`[file]progress:clean`, id, err);
+      console.warn(`[file]progress:clean`, err.message);
     }
   }
 }

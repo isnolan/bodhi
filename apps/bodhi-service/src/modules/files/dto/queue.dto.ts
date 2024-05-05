@@ -32,5 +32,5 @@ export class CleanQueueDto {
   id: number;
 
   @ApiProperty()
-  path: string;
+  user_id: number;
 }

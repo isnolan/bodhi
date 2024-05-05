@@ -27,11 +27,12 @@ export class FilesService {
     return this.file.findActiveByUserId(user_id, client_user_id);
   }
 
-  async findActiveFilesById(id: number, user_id: number, client_user_id?: string) {
-    return this.file.findActiveById(id, user_id, client_user_id);
+  async findActiveById(id: number, user_id: number, client_user_id?: string) {
+    return this.file.findActive(id, user_id, client_user_id);
   }
 
   async delete(id: number, user_id: number, client_user_id?: string) {
+    this.queue.add('clean', { id, user_id });
     return this.file.delete(id, user_id, client_user_id);
   }
 
@@ -55,7 +56,6 @@ export class FilesService {
 
       const { bucket } = this.config.get('gcloud');
       await this.storage.bucket(bucket).file(filePath).save(file.buffer);
-      const id = this.file.encodeId(f.id);
 
       // file extract
       if (mimetype.includes('pdf') && purpose === 'file-extract') {
@@ -63,8 +63,9 @@ export class FilesService {
       }
 
       // 更新文件
-      this.file.updateAttr(f.id, { path: filePath, state: FileState.ACTIVE });
+      this.file.update(f.id, { path: filePath, state: FileState.ACTIVE });
 
+      const id = this.file.encodeId(f.id);
       const url = `https://s.alidraft.com/${filePath}`;
       return { id, name, url, size, mimetype, expires_at: f.expires_at } as FileDto;
     } catch (err) {

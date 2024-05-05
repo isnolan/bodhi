@@ -47,7 +47,7 @@ export class DownloadProcessor {
         const hash = hashhex.digest('hex');
         const ext = mime.extension(mimetype);
         const path = `/attachments/${moment.tz('Asia/Shanghai').format('YYYYMM')}/${uuidv4()}.${ext}`;
-        this.file.updateAttr(id, { hash, path, size, mimetype });
+        this.file.update(id, { hash, path, size, mimetype });
 
         // const { res }: any = await putStream(path, { buffer, size });
         // console.log(`[file]process`, res.statusMessage);

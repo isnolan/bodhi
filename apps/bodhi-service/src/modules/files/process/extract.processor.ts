@@ -56,6 +56,9 @@ export class ExtractProcessor {
       .file(`${folderPath}/1.json`)
       .save(JSON.stringify(res, null, 2));
 
+    // 存储文本
+    this.file.update(id, { extract: res?.document?.text });
+
     // {
     //   name: 'projects/844941471694/locations/us/operations/15081559040310862204',
     //   metadata: {

@@ -38,6 +38,9 @@ export class File extends Base {
   @Column({ type: 'varchar', length: 40, comment: 'FileID', default: '' })
   file_id: string;
 
+  @Column({ type: 'text', comment: 'extract', default: null })
+  extract: string;
+
   @Column({ type: 'enum', enum: FileState, comment: '状态', default: FileState.CREATED })
   state: FileState;
 }

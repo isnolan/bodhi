@@ -21,7 +21,7 @@ export class FileService {
   }
 
   decodeId(id: string) {
-    return this.hashids.decode(id)[0];
+    return this.hashids.decode(id)[0] as number;
   }
 
   async create(opts: Partial<File>) {
@@ -48,12 +48,12 @@ export class FileService {
     });
   }
 
-  async findActiveById(id: number, user_id: number, client_user_id?: string) {
+  async findActive(id: number, user_id: number, client_user_id?: string) {
     const query = { id, user_id, state: FileState.ACTIVE };
     client_user_id && (query['client_user_id'] = client_user_id);
 
     return this.repository.findOne({
-      select: ['id', 'name', 'path', 'size', 'mimetype', 'hash', 'expires_at'],
+      select: ['id', 'name', 'path', 'size', 'mimetype', 'hash', 'expires_at', 'state'],
       where: [
         { expires_at: MoreThan(new Date()), ...query },
         { expires_at: IsNull(), ...query },
@@ -76,7 +76,7 @@ export class FileService {
     return this.repository.update(id, { state });
   }
 
-  async updateAttr(id: number, opts: Partial<File>) {
+  async update(id: number, opts: Partial<File>) {
     return this.repository.update(id, { ...opts });
   }
 
