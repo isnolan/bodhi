@@ -25,51 +25,31 @@ export class ExtractProcessor {
     this.storage = new Storage({ credentials: this.config.get('gcloud') });
   }
 
-  @Process('extract')
+  @Process('file-extract')
   async extract(job: Job<ExtractQueueDto>) {
-    const { id, folderPath, filePath } = job.data;
-    console.log(`[file]extract`, id, job.data);
+    const { id, mimeType, folderPath, filePath } = job.data;
+    console.log(`[files]extract`, job.data);
 
-    const { bucket, processor } = this.config.get('gcloud');
-    const token = await this.auth.getAccessToken();
-    const res = await fetch(`${processor}:process`, {
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      agent: new HttpsProxyAgent(process.env.HTTP_PROXY as string),
-      body: JSON.stringify({
-        skipHumanReview: true,
-        gcsDocument: { mimeType: 'application/pdf', gcsUri: `gs://${bucket}/${filePath}` },
-        // inputDocuments: {
-        //   gcsDocuments: {
-        //     documents: [{ mimeType: 'application/pdf', gcsUri: `gs://${bucket}/${path}` }],
-        //   },
-        // },
-        // documentOutputConfig: {
-        //   gcsOutputConfig: { gcsUri: `gs://${bucket}/extract/` },
-        // },
-      }),
-      method: 'POST',
-    }).then((res) => res.json());
+    if (['application/pdf'].includes(mimeType)) {
+      const token = await this.auth.getAccessToken();
+      const { bucket, processor } = this.config.get('gcloud');
+      const res = await fetch(`${processor}:process`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        agent: new HttpsProxyAgent(process.env.HTTP_PROXY as string),
+        body: JSON.stringify({
+          skipHumanReview: true,
+          gcsDocument: { mimeType, gcsUri: `gs://${bucket}/${filePath}` },
+        }),
+      }).then((res) => res.json());
 
-    // 存储原始JSON
-    await this.storage
-      .bucket(bucket)
-      .file(`${folderPath}/1.json`)
-      .save(JSON.stringify(res, null, 2));
+      // 存储原始JSON
+      await this.storage.bucket(bucket).file(`${folderPath}/1.json`).save(JSON.stringify(res));
 
-    // 存储文本
-    this.file.update(id, { extract: res?.document?.text });
-
-    // {
-    //   name: 'projects/844941471694/locations/us/operations/15081559040310862204',
-    //   metadata: {
-    //     '@type': 'type.googleapis.com/google.cloud.documentai.v1.BatchProcessMetadata',
-    //     state: 'RUNNING',
-    //     createTime: '2024-05-04T15:04:57.750101Z',
-    //     updateTime: '2024-05-04T15:04:57.750101Z'
-    //   }
-    // }
-
-    console.log(`->res`, res);
-    // 更新状态
+      // 存储文本
+      this.file.update(id, { extract: res?.document?.text });
+    } else {
+      console.warn(`[files]extract:unsupported`, mimeType);
+    }
   }
 }

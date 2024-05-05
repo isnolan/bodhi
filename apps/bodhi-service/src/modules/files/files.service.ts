@@ -3,6 +3,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bull';
+import Hashids from 'hashids';
 import * as mime from 'mime-types';
 import * as moment from 'moment-timezone';
 
@@ -12,6 +13,7 @@ import { FileService } from './service';
 
 @Injectable()
 export class FilesService {
+  private readonly hashids: Hashids;
   private readonly storage: Storage;
 
   constructor(
@@ -20,20 +22,29 @@ export class FilesService {
     private readonly file: FileService,
     private readonly config: ConfigService,
   ) {
+    this.hashids = new Hashids('bodhi-files', 10);
     this.storage = new Storage({ credentials: this.config.get('gcloud') });
   }
 
-  async findActiveFilesByUserId(user_id: number, client_user_id?: string) {
+  encodeId(id: number) {
+    return this.hashids.encode(id);
+  }
+
+  decodeId(id: string) {
+    return this.hashids.decode(id)[0] as number;
+  }
+
+  async findActiveByUserId(user_id: number, client_user_id?: string) {
     return this.file.findActiveByUserId(user_id, client_user_id);
   }
 
-  async findActiveById(id: number, user_id: number, client_user_id?: string) {
-    return this.file.findActive(id, user_id, client_user_id);
+  async findById(id: number, user_id: number, client_user_id?: string) {
+    return this.file.find(id, user_id, client_user_id);
   }
 
-  async delete(id: number, user_id: number, client_user_id?: string) {
-    this.queue.add('clean', { id, user_id });
-    return this.file.delete(id, user_id, client_user_id);
+  async delete(id: number, user_id: number) {
+    this.queue.add('file-clean', { id });
+    return this.file.delete(id, user_id);
   }
 
   async uploadFile(file: Express.Multer.File, opts: Partial<File>, purpose: string): Promise<FileDto> {
@@ -41,9 +52,8 @@ export class FilesService {
     // 检查是否已经上传
     let f = await this.file.findActiveByHash(hash);
     if (f) {
-      const id = this.file.encodeId(f.id);
       const url = `https://s.alidraft.com${f.path}`;
-      return { id, name, size, mimetype, url, expires_at: f.expires_at };
+      return { id: this.encodeId(f.id), name, size, mimetype, url, expires_at: f.expires_at };
     }
 
     // 初次上传
@@ -58,16 +68,15 @@ export class FilesService {
       await this.storage.bucket(bucket).file(filePath).save(file.buffer);
 
       // file extract
-      if (mimetype.includes('pdf') && purpose === 'file-extract') {
-        this.queue.add('extract', { id: f.id, mimetype, folderPath, filePath });
+      if (purpose === 'file-extract') {
+        this.queue.add('file-extract', { id: f.id, mimeType: mimetype, folderPath, filePath });
       }
 
       // 更新文件
       this.file.update(f.id, { path: filePath, state: FileState.ACTIVE });
 
-      const id = this.file.encodeId(f.id);
       const url = `https://s.alidraft.com/${filePath}`;
-      return { id, name, url, size, mimetype, expires_at: f.expires_at } as FileDto;
+      return { id: this.encodeId(f.id), name, url, size, mimetype, expires_at: f.expires_at } as FileDto;
     } catch (err) {
       console.warn(err);
 
@@ -94,7 +103,7 @@ export class FilesService {
 
     // 新建下载任务
     file = await this.file.create({ file_id, name });
-    this.queue.add('download', { id: file.id, file_id, name, url });
+    this.queue.add('file-download', { id: file.id, file_id, name, url });
 
     return { id: file.id, name, url };
   }

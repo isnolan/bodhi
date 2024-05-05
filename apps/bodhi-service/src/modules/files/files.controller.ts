@@ -11,7 +11,6 @@ import { RequestWithUser } from '@/core/common/request.interface';
 import { JwtOrApiKeyGuard } from '../auth/guard/mixed.guard';
 import { FileDto, UploadFileReq } from './dto/upload.dto';
 import { FilesService } from './files.service';
-import { FileService } from './service';
 
 @ApiTags('files')
 @ApiBearerAuth()
@@ -19,10 +18,7 @@ import { FileService } from './service';
 @ApiSecurity('api-key', [])
 @Controller('files')
 export class FilesController {
-  constructor(
-    private readonly file: FileService,
-    private readonly service: FilesService,
-  ) {}
+  constructor(private readonly service: FilesService) {}
 
   @Get()
   @ApiOperation({ summary: 'Get Files', description: 'Get Files' })
@@ -31,11 +27,11 @@ export class FilesController {
     const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
 
     try {
-      const rows = await this.service.findActiveFilesByUserId(user_id, client_user_id);
+      const rows = await this.service.findActiveByUserId(user_id, client_user_id);
       return rows.map((item) => {
         const url = `https://s.alidraft.com${item.path}`;
         const { name, size, mimetype, expires_at } = item;
-        const id = this.file.encodeId(item.id);
+        const id = this.service.encodeId(item.id);
         return { id, name, size, mimetype, url, expires_at };
       });
     } catch (err) {
@@ -52,12 +48,12 @@ export class FilesController {
   async upload(@Req() req: RequestWithUser, @UploadedFiles() files, @Body() body: UploadFileReq) {
     const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
     const { purpose } = body;
-    const expires_at = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30); // 30 days
+    const expires_at = new Date(Date.now() + 1000 * 60 * 60 * 24 * 15); // 15 days
 
     try {
       // 计算并检查hash
       return Promise.all(
-        files.map((file) => {
+        files.map((file: Express.Multer.File) => {
           const hashhex = createHash('md5');
           hashhex.update(file.buffer);
           const hash = hashhex.digest('hex');
@@ -75,14 +71,14 @@ export class FilesController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get file detail', description: 'Get file detail' })
+  @ApiOperation({ summary: 'Find file detail', description: 'Find file detail' })
   @ApiResponse({ status: 200, description: 'success', type: FileDto })
-  async get(@Req() req: RequestWithUser, @Param('id') file_id: string): Promise<FileDto> {
+  async find(@Req() req: RequestWithUser, @Param('id') file_id: string): Promise<FileDto> {
     const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
 
     try {
-      const id = this.file.decodeId(file_id);
-      const file = await this.service.findActiveById(id, user_id, client_user_id);
+      const id = this.service.decodeId(file_id);
+      const file = await this.service.findById(id, user_id, client_user_id);
       const url = `https://s.alidraft.com${file.path}`;
       delete file.path;
 
@@ -99,10 +95,11 @@ export class FilesController {
     const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
 
     try {
-      const id = this.file.decodeId(file_id);
-      const file = await this.service.findActiveById(id, user_id, client_user_id);
+      const id = this.service.decodeId(file_id);
+      const file = await this.service.findById(id, user_id, client_user_id);
       if (file && ['active', 'expired', 'created'].includes(file.state)) {
-        return this.service.delete(id, user_id, client_user_id);
+        this.service.delete(id, user_id);
+        return;
       }
       throw new NotFoundException();
     } catch (err) {

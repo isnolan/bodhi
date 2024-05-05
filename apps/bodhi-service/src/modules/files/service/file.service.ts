@@ -1,37 +1,31 @@
 import { Injectable } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import Hashids from 'hashids';
-import { IsNull, MoreThan, Repository } from 'typeorm';
+import { In, IsNull, MoreThan, Repository } from 'typeorm';
 
 import { File, FileState } from '../entity/file.entity';
 
 @Injectable()
 export class FileService {
-  private readonly hashids: Hashids;
-
   constructor(
     @InjectRepository(File)
     private readonly repository: Repository<File>,
-  ) {
-    this.hashids = new Hashids('bodhi-files', 10);
-  }
+  ) {}
 
-  encodeId(id: number) {
-    return this.hashids.encode(id);
-  }
-
-  decodeId(id: string) {
-    return this.hashids.decode(id)[0] as number;
+  @Cron(CronExpression.EVERY_HOUR)
+  async handleExpired() {
+    const files = await this.repository.find({ where: { expires_at: MoreThan(new Date()), state: FileState.ACTIVE } });
+    for (const file of files) {
+      this.repository.update(file.id, { state: FileState.EXPIRED });
+    }
   }
 
   async create(opts: Partial<File>) {
     return this.repository.save(this.repository.create(opts));
   }
 
-  async delete(id: number, user_id: number, client_user_id?: string) {
+  async delete(id: number, user_id: number) {
     const query = { id, user_id };
-    client_user_id && (query['client_user_id'] = client_user_id);
-
     return this.repository.update(query, { state: FileState.DELETED });
   }
 
@@ -48,8 +42,9 @@ export class FileService {
     });
   }
 
-  async findActive(id: number, user_id: number, client_user_id?: string) {
-    const query = { id, user_id, state: FileState.ACTIVE };
+  async find(id: number, user_id?: number, client_user_id?: string) {
+    const query = { id };
+    user_id && (query['user_id'] = user_id);
     client_user_id && (query['client_user_id'] = client_user_id);
 
     return this.repository.findOne({
@@ -82,5 +77,9 @@ export class FileService {
 
   async findActiveByFileID(file_id: string) {
     return this.repository.findOne({ where: { file_id, state: FileState.ACTIVE } });
+  }
+
+  async findExpired() {
+    return this.repository.find({ where: { state: FileState.EXPIRED } });
   }
 }

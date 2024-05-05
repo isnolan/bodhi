@@ -18,7 +18,7 @@ export class ExtractQueueDto {
   id: number;
 
   @ApiProperty()
-  mimetype: string;
+  mimeType: string;
 
   @ApiProperty()
   folderPath: string;
@@ -30,7 +30,4 @@ export class ExtractQueueDto {
 export class CleanQueueDto {
   @ApiProperty()
   id: number;
-
-  @ApiProperty()
-  user_id: number;
 }
