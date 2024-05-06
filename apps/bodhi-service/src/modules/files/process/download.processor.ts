@@ -21,9 +21,10 @@ export class DownloadProcessor {
   @Process('file-download')
   async expired(job: Job<FileQuqueDto>) {
     console.log(`[file]processs`, job.data);
-    const { id, url } = job.data;
+
     try {
       // download & upload
+      const { id, url } = job.data;
       const { buffer, mimetype, size } = await fetch(url, {
         headers: {
           'sec-ch-ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
