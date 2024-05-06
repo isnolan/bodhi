@@ -88,6 +88,7 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
   protected async convertParams(opts: types.chat.SendOptions): Promise<gemini.Request> {
     return {
       contents: await this.corvertContents(opts),
+      // systemInstruction: await this.corvertSystemContent(opts),
       tools: this.corvertTools(opts),
       safety_settings: [
         // { category: 'BLOCK_NONE', threshold: 'HARM_CATEGORY_UNSPECIFIED' },
@@ -107,7 +108,7 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
     // filter system role
     const rows = await Promise.all(
       opts.messages
-        .filter((item) => item.role !== 'system')
+        .filter((item) => ['user', 'assistant'].includes(item.role))
         .map(async (item) => {
           const parts: gemini.Part[] = [];
           await Promise.all(
@@ -115,10 +116,13 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
               if (part.type === 'text') {
                 parts.push({ text: part.text });
               }
+              // if (part.type === 'document') {
+              //   parts.push({ document: { url: part.url } });
+              // }
               if (['image', 'video'].includes(part.type)) {
                 try {
-                  const inline_data = await this.fetchFile((part as types.chat.FilePart).url);
-                  parts.push({ inline_data });
+                  const inlineData = await this.fetchFile((part as types.chat.FilePart).url);
+                  parts.push({ inlineData });
                 } catch (err) {}
               }
               if (part.type === 'function_call') {

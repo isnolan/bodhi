@@ -55,24 +55,17 @@ describe('chat', () => {
       model: 'gemini-pro',
       messages: [
         {
-          role: 'system',
-          parts: [
-            {
-              type: 'text',
-              text: 'You are a very professional document summarization specialist. Please summarize the given document.',
-            },
-          ],
-        },
-        {
           role: 'user',
           parts: [
             {
               type: 'document',
-              url: 'gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf',
+              // url: 'gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf',
+              url: 'gs://bodhi-storage/uploads/202405/0db16ca633824283d07cf3774f886cef/0.pdf',
+              // url: 'https://s.chatonce.cn/bodhi/uploads/202405/0db16ca633824283d07cf3774f886cef/0.pdf',
             },
             {
               type: 'text',
-              text: '这里都讲了什么？',
+              text: '这个文档都讲了什么呢？',
             },
           ],
         },

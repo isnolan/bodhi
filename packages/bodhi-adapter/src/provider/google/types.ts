@@ -6,6 +6,7 @@ export namespace gemini {
    */
   export type Request = {
     contents: Content[];
+    systemInstruction?: Content;
     tools: Tools[];
     safety_settings: safetyRating[];
     generationConfig: {
@@ -27,7 +28,7 @@ export namespace gemini {
 
   export type Part = TextPart | FilePart | ToolPart;
   export type TextPart = { text: string };
-  export type FilePart = { inline_data: { mime_type: string; data: string } };
+  export type FilePart = { inlineData: { mimeType: string; data: string } };
   export type ToolPart = { functionCall: { name: string; args: any } };
 
   export type Tools = { functionDeclarations: types.chat.Function[] };
