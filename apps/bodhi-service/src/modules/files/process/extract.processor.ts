@@ -43,6 +43,7 @@ export class ExtractProcessor {
           gcsDocument: { mimeType, gcsUri: `gs://${bucket}/${filePath}` },
         }),
       }).then((res) => res.json());
+
       // 存储原始JSON
       const folderUri = `${path.dirname(filePath)}/1.json`;
       await this.storage.bucket(bucket).file(folderUri).save(JSON.stringify(res));
