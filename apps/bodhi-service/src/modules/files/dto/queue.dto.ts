@@ -21,9 +21,6 @@ export class ExtractQueueDto {
   mimeType: string;
 
   @ApiProperty()
-  folderPath: string;
-
-  @ApiProperty()
   filePath: string;
 }
 

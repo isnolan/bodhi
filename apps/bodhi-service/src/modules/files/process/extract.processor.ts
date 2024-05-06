@@ -5,6 +5,7 @@ import { Job } from 'bull';
 import { GoogleAuth } from 'google-auth-library';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import fetch from 'node-fetch';
+import path from 'path';
 
 import { ExtractQueueDto } from '../dto/queue.dto';
 import { FileService } from '../service/file.service';
@@ -27,30 +28,27 @@ export class ExtractProcessor {
 
   @Process('file-extract')
   async extract(job: Job<ExtractQueueDto>) {
-    const { id, mimeType, folderPath, filePath } = job.data;
-    console.log(`[files]extract`, job.data);
+    const { id, mimeType, filePath } = job.data;
+    console.log(`[files]extract`, id, filePath);
 
     try {
-      if (['application/pdf'].includes(mimeType)) {
-        const token = await this.auth.getAccessToken();
-        const { bucket, processor } = this.config.get('gcloud');
-        const res = await fetch(`${processor}:process`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          agent: new HttpsProxyAgent(process.env.HTTP_PROXY as string),
-          body: JSON.stringify({
-            skipHumanReview: true,
-            gcsDocument: { mimeType, gcsUri: `gs://${bucket}/${filePath}` },
-          }),
-        }).then((res) => res.json());
-        // 存储原始JSON
-        await this.storage.bucket(bucket).file(`${folderPath}/1.json`).save(JSON.stringify(res));
+      const token = await this.auth.getAccessToken();
+      const { bucket, processor } = this.config.get('gcloud');
+      const res = await fetch(`${processor}:process`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        agent: new HttpsProxyAgent(process.env.HTTP_PROXY as string),
+        body: JSON.stringify({
+          skipHumanReview: true,
+          gcsDocument: { mimeType, gcsUri: `gs://${bucket}/${filePath}` },
+        }),
+      }).then((res) => res.json());
+      // 存储原始JSON
+      const folderUri = `${path.dirname(filePath)}/1.json`;
+      await this.storage.bucket(bucket).file(folderUri).save(JSON.stringify(res));
 
-        // 存储文本
-        this.file.update(id, { extract: res?.document?.text });
-      } else {
-        console.warn(`[files]extract:unsupported`, mimeType);
-      }
+      // 存储文本
+      this.file.update(id, { extract: res?.document?.text });
     } catch (err) {
       console.warn(`[files]extract: error`, err);
     }

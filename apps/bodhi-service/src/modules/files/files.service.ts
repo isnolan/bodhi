@@ -51,31 +51,34 @@ export class FilesService {
 
   async uploadFile(file: Express.Multer.File, opts: Partial<File>, purpose: string): Promise<FileDto> {
     const { hash, name, mimetype, size } = opts;
-    // 检查是否已经上传
+    // check file is exists
     let f = await this.file.findActiveByHash(hash);
     if (f) {
       const url = `${this.cdn}/${f.path}`;
       return { id: this.encodeId(f.id), name, size, mimetype, url, expires_at: f.expires_at };
     }
 
-    // 初次上传
+    // create file
     f = await this.file.create({ ...opts, state: FileState.CREATED });
 
     try {
-      const ext = mime.extension(mimetype as string);
-      const folderPath = `uploads/${moment.tz('Asia/Shanghai').format('YYYYMM')}/${hash}`;
-      const filePath = `${folderPath}/0.${ext}`;
-
+      const options = { state: FileState.ACTIVE };
       const { bucket } = this.config.get('gcloud');
+      const ext = mime.extension(mimetype as string);
+      const filePath = `uploads/${moment.tz().format('YYYYMM')}/${hash}/0.${ext}`;
+      Object.assign(options, { path: filePath, file_uri: `gs://${bucket}/${filePath}` });
+
+      // upload to gcsß
       await this.storage.bucket(bucket).file(filePath).save(file.buffer);
 
       // file extract
-      if (mimetype === 'application/pdf' && purpose === 'file-extract') {
-        this.queue.add('file-extract', { id: f.id, mimeType: mimetype, folderPath, filePath });
+      if (['application/pdf'].includes(mimetype) && purpose === 'file-extract') {
+        this.queue.add('file-extract', { id: f.id, mimeType: mimetype, filePath });
+        Object.assign(options, { state: FileState.PROGRESS });
       }
 
-      // 更新文件
-      this.file.update(f.id, { path: filePath, state: FileState.ACTIVE });
+      // update state
+      this.file.update(f.id, options);
 
       const url = `${this.cdn}/${filePath}`;
       return { id: this.encodeId(f.id), name, url, size, mimetype, expires_at: f.expires_at } as FileDto;

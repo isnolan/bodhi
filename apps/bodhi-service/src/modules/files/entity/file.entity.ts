@@ -4,6 +4,7 @@ import { Base } from '@/core/common/base.entity';
 
 export enum FileState {
   CREATED = 'created',
+  PROGRESS = 'progress',
   ACTIVE = 'active',
   EXPIRED = 'expired',
   DELETED = 'deleted',
@@ -37,6 +38,9 @@ export class File extends Base {
 
   @Column({ type: 'varchar', length: 40, comment: 'FileID', default: '' })
   file_id: string;
+
+  @Column({ type: 'varchar', length: 100, comment: 'GURI', default: '' })
+  file_uri;
 
   @Column({ type: 'text', comment: 'extract', default: null })
   extract: string;
