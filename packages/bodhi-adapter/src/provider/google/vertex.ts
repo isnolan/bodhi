@@ -14,7 +14,7 @@ export class GoogleVertexAPI extends GoogleGeminiAPI {
   constructor(opts: types.chat.ChatOptions) {
     const options = Object.assign(
       {
-        baseURL: 'https://asia-northeast1-aiplatform.googleapis.com/v1/projects/bodhi-415003/locations/asia-northeast1',
+        baseURL: 'https://us-central1-aiplatform.googleapis.com/v1/projects/bodhi-415003/locations/us-central1',
       },
       opts,
     );
@@ -22,7 +22,7 @@ export class GoogleVertexAPI extends GoogleGeminiAPI {
   }
 
   public models(): string[] {
-    return ['gemini-pro', 'gemini-pro-vision'];
+    return ['gemini-1.0-pro', 'gemini-1.5-pro-preview-0409'];
   }
 
   /**
@@ -51,10 +51,8 @@ export class GoogleVertexAPI extends GoogleGeminiAPI {
     return new Promise(async (resolove, reject) => {
       const token = await this.getToken();
       // if have media, use gemini-pro-vision
-      const hasMedia = opts.messages.some((item) =>
-        item.parts.some((part) => part.type === 'image' || part.type === 'video'),
-      );
-      const model = hasMedia ? 'gemini-pro-vision' : opts.model || 'gemini-pro';
+      const hasFile = opts.messages.some((item) => item.parts.some((part) => part.type === 'file'));
+      const model = hasFile && opts.model === 'gemini-1.0-pro' ? 'gemini-1.0-pro-vision' : opts.model;
       const url = `${this.baseURL}/publishers/google/models/${model}:streamGenerateContent?alt=sse`;
       const params: gemini.Request = await this.convertParams(options);
       console.log(`[fetch]params`, url, JSON.stringify(params, null, 2));

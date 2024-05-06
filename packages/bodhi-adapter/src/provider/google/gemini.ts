@@ -113,18 +113,22 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
           const parts: gemini.Part[] = [];
           await Promise.all(
             item.parts.map(async (part: types.chat.Part) => {
+              // text
               if (part.type === 'text') {
                 parts.push({ text: part.text });
               }
-              // if (part.type === 'document') {
-              //   parts.push({ document: { url: part.url } });
-              // }
-              if (['image', 'video'].includes(part.type)) {
-                try {
-                  const inlineData = await this.fetchFile((part as types.chat.FilePart).url);
-                  parts.push({ inlineData });
-                } catch (err) {}
+              // file
+              if (part.type === 'file') {
+                const { mime_type, url } = part as types.chat.FilePart;
+                if (url.startsWith('gs://')) {
+                  parts.push({ fileData: { mimeType: mime_type, fileUri: url } });
+                } else {
+                  try {
+                    parts.push({ inlineData: await this.fetchFile(url) });
+                  } catch (err) {}
+                }
               }
+              // tools
               if (part.type === 'function_call') {
                 const { name, args } = part.function_call;
                 parts.push({ functionCall: { name, args } });

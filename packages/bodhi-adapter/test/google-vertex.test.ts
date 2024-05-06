@@ -16,7 +16,7 @@ describe('chat', () => {
   });
 
   const api = new ChatAPI(Provider.GOOGLE_VERTEX, {
-    baseURL: 'https://asia-northeast1-aiplatform.googleapis.com/v1/projects/bodhi-415003/locations/asia-northeast1',
+    baseURL: 'https://us-central1-aiplatform.googleapis.com/v1/projects/bodhi-415003/locations/us-central1',
     apiKey: credential.client_email,
     apiSecret: credential.private_key,
     agent: process.env.HTTP_PROXY as string,
@@ -50,15 +50,16 @@ describe('chat', () => {
   //   expect(res).toBeInstanceOf(Object);
   // }, 30000);
 
-  it('document: streaming', async () => {
+  it('file: document', async () => {
     const res = await api.sendMessage({
-      model: 'gemini-pro',
+      model: 'gemini-1.0-pro', // gemini-1.5-pro-preview-0409
       messages: [
         {
           role: 'user',
           parts: [
             {
-              type: 'document',
+              type: 'file',
+              mime_type: 'application/pdf',
               // url: 'gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf',
               url: 'gs://bodhi-storage/uploads/202405/0db16ca633824283d07cf3774f886cef/0.pdf',
               // url: 'https://s.chatonce.cn/bodhi/uploads/202405/0db16ca633824283d07cf3774f886cef/0.pdf',
@@ -84,58 +85,59 @@ describe('chat', () => {
   }, 60000);
 
   // vision: image part, from inline data
-  // it('vision:image from inline data', async () => {
-  //   const res = await api.sendMessage({
-  //     model: 'gemini-pro-vision',
-  //     messages: [
-  //       {
-  //         role: 'user',
-  //         parts: [
-  //           { type: 'text', text: 'Describe this image' },
-  //           {
-  //             type: 'image',
-  //             url: 'https://miro.medium.com/v2/resize:fit:720/format:jpeg/1*YMJDp-kqus7i-ktWtksNjg.jpeg',
-  //           },
-  //         ],
-  //       },
-  //     ],
-  //     onProgress: (choices) => {
-  //       console.log(`[vertex]`, JSON.stringify(choices));
-  //       expect(choices).toBeInstanceOf(Object);
-  //     },
-  //   });
+  it('file: image', async () => {
+    const res = await api.sendMessage({
+      model: 'gemini-1.0-pro',
+      messages: [
+        {
+          role: 'user',
+          parts: [
+            { type: 'text', text: 'Describe this image' },
+            {
+              type: 'file',
+              mime_type: 'image/jpeg',
+              url: 'https://miro.medium.com/v2/resize:fit:720/format:jpeg/1*YMJDp-kqus7i-ktWtksNjg.jpeg',
+            },
+          ],
+        },
+      ],
+      onProgress: (choices) => {
+        console.log(`[vertex]`, JSON.stringify(choices));
+        expect(choices).toBeInstanceOf(Object);
+      },
+    });
 
-  //   console.log(`[vertex]result:`, JSON.stringify(res));
-  //   expect(res).toBeInstanceOf(Object);
-  // }, 30000);
+    console.log(`[vertex]result:`, JSON.stringify(res));
+    expect(res).toBeInstanceOf(Object);
+  }, 30000);
 
   // vision: video part, from Google Cloud Storage
-  // it('vision:video from google cloud storage', async () => {
-  //   const result = await api.sendMessage({
-  //     model: 'gemini-pro-vision',
-  //     messages: [
-  //       {
-  //         role: 'user',
-  //         parts: [
-  //           {
-  //             text: 'Answer the following questions using the video only. What is the profession of the main person? What are the main features of the phone highlighted?Which city was this recorded in?Provide the answer JSON.',
-  //           },
-  //           {
-  //             file_data: {
-  //               mime_type: 'video/mp4',
-  //               file_uri: 'gs://github-repo/img/gemini/multimodality_usecases_overview/pixel8.mp4',
-  //             },
-  //           },
-  //         ],
-  //       },
-  //     ],
-  //     onProgress: (choices) => {
-  //       console.log(`[vertex]`, JSON.stringify(choices));
-  //       expect(choices).toBeInstanceOf(Object);
-  //     },
-  //   });
-  //   expect(result).toBeInstanceOf(Object);
-  // }, 30000);
+  it('file: video', async () => {
+    const result = await api.sendMessage({
+      model: 'gemini-1.0-pro',
+      messages: [
+        {
+          role: 'user',
+          parts: [
+            {
+              type: 'text',
+              text: 'Answer the following questions using the video only. What is the profession of the main person? What are the main features of the phone highlighted?Which city was this recorded in?Provide the answer JSON.',
+            },
+            {
+              type: 'file',
+              mime_type: 'video/mp4',
+              url: 'gs://github-repo/img/gemini/multimodality_usecases_overview/pixel8.mp4',
+            },
+          ],
+        },
+      ],
+      onProgress: (choices) => {
+        console.log(`[vertex]`, JSON.stringify(choices));
+        expect(choices).toBeInstanceOf(Object);
+      },
+    });
+    expect(result).toBeInstanceOf(Object);
+  }, 30000);
 
   // function call
   // it('function call', async () => {
