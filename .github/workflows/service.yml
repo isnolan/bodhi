@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'apps/bodhi-service/src/**'
+      - 'apps/bodhi-service/**'
 
 jobs:
   build:
