@@ -1,16 +1,10 @@
 FROM node:lts-alpine
 
 # Essentials
-# RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
-# RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.cloud.tencent.com/g' /etc/apk/repositories
-RUN apk update && apk upgrade
-
-RUN apk add -U tzdata
-ENV TZ="Asia/Shanghai"
-RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-
-# Install Chromium
-RUN apk add --no-cache \
+RUN apk update && apk upgrade && \
+    apk add -U tzdata && \
+    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    apk add --no-cache \
       chromium \
       nss \
       freetype \
@@ -18,7 +12,15 @@ RUN apk add --no-cache \
       ca-certificates \
       ttf-freefont \
       xvfb \
-      curl
+      curl && \
+    rm -rf /var/cache/apk/*
+
+
+# Set the timezone
+ENV TZ="Asia/Shanghai"
+ENV NODE_ENV=production
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/lib/chromium/chrome
+
 
 # workdir
 WORKDIR /app
@@ -30,15 +32,12 @@ COPY build-prod.js ./
 # Set the DISPLAY environment variable & Start xvfb
 # RUN Xvfb :10 -screen 0 1920x1080x16 & 
 
-# production
-ENV NODE_ENV=production
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/lib/chromium/chrome
-# ENV NODE_TLS_REJECT_UNAUTHORIZED=0
 
-RUN npm install -g pnpm
-RUN node ./build-prod.js
-RUN pnpm install --ignore-scripts
-RUN chmod a+x ./startup.sh
+RUN npm install -g pnpm && \
+    node ./build-prod.js && \
+    pnpm install --ignore-scripts && \
+    chmod a+x ./startup.sh
+
 
 EXPOSE 3000
 ENTRYPOINT ["./startup.sh"]
