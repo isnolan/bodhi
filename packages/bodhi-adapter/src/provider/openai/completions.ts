@@ -128,7 +128,8 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
             }
             if (['image', 'video'].includes(part.type)) {
               // TODO: fetch 下载图片并转化buffer为base64
-              parts.push({ type: 'image_url', image_url: (part as types.chat.FilePart).url });
+              // parts.push({ type: 'image_url', image_url: (part as types.chat.FilePart).url });
+              parts.push({ type: 'image_url', image_url: { url: (part as types.chat.FilePart).url } });
             }
             if (part.type === 'function_call' && part.id) {
               const { name, args } = part.function_call;

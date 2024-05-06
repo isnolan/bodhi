@@ -134,7 +134,7 @@ export class GoogleClaudeAPI extends ChatBaseAPI {
               }
               if (['image', 'video'].includes(part.type)) {
                 try {
-                  const { mime_type: media_type, data } = await this.fetchFile((part as types.chat.FilePart).url);
+                  const { mimeType: media_type, data } = await this.fetchFile((part as types.chat.FilePart).url);
                   parts.push({ type: 'image', source: { type: 'base64', media_type, data } });
                 } catch (err) {
                   // console.warn(``);

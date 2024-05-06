@@ -28,7 +28,7 @@ export namespace openai {
 
   export type Part = TextPart | ImagePart;
   export type TextPart = { type: 'text'; text: string };
-  export type ImagePart = { type: 'image_url'; image_url: string };
+  export type ImagePart = { type: 'image_url'; image_url: { url: string } };
   export type ToolCallPart = {
     id: string;
     type: 'function';

@@ -42,8 +42,8 @@ export class ChatBaseAPI {
     });
     const buffer = await response.buffer();
     const base64 = buffer.toString('base64');
-    const mime_type = response.headers.get('content-type') as string;
-    return { mime_type, data: base64 };
+    const mimeType = response.headers.get('content-type') as string;
+    return { mimeType, data: base64 };
   }
 
   protected combineChoices(choices: types.chat.Choice[]): types.chat.Choice[] {
