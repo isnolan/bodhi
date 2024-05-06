@@ -71,7 +71,7 @@ jobs:
     steps:
       - name: Deploy to Kubernetes
         run: |
-          curl -X PUT -H "content-type:application/json" -H "Cookie:KuboardUsername=${KuboardUsername};KuboardAccessKey=${KuboardAccessKey}" -d '{"kind":"deployments","namespace":"default","name":"bodhi-service","images":{"ghcr.nju.edu.cn/isnolan/bodhi":"ghcr.nju.edu.cn/isnolan/bodhi:service-${{ github.run_id }}"}}' https://kuboard.devflow.ltd/kuboard-api/cluster/Test/kind/CICDApi/admin/resource/updateImageTag
+          curl -X PUT -H "content-type:application/json" -H "Cookie:KuboardUsername=${KuboardUsername};KuboardAccessKey=${KuboardAccessKey}" -d '{"kind":"deployments","namespace":"default","name":"bodhi-service","images":{"ghcr.io/isnolan/bodhi":"ghcr.io/isnolan/bodhi:service-${{ github.run_id }}"}}' https://kuboard.devflow.ltd/kuboard-api/cluster/Test/kind/CICDApi/admin/resource/updateImageTag
         env:
           KuboardUsername: ${{ secrets.KUBOARD_USER }}
           KuboardAccessKey: ${{ secrets.KUBOARD_KEY }}
