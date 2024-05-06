@@ -70,7 +70,7 @@ export class FilesService {
       await this.storage.bucket(bucket).file(filePath).save(file.buffer);
 
       // file extract
-      if (purpose === 'file-extract') {
+      if (mimetype === 'application/pdf' && purpose === 'file-extract') {
         this.queue.add('file-extract', { id: f.id, mimeType: mimetype, folderPath, filePath });
       }
 

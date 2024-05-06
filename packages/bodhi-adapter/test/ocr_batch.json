@@ -1,9 +1,0 @@
-{
-  "name": "projects/844941471694/locations/us/operations/2217138791357207103",
-  "metadata": {
-    "@type": "type.googleapis.com/google.cloud.documentai.v1.BatchProcessMetadata",
-    "state": "RUNNING",
-    "createTime": "2024-05-02T14:13:11.613705Z",
-    "updateTime": "2024-05-02T14:13:11.613705Z"
-  }
-}
