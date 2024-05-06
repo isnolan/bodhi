@@ -31,7 +31,7 @@ jobs:
           npm i pnpm -g
           pnpm -v
           pnpm config set store-dir .pnpm-store
-          pnpm i
+          # pnpm i
           cd apps/bodhi-service
           pnpm i
 
