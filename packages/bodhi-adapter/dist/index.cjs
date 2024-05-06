@@ -113,8 +113,8 @@ var ChatBaseAPI = class {
     });
     const buffer = await response.buffer();
     const base64 = buffer.toString('base64');
-    const mime_type = response.headers.get('content-type');
-    return { mime_type, data: base64 };
+    const mimeType = response.headers.get('content-type');
+    return { mimeType, data: base64 };
   }
   combineChoices(choices) {
     return choices.reduce((acc, item) => {
@@ -257,8 +257,8 @@ var OpenAICompletionsAPI = class extends ChatBaseAPI {
             if (part.type === 'text') {
               parts.push({ type: 'text', text: part.text });
             }
-            if (['image', 'video'].includes(part.type)) {
-              parts.push({ type: 'image_url', image_url: part.url });
+            if (part.type === 'file' && part.mime_type?.startsWith('image')) {
+              parts.push({ type: 'image_url', image_url: { url: part.url } });
             }
             if (part.type === 'function_call' && part.id) {
               const { name, args } = part.function_call;
@@ -399,6 +399,7 @@ var GoogleGeminiAPI = class extends ChatBaseAPI {
   async convertParams(opts) {
     return {
       contents: await this.corvertContents(opts),
+      // systemInstruction: await this.corvertSystemContent(opts),
       tools: this.corvertTools(opts),
       safety_settings: [
         // { category: 'BLOCK_NONE', threshold: 'HARM_CATEGORY_UNSPECIFIED' },
@@ -419,7 +420,7 @@ var GoogleGeminiAPI = class extends ChatBaseAPI {
   async corvertContents(opts) {
     const rows = await Promise.all(
       opts.messages
-        .filter((item) => item.role !== 'system')
+        .filter((item) => ['user', 'assistant'].includes(item.role))
         .map(async (item) => {
           const parts = [];
           await Promise.all(
@@ -427,11 +428,15 @@ var GoogleGeminiAPI = class extends ChatBaseAPI {
               if (part.type === 'text') {
                 parts.push({ text: part.text });
               }
-              if (['image', 'video'].includes(part.type)) {
-                try {
-                  const inline_data = await this.fetchFile(part.url);
-                  parts.push({ inline_data });
-                } catch (err) {}
+              if (part.type === 'file') {
+                const { mime_type, url } = part;
+                if (url.startsWith('gs://')) {
+                  parts.push({ fileData: { mimeType: mime_type, fileUri: url } });
+                } else {
+                  try {
+                    parts.push({ inlineData: await this.fetchFile(url) });
+                  } catch (err) {}
+                }
               }
               if (part.type === 'function_call') {
                 const { name, args } = part.function_call;
@@ -496,7 +501,7 @@ var GoogleVertexAPI = class extends GoogleGeminiAPI {
   constructor(opts) {
     const options = Object.assign(
       {
-        baseURL: 'https://asia-northeast1-aiplatform.googleapis.com/v1/projects/bodhi-415003/locations/asia-northeast1',
+        baseURL: 'https://us-central1-aiplatform.googleapis.com/v1/projects/bodhi-415003/locations/us-central1',
       },
       opts,
     );
@@ -504,7 +509,7 @@ var GoogleVertexAPI = class extends GoogleGeminiAPI {
     this.provider = 'google';
   }
   models() {
-    return ['gemini-pro', 'gemini-pro-vision'];
+    return ['gemini-1.0-pro', 'gemini-1.5-pro-preview-0409'];
   }
   /**
    * 根据服务账号获取 access token
@@ -529,12 +534,11 @@ var GoogleVertexAPI = class extends GoogleGeminiAPI {
     const { onProgress = () => {}, ...options } = opts;
     return new Promise(async (resolove, reject) => {
       const token = await this.getToken();
-      const hasMedia = opts.messages.some((item) =>
-        item.parts.some((part) => part.type === 'image' || part.type === 'video'),
-      );
-      const model = hasMedia ? 'gemini-pro-vision' : opts.model || 'gemini-pro';
+      const hasFile = opts.messages.some((item) => item.parts.some((part) => part.type === 'file'));
+      const model = hasFile && opts.model === 'gemini-1.0-pro' ? 'gemini-1.0-pro-vision' : opts.model;
       const url = `${this.baseURL}/publishers/google/models/${model}:streamGenerateContent?alt=sse`;
       const params = await this.convertParams(options);
+      console.log(`[fetch]params`, url, JSON.stringify(params, null, 2));
       const res = await (0, import_node_fetch4.default)(url, {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(params),
@@ -545,7 +549,6 @@ var GoogleVertexAPI = class extends GoogleGeminiAPI {
         const reason = await res.json();
         reject(new chat.ChatError(reason.error?.message || 'request error', res.status));
       }
-      let response;
       const body = res.body;
       body.on('error', (err) => reject(new chat.ChatError(err.message, 500)));
       const choicesList = [];
@@ -694,9 +697,9 @@ var GoogleClaudeAPI = class extends ChatBaseAPI {
               if (part.type === 'text') {
                 parts.push({ type: 'text', text: part.text });
               }
-              if (['image', 'video'].includes(part.type)) {
+              if (part.type === 'file') {
                 try {
-                  const { mime_type: media_type, data } = await this.fetchFile(part.url);
+                  const { mimeType: media_type, data } = await this.fetchFile(part.url);
                   parts.push({ type: 'image', source: { type: 'base64', media_type, data } });
                 } catch (err) {}
               }
@@ -862,9 +865,9 @@ var AnthropicClaudeAPI = class extends ChatBaseAPI {
               if (part.type === 'text') {
                 parts.push({ type: 'text', text: part.text });
               }
-              if (['image', 'video'].includes(part.type)) {
+              if (part.type === 'file') {
                 try {
-                  const { mime_type: media_type, data } = await this.fetchFile(part.url);
+                  const { mimeType: media_type, data } = await this.fetchFile(part.url);
                   parts.push({ type: 'image', source: { type: 'base64', media_type, data } });
                 } catch (err) {}
               }

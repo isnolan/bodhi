@@ -48,7 +48,8 @@ describe('chat', () => {
           role: 'user',
           parts: [
             {
-              type: 'image',
+              type: 'file',
+              mime_type: 'image/jpeg',
               url: 'https://miro.medium.com/v2/resize:fit:720/format:jpeg/1*YMJDp-kqus7i-ktWtksNjg.jpeg',
             },
             { type: 'text', text: 'Describe this image' },

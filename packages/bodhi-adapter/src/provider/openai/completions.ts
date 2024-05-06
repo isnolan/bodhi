@@ -123,14 +123,17 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
         const tool_calls: openai.ToolCallPart[] = [];
         await Promise.all(
           item.parts.map(async (part: types.chat.Part) => {
+            // text
             if (part.type === 'text') {
               parts.push({ type: 'text', text: part.text });
             }
-            if (['image', 'video'].includes(part.type)) {
+            // image
+            if (part.type === 'file' && part.mime_type?.startsWith('image')) {
               // TODO: fetch 下载图片并转化buffer为base64
               // parts.push({ type: 'image_url', image_url: (part as types.chat.FilePart).url });
               parts.push({ type: 'image_url', image_url: { url: (part as types.chat.FilePart).url } });
             }
+            // tools
             if (part.type === 'function_call' && part.id) {
               const { name, args } = part.function_call;
               tool_calls.push({ id: part.id, type: 'function', function: { name, arguments: args } });

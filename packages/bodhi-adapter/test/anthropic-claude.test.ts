@@ -36,68 +36,69 @@ describe('chat', () => {
   // }, 30000);
 
   // // vision: image part, from inline data
-  // it('text: streaming', async () => {
-  //   const res = await api.sendMessage({
-  //     // model: 'claude-instant-1.2',
-  //     model: 'claude-3-haiku-20240307',
-  //     messages: [
-  //       {
-  //         role: 'user',
-  //         parts: [
-  //           {
-  //             type: 'image',
-  //             url: 'https://miro.medium.com/v2/resize:fit:720/format:jpeg/1*YMJDp-kqus7i-ktWtksNjg.jpeg',
-  //           },
-  //           { type: 'text', text: 'Describe this image' },
-  //         ],
-  //       },
-  //     ],
-  //     onProgress: (choices) => {
-  //       console.log(`[anthropic]claude:vision`, 'progress', JSON.stringify(choices));
-  //       expect(choices).toBeInstanceOf(Object);
-  //     },
-  //   });
-  //   console.log(`[anthropic]claude:vision`, 'result', JSON.stringify(res));
-  //   expect(res).toBeInstanceOf(Object);
-  // }, 30000);
-
-  // function call
-  it('function call', async () => {
-    const result = await api.sendMessage({
+  it('text: streaming', async () => {
+    const res = await api.sendMessage({
+      // model: 'claude-instant-1.2',
       model: 'claude-3-haiku-20240307',
       messages: [
         {
           role: 'user',
-          parts: [{ type: 'text', text: 'Which theaters in Mountain View show Barbie movie?' }],
-        },
-      ],
-      tools: [
-        {
-          type: 'function',
-          function: {
-            name: 'find_theaters',
-            description:
-              'find theaters based on location and optionally movie title which are is currently playing in theaters',
-            parameters: {
-              type: 'object',
-              properties: {
-                location: {
-                  type: 'string',
-                  description: 'The city and state, e.g. San Francisco, CA or a zip code e.g. 95616',
-                },
-                movie: { type: 'string', description: 'Any movie title' },
-              },
-              required: ['location'],
+          parts: [
+            {
+              type: 'file',
+              mime_type: 'image/jpeg',
+              url: 'https://miro.medium.com/v2/resize:fit:720/format:jpeg/1*YMJDp-kqus7i-ktWtksNjg.jpeg',
             },
-          },
+            { type: 'text', text: 'Describe this image' },
+          ],
         },
       ],
       onProgress: (choices) => {
-        console.log(`[anthropic]`, JSON.stringify(choices));
+        console.log(`[anthropic]claude:vision`, 'progress', JSON.stringify(choices));
         expect(choices).toBeInstanceOf(Object);
       },
     });
-    console.log(`[anthropic]result:`, JSON.stringify(result));
-    expect(result).toBeInstanceOf(Object);
-  }, 10000);
+    console.log(`[anthropic]claude:vision`, 'result', JSON.stringify(res));
+    expect(res).toBeInstanceOf(Object);
+  }, 30000);
+
+  // function call
+  // it('function call', async () => {
+  //   const result = await api.sendMessage({
+  //     model: 'claude-3-haiku-20240307',
+  //     messages: [
+  //       {
+  //         role: 'user',
+  //         parts: [{ type: 'text', text: 'Which theaters in Mountain View show Barbie movie?' }],
+  //       },
+  //     ],
+  //     tools: [
+  //       {
+  //         type: 'function',
+  //         function: {
+  //           name: 'find_theaters',
+  //           description:
+  //             'find theaters based on location and optionally movie title which are is currently playing in theaters',
+  //           parameters: {
+  //             type: 'object',
+  //             properties: {
+  //               location: {
+  //                 type: 'string',
+  //                 description: 'The city and state, e.g. San Francisco, CA or a zip code e.g. 95616',
+  //               },
+  //               movie: { type: 'string', description: 'Any movie title' },
+  //             },
+  //             required: ['location'],
+  //           },
+  //         },
+  //       },
+  //     ],
+  //     onProgress: (choices) => {
+  //       console.log(`[anthropic]`, JSON.stringify(choices));
+  //       expect(choices).toBeInstanceOf(Object);
+  //     },
+  //   });
+  //   console.log(`[anthropic]result:`, JSON.stringify(result));
+  //   expect(result).toBeInstanceOf(Object);
+  // }, 10000);
 });

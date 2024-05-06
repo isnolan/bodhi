@@ -19,7 +19,7 @@ describe('chat', () => {
   // 发送聊天消息
   it('text: streaming', async () => {
     const res = await api.sendMessage({
-      model: 'gpt-3.5-turbo-0125',
+      model: 'gpt-3.5-turbo',
       messages: [
         { role: 'system', parts: [{ type: 'text', text: '你是一个核物理专家' }] },
         { role: 'user', parts: [{ type: 'text', text: '请写一个你擅长的小故事？' }] },
@@ -36,7 +36,7 @@ describe('chat', () => {
   // vision: image part, from inline data
   it('vision:image from inline data', async () => {
     const res = await api.sendMessage({
-      model: 'gpt-4-vision-preview',
+      model: 'gpt-4-turbo',
       max_tokens: 1000,
       messages: [
         {
@@ -44,7 +44,8 @@ describe('chat', () => {
           parts: [
             { type: 'text', text: 'Describe this image' },
             {
-              type: 'image',
+              type: 'file',
+              mime_type: 'image/jpeg',
               url: 'https://miro.medium.com/v2/resize:fit:720/format:jpeg/1*YMJDp-kqus7i-ktWtksNjg.jpeg',
             },
           ],
@@ -62,7 +63,7 @@ describe('chat', () => {
   // function call
   it('function call', async () => {
     const result = await api.sendMessage({
-      model: 'gpt-3.5-turbo-1106',
+      model: 'gpt-3.5-turbo',
       messages: [
         {
           role: 'user',
