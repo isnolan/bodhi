@@ -13,6 +13,7 @@ import { FileService } from './service';
 
 @Injectable()
 export class FilesService {
+  private readonly cdn: string;
   private readonly hashids: Hashids;
   private readonly storage: Storage;
 
@@ -24,6 +25,7 @@ export class FilesService {
   ) {
     this.hashids = new Hashids('bodhi-files', 10);
     this.storage = new Storage({ credentials: this.config.get('gcloud') });
+    this.cdn = this.config.get('cdn');
   }
 
   encodeId(id: number) {
@@ -52,7 +54,7 @@ export class FilesService {
     // 检查是否已经上传
     let f = await this.file.findActiveByHash(hash);
     if (f) {
-      const url = `https://s.alidraft.com${f.path}`;
+      const url = `${this.cdn}/${f.path}`;
       return { id: this.encodeId(f.id), name, size, mimetype, url, expires_at: f.expires_at };
     }
 
@@ -75,7 +77,7 @@ export class FilesService {
       // 更新文件
       this.file.update(f.id, { path: filePath, state: FileState.ACTIVE });
 
-      const url = `https://s.alidraft.com/${filePath}`;
+      const url = `${this.cdn}/${filePath}`;
       return { id: this.encodeId(f.id), name, url, size, mimetype, expires_at: f.expires_at } as FileDto;
     } catch (err) {
       console.warn(err);

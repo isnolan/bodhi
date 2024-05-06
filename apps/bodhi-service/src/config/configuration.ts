@@ -6,6 +6,8 @@ export default () => {
       expiresIn: '604800s',
     },
 
+    cdn: process.env.CDN_URL || 'https://s.chatonce.cn/bodhi',
+
     database: {
       type: 'mysql',
       host: process.env.MYSQL_HOST,

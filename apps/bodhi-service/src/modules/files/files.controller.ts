@@ -1,6 +1,7 @@
-import { Body, Delete, NotFoundException, Param, Post, Req } from '@nestjs/common';
+import { Body, Delete, NotFoundException, Param, Put, Req } from '@nestjs/common';
 import { UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
@@ -18,7 +19,13 @@ import { FilesService } from './files.service';
 @ApiSecurity('api-key', [])
 @Controller('files')
 export class FilesController {
-  constructor(private readonly service: FilesService) {}
+  private readonly cdn: string;
+  constructor(
+    private readonly config: ConfigService,
+    private readonly service: FilesService,
+  ) {
+    this.cdn = this.config.get('cdn');
+  }
 
   @Get()
   @ApiOperation({ summary: 'Get Files', description: 'Get Files' })
@@ -29,7 +36,7 @@ export class FilesController {
     try {
       const rows = await this.service.findActiveByUserId(user_id, client_user_id);
       return rows.map((item) => {
-        const url = `https://s.alidraft.com${item.path}`;
+        const url = `${this.cdn}/${item.path}`;
         const { name, size, mimetype, expires_at } = item;
         const id = this.service.encodeId(item.id);
         return { id, name, size, mimetype, url, expires_at };
@@ -39,7 +46,7 @@ export class FilesController {
     }
   }
 
-  @Post('upload')
+  @Put('upload')
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UploadFileReq })
   @ApiOperation({ summary: 'Upload File', description: 'Upload File' })
@@ -49,7 +56,7 @@ export class FilesController {
     const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
     const { purpose } = body;
     const expires_at = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 15 days
-
+    console.log(`->files`, user_id);
     try {
       // 计算并检查hash
       return Promise.all(
@@ -79,7 +86,7 @@ export class FilesController {
     try {
       const id = this.service.decodeId(file_id);
       const file = await this.service.findById(id, user_id, client_user_id);
-      const url = `https://s.alidraft.com${file.path}`;
+      const url = `${this.cdn}/${file.path}`;
       delete file.path;
 
       return { ...file, id: file_id, url };
