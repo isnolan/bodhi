@@ -56,7 +56,7 @@ export class FilesController {
     const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
     const { purpose } = body;
     const expires_at = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 15 days
-    console.log(`->files`, user_id);
+    console.log(`->purpose`, purpose);
     try {
       // 计算并检查hash
       return Promise.all(

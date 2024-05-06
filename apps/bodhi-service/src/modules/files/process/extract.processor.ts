@@ -30,26 +30,29 @@ export class ExtractProcessor {
     const { id, mimeType, folderPath, filePath } = job.data;
     console.log(`[files]extract`, job.data);
 
-    if (['application/pdf'].includes(mimeType)) {
-      const token = await this.auth.getAccessToken();
-      const { bucket, processor } = this.config.get('gcloud');
-      const res = await fetch(`${processor}:process`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        agent: new HttpsProxyAgent(process.env.HTTP_PROXY as string),
-        body: JSON.stringify({
-          skipHumanReview: true,
-          gcsDocument: { mimeType, gcsUri: `gs://${bucket}/${filePath}` },
-        }),
-      }).then((res) => res.json());
+    try {
+      if (['application/pdf'].includes(mimeType)) {
+        const token = await this.auth.getAccessToken();
+        const { bucket, processor } = this.config.get('gcloud');
+        const res = await fetch(`${processor}:process`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          agent: new HttpsProxyAgent(process.env.HTTP_PROXY as string),
+          body: JSON.stringify({
+            skipHumanReview: true,
+            gcsDocument: { mimeType, gcsUri: `gs://${bucket}/${filePath}` },
+          }),
+        }).then((res) => res.json());
+        // 存储原始JSON
+        await this.storage.bucket(bucket).file(`${folderPath}/1.json`).save(JSON.stringify(res));
 
-      // 存储原始JSON
-      await this.storage.bucket(bucket).file(`${folderPath}/1.json`).save(JSON.stringify(res));
-
-      // 存储文本
-      this.file.update(id, { extract: res?.document?.text });
-    } else {
-      console.warn(`[files]extract:unsupported`, mimeType);
+        // 存储文本
+        this.file.update(id, { extract: res?.document?.text });
+      } else {
+        console.warn(`[files]extract:unsupported`, mimeType);
+      }
+    } catch (err) {
+      console.warn(`[files]extract: error`, err);
     }
   }
 }
