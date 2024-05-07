@@ -1,3 +1,5 @@
+/* eslint max-params: */
+import { chat } from '@isnolan/bodhi-adapter';
 import { Body, Controller, Get, HttpException, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
@@ -6,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { RequestWithUser } from '@/core/common/request.interface';
 
 import { JwtOrApiKeyGuard } from '../auth/guard/mixed.guard';
+import { FilesService } from '../files/files.service';
 import { ProviderService } from '../provider/service';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { UsersService } from '../users/users.service';
@@ -26,6 +29,7 @@ export class ChatController {
     private readonly provider: ProviderService,
     private readonly conversations: ChatConversationService,
     private readonly subscription: SubscriptionService,
+    private readonly file: FilesService,
   ) {}
 
   /**
@@ -76,6 +80,32 @@ export class ChatController {
       const listener = this.createListener(channel, res, stream);
       this.service.subscribe(channel, listener);
       req.on('close', () => this.service.unsubscribe(channel, listener));
+
+      // 检查是否存在File docs
+      // replace file id to file object with last message
+      const file_ids = messages[0].parts
+        .filter((p) => p.type === 'file' && p.mimetype === 'application/pdf')
+        .map((p: chat.FilePart) => p.id);
+      if (file_ids.length > 0) {
+        const files = await this.file.findExtractByFileIds(file_ids);
+        if (files) {
+          messages[0].parts = messages[0].parts.map((part) => {
+            if (part.type === 'file') {
+              const file = files.find((f) => f.id === part.id);
+              // return {
+              //   type: 'text',
+              //   text: `Attachment: ${file.name} \nSize: ${file.size} \nContent: ${file.extract}`,
+              // };
+              return {
+                ...part,
+                text: `Attachment: ${file.name} \nSize: ${file.size} \nContent: ${file.extract}`,
+              };
+            } else {
+              return part;
+            }
+          });
+        }
+      }
 
       // 发送消息
       const options: SendMessageDto = { usages, provider_ids, messages: [], message_id, parent_id };
@@ -180,11 +210,12 @@ export class ChatController {
   private checkAbilities(messages) {
     const abilities = new Set();
     messages.forEach((message) => {
-      message.parts.forEach((part) => {
-        part.type === 'image' && abilities.add('vision');
-        part.type === 'tools' && abilities.add('tools');
-        part.type === 'docs' && abilities.add('docs');
-      });
+      message.parts
+        .filter((p) => p.type === 'file')
+        .forEach((part) => {
+          part.type === 'file' && part.mimetype.startsWith('image') && abilities.add('vision');
+          part.type === 'tools' && abilities.add('tools');
+        });
     });
     // 转换为数组后返回
     return Array.from(abilities) as string[];

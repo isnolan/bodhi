@@ -3,6 +3,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { FilesModule } from '../files/files.module';
 import { ProviderModule } from '../provider/provider.module';
 import { SubscriptionModule } from '../subscription/subscription.module';
 import { SupplierModule } from '../supplier/supplier.module';
@@ -35,6 +36,8 @@ import Service from './service';
     SubscriptionModule,
 
     UsersModule,
+
+    FilesModule,
   ],
 
   controllers: [ChatController],

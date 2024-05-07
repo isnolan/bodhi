@@ -55,9 +55,8 @@ export class SupplierOpenAPIProcessor {
       // console.log(`->conversation`, conversation);
       const { context_limit } = conversation;
       const messages = await this.chat.findLastMessagesByConversationId(conversation_id, context_limit, status);
-      // replace file id to file object with last message
 
-      // console.log(`->message`, JSON.stringify(messages));
+      console.log(`->message`, JSON.stringify(messages));
       const res = await api.sendMessage({
         model: model.name,
         messages: [...messages],

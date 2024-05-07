@@ -40,8 +40,16 @@ export class FilesService {
     return this.file.findActiveByUserId(user_id, client_user_id);
   }
 
-  async findById(id: number, user_id: number, client_user_id?: string) {
+  async findById(id: number, user_id?: number, client_user_id?: string) {
     return this.file.find(id, user_id, client_user_id);
+  }
+
+  async findExtractByFileIds(file_ids: string[]) {
+    const ids = file_ids.map((i) => this.decodeId(i));
+    return (await this.file.findExtractByIds(ids)).map((f) => ({
+      ...f,
+      id: this.encodeId(f.id),
+    }));
   }
 
   async delete(id: number, user_id: number) {

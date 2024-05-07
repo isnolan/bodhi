@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import moment from 'moment-timezone';
-import { IsNull, MoreThan, Repository } from 'typeorm';
+import { In, IsNull, MoreThan, Repository } from 'typeorm';
 
 import { File, FileState } from '../entity/file.entity';
 
@@ -54,6 +54,13 @@ export class FileService {
         { expires_at: MoreThan(new Date()), ...query },
         { expires_at: IsNull(), ...query },
       ],
+    });
+  }
+
+  async findExtractByIds(ids: number[]) {
+    return this.repository.find({
+      select: ['id', 'name', 'path', 'size', 'mimetype', 'extract', 'state'],
+      where: [{ id: In(ids) }],
     });
   }
 
