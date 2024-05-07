@@ -342,7 +342,7 @@ var GoogleGeminiAPI = class extends ChatBaseAPI {
     this.provider = 'google';
   }
   models() {
-    return ['gemini-pro', 'gemini-pro-vision'];
+    return ['gemini-pro', 'gemini-pro-vision', 'gemini-1.5-pro-latest'];
   }
   /**
    *
@@ -354,8 +354,8 @@ var GoogleGeminiAPI = class extends ChatBaseAPI {
     const { onProgress = () => {}, ...options } = opts;
     return new Promise(async (resolove, reject) => {
       const params = await this.convertParams(options);
-      const hasMedia = params.contents.some((item) => item.parts.some((part) => 'inline_data' in part));
-      const model = hasMedia ? 'gemini-pro-vision' : opts.model || 'gemini-pro';
+      const hasFile = opts.messages.some((item) => item.parts.some((part) => part.type === 'file'));
+      const model = hasFile && opts.model === 'gemini-1.0-pro' ? 'gemini-pro-vision' : opts.model;
       const url = `${this.baseURL}/models/${model}:streamGenerateContent?alt=sse`;
       const res = await (0, import_node_fetch3.default)(url, {
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': this.apiKey },
@@ -538,7 +538,6 @@ var GoogleVertexAPI = class extends GoogleGeminiAPI {
       const model = hasFile && opts.model === 'gemini-1.0-pro' ? 'gemini-1.0-pro-vision' : opts.model;
       const url = `${this.baseURL}/publishers/google/models/${model}:streamGenerateContent?alt=sse`;
       const params = await this.convertParams(options);
-      console.log(`[fetch]params`, url, JSON.stringify(params, null, 2));
       const res = await (0, import_node_fetch4.default)(url, {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(params),

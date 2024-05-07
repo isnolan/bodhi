@@ -56,6 +56,7 @@ declare namespace chat {
     type: 'file';
     mime_type: string;
     url: string;
+    id: string;
   };
   type ToolPart = FunctionCallTool | FunctionTool;
   type Tools = FunctionTool;

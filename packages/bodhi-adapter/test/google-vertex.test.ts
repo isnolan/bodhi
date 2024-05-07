@@ -127,6 +127,7 @@ describe('chat', () => {
               type: 'file',
               mime_type: 'video/mp4',
               url: 'gs://github-repo/img/gemini/multimodality_usecases_overview/pixel8.mp4',
+              id: 'image_1',
             },
           ],
         },

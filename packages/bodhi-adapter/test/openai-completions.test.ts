@@ -47,6 +47,7 @@ describe('chat', () => {
               type: 'file',
               mime_type: 'image/jpeg',
               url: 'https://miro.medium.com/v2/resize:fit:720/format:jpeg/1*YMJDp-kqus7i-ktWtksNjg.jpeg',
+              id: 'image_1',
             },
           ],
         },
