@@ -257,7 +257,7 @@ var OpenAICompletionsAPI = class extends ChatBaseAPI {
             if (part.type === 'text') {
               parts.push({ type: 'text', text: part.text });
             }
-            if (part.type === 'file' && part.mime_type?.startsWith('image')) {
+            if (part.type === 'file' && part.mimetype?.startsWith('image')) {
               parts.push({ type: 'image_url', image_url: { url: part.url } });
             }
             if (part.type === 'function_call' && part.id) {
@@ -429,9 +429,9 @@ var GoogleGeminiAPI = class extends ChatBaseAPI {
                 parts.push({ text: part.text });
               }
               if (part.type === 'file') {
-                const { mime_type, url } = part;
+                const { mimetype: mimeType, url } = part;
                 if (url.startsWith('gs://')) {
-                  parts.push({ fileData: { mimeType: mime_type, fileUri: url } });
+                  parts.push({ fileData: { mimeType, fileUri: url } });
                 } else {
                   try {
                     parts.push({ inlineData: await this.fetchFile(url) });

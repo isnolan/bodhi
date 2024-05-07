@@ -119,9 +119,9 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
               }
               // file
               if (part.type === 'file') {
-                const { mime_type, url } = part as types.chat.FilePart;
+                const { mimetype: mimeType, url } = part as types.chat.FilePart;
                 if (url.startsWith('gs://')) {
-                  parts.push({ fileData: { mimeType: mime_type, fileUri: url } });
+                  parts.push({ fileData: { mimeType, fileUri: url } });
                 } else {
                   try {
                     parts.push({ inlineData: await this.fetchFile(url) });

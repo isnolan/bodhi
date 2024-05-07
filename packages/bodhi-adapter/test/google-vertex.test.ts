@@ -58,8 +58,9 @@ describe('chat', () => {
           role: 'user',
           parts: [
             {
+              id: 'document_1',
               type: 'file',
-              mime_type: 'application/pdf',
+              mimetype: 'application/pdf',
               // url: 'gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf',
               url: 'gs://bodhi-storage/uploads/202405/0db16ca633824283d07cf3774f886cef/0.pdf',
               // url: 'https://s.chatonce.cn/bodhi/uploads/202405/0db16ca633824283d07cf3774f886cef/0.pdf',
@@ -94,8 +95,9 @@ describe('chat', () => {
           parts: [
             { type: 'text', text: 'Describe this image' },
             {
+              id: 'image_1',
               type: 'file',
-              mime_type: 'image/jpeg',
+              mimetype: 'image/jpeg',
               url: 'https://miro.medium.com/v2/resize:fit:720/format:jpeg/1*YMJDp-kqus7i-ktWtksNjg.jpeg',
             },
           ],
@@ -125,7 +127,7 @@ describe('chat', () => {
             },
             {
               type: 'file',
-              mime_type: 'video/mp4',
+              mimetype: 'video/mp4',
               url: 'gs://github-repo/img/gemini/multimodality_usecases_overview/pixel8.mp4',
               id: 'image_1',
             },
