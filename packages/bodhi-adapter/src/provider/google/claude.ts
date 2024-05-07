@@ -47,7 +47,7 @@ export class GoogleClaudeAPI extends ChatBaseAPI {
       const token = await this.getToken();
       const url = `${this.baseURL}/publishers/anthropic/models/${opts.model}:streamRawPredict?alt=sse`;
       const params: claude.Request = await this.convertParams(options);
-      // console.log(`->url`, url, JSON.stringify(params));
+      console.log(`->url`, url, JSON.stringify(params));
       const res = await fetchSSE(url, {
         headers: { 'content-type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(params),
@@ -130,7 +130,7 @@ export class GoogleClaudeAPI extends ChatBaseAPI {
           await Promise.all(
             item.parts.map(async (part: types.chat.Part) => {
               // text
-              if (part.type === 'text') {
+              if (part.type === 'text' || (part.type === 'file' && part?.text)) {
                 parts.push({ type: 'text', text: part.text });
               }
               // file, only support image, now

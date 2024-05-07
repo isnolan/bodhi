@@ -57,6 +57,7 @@ declare namespace chat {
     mimetype: string;
     url: string;
     id: string;
+    text?: string;
   };
   type ToolPart = FunctionCallTool | FunctionTool;
   type Tools = FunctionTool;
