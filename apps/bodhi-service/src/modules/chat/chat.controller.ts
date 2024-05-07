@@ -94,7 +94,7 @@ export class ChatController {
               const file = files.find((f) => f.id === part.id);
               return {
                 ...part,
-                text: `Attachment: ${file.name} \n\nSize: ${file.size} \n\nContent: ${file.extract}`,
+                extract: `Attachment: ${file.name} \n\nSize: ${file.size} \n\nContent: ${file.extract}`,
               };
             } else {
               return part;
