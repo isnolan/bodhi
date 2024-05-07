@@ -20,7 +20,7 @@ describe('chat', () => {
   // 发送聊天消息
   it('text: streaming', async () => {
     const res = await api.sendMessage({
-      model: 'gemini-pro',
+      model: 'gemini-1.0-pro',
       messages: [
         { role: 'user', parts: [{ type: 'text', text: 'Hello, 我家有两只小狗，一只小迪，一只叫小瑞' }] },
         { role: 'assistant', parts: [{ type: 'text', text: 'Great to meet you. What would you like to know?' }] },
@@ -38,14 +38,15 @@ describe('chat', () => {
   // vision: image part, from inline data
   it('vision:image from inline data', async () => {
     const res = await api.sendMessage({
-      model: 'gemini-pro',
+      model: 'gemini-1.0-pro',
       messages: [
         {
           role: 'user',
           parts: [
             { type: 'text', text: 'Describe this image' },
             {
-              type: 'image',
+              type: 'file',
+              mime_type: 'image/jpeg',
               url: 'https://miro.medium.com/v2/resize:fit:720/format:jpeg/1*YMJDp-kqus7i-ktWtksNjg.jpeg',
             },
           ],
@@ -63,7 +64,7 @@ describe('chat', () => {
   // function call
   it('function call', async () => {
     const result = await api.sendMessage({
-      model: 'gemini-pro',
+      model: 'gemini-1.0-pro',
       messages: [
         {
           role: 'user',

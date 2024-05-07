@@ -16,7 +16,7 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
   }
 
   public models(): string[] {
-    return ['gemini-pro', 'gemini-pro-vision'];
+    return ['gemini-pro', 'gemini-pro-vision', 'gemini-1.5-pro-latest'];
   }
 
   /**
@@ -30,10 +30,10 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
     return new Promise(async (resolove, reject) => {
       const params: gemini.Request = await this.convertParams(options);
       // if have media, use gemini-pro-vision
-      const hasMedia = params.contents.some((item) => item.parts.some((part) => 'inline_data' in part));
-      const model = hasMedia ? 'gemini-pro-vision' : opts.model || 'gemini-pro';
+      const hasFile = opts.messages.some((item) => item.parts.some((part) => part.type === 'file'));
+      const model = hasFile && opts.model === 'gemini-1.0-pro' ? 'gemini-pro-vision' : opts.model;
       const url = `${this.baseURL}/models/${model}:streamGenerateContent?alt=sse`;
-      // console.log(`[fetch]params`, JSON.stringify(params, null, 2));
+      // console.log(`[fetch]params`, url, JSON.stringify(params, null, 2));
 
       const res = await fetchSSE(url, {
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': this.apiKey },

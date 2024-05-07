@@ -55,7 +55,7 @@ export class GoogleVertexAPI extends GoogleGeminiAPI {
       const model = hasFile && opts.model === 'gemini-1.0-pro' ? 'gemini-1.0-pro-vision' : opts.model;
       const url = `${this.baseURL}/publishers/google/models/${model}:streamGenerateContent?alt=sse`;
       const params: gemini.Request = await this.convertParams(options);
-      console.log(`[fetch]params`, url, JSON.stringify(params, null, 2));
+      // console.log(`[fetch]params`, url, JSON.stringify(params, null, 2));
 
       const res = await fetchSSE(url, {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
