@@ -127,6 +127,9 @@ export class AnthropicClaudeAPI extends ChatBaseAPI {
                 parts.push({ type: 'text', text: part.text });
               }
               // file, only support image, now
+              if (part.type === 'file' && part?.extract) {
+                parts.push({ type: 'text', text: part.extract });
+              }
               if (part.type === 'file' && part.mimetype?.startsWith('image')) {
                 try {
                   const { mimeType: media_type, data } = await this.fetchFile((part as types.chat.FilePart).url);

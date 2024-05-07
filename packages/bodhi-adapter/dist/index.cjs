@@ -429,13 +429,17 @@ var GoogleGeminiAPI = class extends ChatBaseAPI {
                 parts.push({ text: part.text });
               }
               if (part.type === 'file') {
-                const { mimetype: mimeType, url } = part;
-                if (url.startsWith('gs://')) {
-                  parts.push({ fileData: { mimeType, fileUri: url } });
+                if (part?.extract) {
+                  parts.push({ text: part.extract });
                 } else {
-                  try {
-                    parts.push({ inlineData: await this.fetchFile(url) });
-                  } catch (err) {}
+                  const { mimetype: mimeType, url } = part;
+                  if (url.startsWith('gs://')) {
+                    parts.push({ fileData: { mimeType, fileUri: url } });
+                  } else {
+                    try {
+                      parts.push({ inlineData: await this.fetchFile(url) });
+                    } catch (err) {}
+                  }
                 }
               }
               if (part.type === 'function_call') {
@@ -620,7 +624,6 @@ var GoogleClaudeAPI = class extends ChatBaseAPI {
       const token = await this.getToken();
       const url = `${this.baseURL}/publishers/anthropic/models/${opts.model}:streamRawPredict?alt=sse`;
       const params = await this.convertParams(options);
-      console.log(`->url`, url, JSON.stringify(params));
       const res = await (0, import_node_fetch5.default)(url, {
         headers: { 'content-type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(params),
@@ -694,8 +697,11 @@ var GoogleClaudeAPI = class extends ChatBaseAPI {
           const parts = [];
           await Promise.all(
             item.parts.map(async (part) => {
-              if (part.type === 'text' || (part.type === 'file' && part?.text)) {
+              if (part.type === 'text') {
                 parts.push({ type: 'text', text: part.text });
+              }
+              if (part.type === 'file' && part?.extract) {
+                parts.push({ type: 'text', text: part.extract });
               }
               if (part.type === 'file' && part.mimetype?.startsWith('image')) {
                 try {
@@ -864,6 +870,9 @@ var AnthropicClaudeAPI = class extends ChatBaseAPI {
             item.parts.map(async (part) => {
               if (part.type === 'text') {
                 parts.push({ type: 'text', text: part.text });
+              }
+              if (part.type === 'file' && part?.extract) {
+                parts.push({ type: 'text', text: part.extract });
               }
               if (part.type === 'file' && part.mimetype?.startsWith('image')) {
                 try {

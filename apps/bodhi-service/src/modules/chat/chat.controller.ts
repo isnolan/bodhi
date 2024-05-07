@@ -92,13 +92,9 @@ export class ChatController {
           messages[0].parts = messages[0].parts.map((part) => {
             if (part.type === 'file') {
               const file = files.find((f) => f.id === part.id);
-              // return {
-              //   type: 'text',
-              //   text: `Attachment: ${file.name} \nSize: ${file.size} \nContent: ${file.extract}`,
-              // };
               return {
                 ...part,
-                text: `Attachment: ${file.name} \nSize: ${file.size} \nContent: ${file.extract}`,
+                text: `Attachment: ${file.name} \n\nSize: ${file.size} \n\nContent: ${file.extract}`,
               };
             } else {
               return part;

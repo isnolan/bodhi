@@ -119,13 +119,17 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
               }
               // file
               if (part.type === 'file') {
-                const { mimetype: mimeType, url } = part as types.chat.FilePart;
-                if (url.startsWith('gs://')) {
-                  parts.push({ fileData: { mimeType, fileUri: url } });
+                if (part?.extract) {
+                  parts.push({ text: part.extract });
                 } else {
-                  try {
-                    parts.push({ inlineData: await this.fetchFile(url) });
-                  } catch (err) {}
+                  const { mimetype: mimeType, url } = part as types.chat.FilePart;
+                  if (url.startsWith('gs://')) {
+                    parts.push({ fileData: { mimeType, fileUri: url } });
+                  } else {
+                    try {
+                      parts.push({ inlineData: await this.fetchFile(url) });
+                    } catch (err) {}
+                  }
                 }
               }
               // tools
