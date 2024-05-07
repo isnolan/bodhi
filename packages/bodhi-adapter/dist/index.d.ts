@@ -54,7 +54,7 @@ declare namespace chat {
   };
   type FilePart = {
     type: 'file';
-    mime_type: string;
+    mimetype: string;
     url: string;
     id: string;
   };

@@ -114,6 +114,7 @@ export class MoonshotKimiAPI extends ChatBaseAPI {
         const parts: string[] = [];
         await Promise.all(
           item.parts.map(async (part: types.chat.Part) => {
+            // text
             if (part.type === 'text') {
               parts.push(part.text);
             }

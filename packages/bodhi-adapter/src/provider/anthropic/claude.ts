@@ -122,10 +122,12 @@ export class AnthropicClaudeAPI extends ChatBaseAPI {
           const parts: claude.Part[] = [];
           await Promise.all(
             item.parts.map(async (part: types.chat.Part) => {
+              // text
               if (part.type === 'text') {
                 parts.push({ type: 'text', text: part.text });
               }
-              if (part.type === 'file') {
+              // file, only support image, now
+              if (part.type === 'file' && part.mimetype?.startsWith('image')) {
                 try {
                   const { mimeType: media_type, data } = await this.fetchFile((part as types.chat.FilePart).url);
                   parts.push({ type: 'image', source: { type: 'base64', media_type, data } });

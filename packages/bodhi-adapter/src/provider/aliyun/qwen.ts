@@ -139,10 +139,12 @@ export class AliyunQwenAPI extends ChatBaseAPI {
         const parts: aliyun.Part[] = [];
         await Promise.all(
           item.parts.map(async (part: types.chat.Part) => {
+            // text
             if (part.type === 'text') {
               parts.push({ text: part.text });
             }
-            if (['image'].includes(part.type)) {
+            // file, only support image, now
+            if (part.type === 'file' && part.mimetype?.startsWith('image')) {
               parts.push({ image: (part as types.chat.FilePart).url });
             }
           }),

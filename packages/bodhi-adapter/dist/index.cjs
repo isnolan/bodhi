@@ -696,7 +696,7 @@ var GoogleClaudeAPI = class extends ChatBaseAPI {
               if (part.type === 'text') {
                 parts.push({ type: 'text', text: part.text });
               }
-              if (part.type === 'file') {
+              if (part.type === 'file' && part.mimetype?.startsWith('image')) {
                 try {
                   const { mimeType: media_type, data } = await this.fetchFile(part.url);
                   parts.push({ type: 'image', source: { type: 'base64', media_type, data } });
@@ -864,7 +864,7 @@ var AnthropicClaudeAPI = class extends ChatBaseAPI {
               if (part.type === 'text') {
                 parts.push({ type: 'text', text: part.text });
               }
-              if (part.type === 'file') {
+              if (part.type === 'file' && part.mimetype?.startsWith('image')) {
                 try {
                   const { mimeType: media_type, data } = await this.fetchFile(part.url);
                   parts.push({ type: 'image', source: { type: 'base64', media_type, data } });
@@ -1154,7 +1154,7 @@ var AliyunQwenAPI = class extends ChatBaseAPI {
             if (part.type === 'text') {
               parts.push({ text: part.text });
             }
-            if (['image'].includes(part.type)) {
+            if (part.type === 'file' && part.mimetype?.startsWith('image')) {
               parts.push({ image: part.url });
             }
           }),

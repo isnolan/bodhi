@@ -8,6 +8,7 @@ import fetch from 'node-fetch';
 import path from 'path';
 
 import { ExtractQueueDto } from '../dto/queue.dto';
+import { FileState } from '../entity/file.entity';
 import { FileService } from '../service/file.service';
 
 @Processor('bodhi')
@@ -49,7 +50,7 @@ export class ExtractProcessor {
       await this.storage.bucket(bucket).file(folderUri).save(JSON.stringify(res));
 
       // 存储文本
-      this.file.update(id, { extract: res?.document?.text });
+      this.file.update(id, { extract: res?.document?.text, state: FileState.ACTIVE });
     } catch (err) {
       console.warn(`[files]extract: error`, err);
     }

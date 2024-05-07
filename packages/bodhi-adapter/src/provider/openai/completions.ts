@@ -127,7 +127,7 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
             if (part.type === 'text') {
               parts.push({ type: 'text', text: part.text });
             }
-            // image
+            // file, only support image, now
             if (part.type === 'file' && part.mimetype?.startsWith('image')) {
               // TODO: fetch 下载图片并转化buffer为base64
               // parts.push({ type: 'image_url', image_url: (part as types.chat.FilePart).url });
