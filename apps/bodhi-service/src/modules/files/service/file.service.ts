@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import moment from 'moment-timezone';
-import { In, IsNull, MoreThan, Repository } from 'typeorm';
+import { In, IsNull, LessThan, MoreThan, Repository } from 'typeorm';
 
 import { File, FileState } from '../entity/file.entity';
 
@@ -15,7 +15,7 @@ export class FileService {
 
   @Cron(CronExpression.EVERY_HOUR)
   async handleExpired() {
-    const files = await this.repository.find({ where: { expires_at: MoreThan(new Date()), state: FileState.ACTIVE } });
+    const files = await this.repository.find({ where: { expires_at: LessThan(new Date()), state: FileState.ACTIVE } });
     for (const file of files) {
       this.repository.update(file.id, { state: FileState.EXPIRED });
     }
