@@ -209,8 +209,19 @@ export class ChatController {
       message.parts
         .filter((p) => p.type === 'file')
         .forEach((part) => {
-          part.type === 'file' && part.mimetype.startsWith('image') && abilities.add('vision');
-          part.type === 'tools' && abilities.add('tools');
+          if (part.type === 'file') {
+            // text
+            if (part.mimetype.startsWith('application') || part.mimetype.startsWith('text')) {
+              abilities.add('text');
+            }
+            part.mimetype.startsWith('image') && abilities.add('vision');
+            part.mimetype.startsWith('audio') && abilities.add('audio');
+            part.mimetype.startsWith('video') && abilities.add('video');
+          }
+          // tools
+          if (part.type === 'tools') {
+            abilities.add('tools');
+          }
         });
     });
     // 转换为数组后返回
@@ -227,6 +238,7 @@ export class ChatController {
     // validate provider
     const ids = [...new Set(usages.flatMap((usage) => usage.quota.providers))];
     const provider_ids = await this.provider.filterProviderByModel(ids as [], model, abilities);
+    console.log(`->validate`, abilities, provider_ids);
     if (provider_ids.length === 0) {
       throw new HttpException(`No valid supplier for model:${model}`, 403);
     }

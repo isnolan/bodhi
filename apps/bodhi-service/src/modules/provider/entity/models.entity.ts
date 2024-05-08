@@ -25,14 +25,9 @@ export class ProviderModels extends Base {
   @Column({ type: 'int', comment: 'context', default: 0 })
   context_tokens: number;
 
-  @Column({ type: 'tinyint', comment: 'tools', default: 0 })
-  is_tools: number;
-
-  @Column({ type: 'tinyint', comment: 'vision', default: 0 })
-  is_vision: number;
-
-  @Column({ type: 'simple-json', comment: 'mime', default: null })
-  mime_types: string[];
+  /** Capabilities */
+  @Column({ type: 'simple-json', comment: 'abilities', default: null })
+  abilities: string[];
 
   @Column({ type: 'tinyint', comment: 'status', default: ModelState.ACTIVE })
   status: number;

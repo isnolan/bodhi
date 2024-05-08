@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Equal, In, IsNull, MoreThan, Repository } from 'typeorm';
+import { In, IsNull, MoreThan, Repository } from 'typeorm';
 
 import { ProviderWithRelations } from '../dto/find-provider.dto';
 import { CredentialsState, Provider } from '../entity';
@@ -59,9 +59,7 @@ export class ProviderService {
     const models = [];
     providers.map((provider) => {
       const existing = models.find((m) => m.model === provider.slug);
-      const abilities = [];
-      provider.model.is_tools == 1 && abilities.push('tools');
-      provider.model.is_vision == 1 && abilities.push('vision');
+      const abilities = provider.model.abilities; // Use the abilities field directly
       if (existing) {
         existing.abilities = [...new Set([...existing.abilities, ...abilities])];
       } else {
@@ -74,12 +72,29 @@ export class ProviderService {
   }
 
   async filterProviderByModel(ids: number[], name: string, abilities: string[]): Promise<number[]> {
-    const where = { id: In(ids), slug: Equal(name), model: { status: CredentialsState.ACTIVE } };
+    // const where = { id: In(ids), slug: Equal(name), model: { status: CredentialsState.ACTIVE } };
+    // if (abilities.length > 0) {
+    //   abilities.includes('tools') && Object.assign(where.model, { is_tools: 1 });
+    //   abilities.includes('vision') && Object.assign(where.model, { is_vision: 1 });
+    // }
+    // const providers = await this.repository.find({ select: ['id'], where, relations: ['model'] });
+    // return providers.map((provider) => provider.id);
+
+    const query = this.repository
+      .createQueryBuilder('provider')
+      .select('provider.id')
+      .innerJoin('provider.model', 'model')
+      .where('provider.id IN (:...ids)', { ids })
+      .andWhere('provider.slug = :name', { name })
+      .andWhere('model.status = :status', { status: CredentialsState.ACTIVE });
+
     if (abilities.length > 0) {
-      abilities.includes('tools') && Object.assign(where.model, { is_tools: 1 });
-      abilities.includes('vision') && Object.assign(where.model, { is_vision: 1 });
+      abilities.forEach((ability) => {
+        query.andWhere(`CONVERT(model.abilities, CHAR) LIKE :ability`, { ability: `%${ability}%` });
+      });
     }
-    const providers = await this.repository.find({ select: ['id'], where, relations: ['model'] });
+
+    const providers = await query.getMany();
     return providers.map((provider) => provider.id);
   }
 
