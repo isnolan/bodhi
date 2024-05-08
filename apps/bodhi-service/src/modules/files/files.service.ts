@@ -80,7 +80,7 @@ export class FilesService {
       await this.storage.bucket(bucket).file(filePath).save(file.buffer);
 
       // file extract
-      if (['application/pdf'].includes(mimetype) && purpose === 'file-extract') {
+      if (['application/pdf', 'text/plain', 'application/json'].includes(mimetype) && purpose === 'file-extract') {
         this.queue.add('file-extract', { id: f.id, mimeType: mimetype, filePath });
         Object.assign(options, { state: FileState.PROGRESS });
       }

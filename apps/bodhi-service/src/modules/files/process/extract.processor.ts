@@ -33,6 +33,9 @@ export class ExtractProcessor {
     console.log(`[files]extract`, id, filePath);
 
     try {
+      // text/plain, application/json
+
+      // application/pdf
       const token = await this.auth.getAccessToken();
       const { bucket, processor } = this.config.get('gcloud');
       const res = await fetch(`${processor}:process`, {
