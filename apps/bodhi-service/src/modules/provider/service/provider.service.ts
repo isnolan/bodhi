@@ -62,7 +62,6 @@ export class ProviderService {
       const abilities = [];
       provider.model.is_tools == 1 && abilities.push('tools');
       provider.model.is_vision == 1 && abilities.push('vision');
-      provider.model.is_docs == 1 && abilities.push('docs');
       if (existing) {
         existing.abilities = [...new Set([...existing.abilities, ...abilities])];
       } else {
@@ -79,7 +78,6 @@ export class ProviderService {
     if (abilities.length > 0) {
       abilities.includes('tools') && Object.assign(where.model, { is_tools: 1 });
       abilities.includes('vision') && Object.assign(where.model, { is_vision: 1 });
-      abilities.includes('docs') && Object.assign(where.model, { is_docs: 1 });
     }
     const providers = await this.repository.find({ select: ['id'], where, relations: ['model'] });
     return providers.map((provider) => provider.id);

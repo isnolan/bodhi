@@ -31,8 +31,8 @@ export class ProviderModels extends Base {
   @Column({ type: 'tinyint', comment: 'vision', default: 0 })
   is_vision: number;
 
-  @Column({ type: 'tinyint', comment: 'docs', default: 0 })
-  is_docs: number;
+  @Column({ type: 'simple-json', comment: 'mime', default: null })
+  mime_types: string[];
 
   @Column({ type: 'tinyint', comment: 'status', default: ModelState.ACTIVE })
   status: number;
