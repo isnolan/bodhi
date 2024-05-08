@@ -1115,6 +1115,9 @@ var AliyunQwenAPI = class extends ChatBaseAPI {
             if (part.type === 'text') {
               parts.push({ text: part.text });
             }
+            if (part.type === 'file' && part?.extract) {
+              parts.push({ text: part.extract });
+            }
             if (part.type === 'file' && part.mimetype?.startsWith('image')) {
               parts.push({ image: part.url });
             }
@@ -1343,6 +1346,9 @@ var MoonshotKimiAPI = class extends ChatBaseAPI {
             if (part.type === 'text') {
               parts.push(part.text);
             }
+            if (part.type === 'file' && part?.extract) {
+              parts.push(part.extract);
+            }
           }),
         );
         return { role: item.role, content: parts.join('\n') };
@@ -1440,15 +1446,18 @@ var QcloudHunyuanAPI = class extends ChatBaseAPI {
   async corvertContents(opts) {
     return Promise.all(
       opts.messages.map(async (item) => {
-        const contents = [];
+        const parts = [];
         await Promise.all(
           item.parts.map(async (part) => {
             if (part.type === 'text') {
-              contents.push(part.text);
+              parts.push(part.text);
+            }
+            if (part.type === 'file' && part?.extract) {
+              parts.push(part.extract);
             }
           }),
         );
-        return { Role: item.role, Content: contents.join('/n') };
+        return { Role: item.role, Content: parts.join('/n') };
       }),
     );
   }

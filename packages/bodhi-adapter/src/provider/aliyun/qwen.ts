@@ -143,6 +143,11 @@ export class AliyunQwenAPI extends ChatBaseAPI {
             if (part.type === 'text') {
               parts.push({ text: part.text });
             }
+            // file: docs
+            if (part.type === 'file' && part?.extract) {
+              parts.push({ text: part.extract });
+            }
+
             // file, only support image, now
             if (part.type === 'file' && part.mimetype?.startsWith('image')) {
               parts.push({ image: (part as types.chat.FilePart).url });

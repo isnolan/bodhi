@@ -118,6 +118,10 @@ export class MoonshotKimiAPI extends ChatBaseAPI {
             if (part.type === 'text') {
               parts.push(part.text);
             }
+            // file, only support image, now
+            if (part.type === 'file' && part?.extract) {
+              parts.push(part.extract);
+            }
           }),
         );
 

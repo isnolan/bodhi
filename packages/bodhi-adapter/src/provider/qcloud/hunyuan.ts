@@ -87,15 +87,20 @@ export class QcloudHunyuanAPI extends ChatBaseAPI {
   private async corvertContents(opts: types.chat.SendOptions): Promise<hunyuan.Content[]> {
     return Promise.all(
       opts.messages.map(async (item) => {
-        const contents: string[] = [];
+        const parts: string[] = [];
         await Promise.all(
           item.parts.map(async (part: types.chat.Part) => {
+            // text
             if (part.type === 'text') {
-              contents.push(part.text);
+              parts.push(part.text);
+            }
+            // file, only support image, now
+            if (part.type === 'file' && part?.extract) {
+              parts.push(part.extract);
             }
           }),
         );
-        return { Role: item.role, Content: contents.join('/n') } as hunyuan.Content;
+        return { Role: item.role, Content: parts.join('/n') } as hunyuan.Content;
       }),
     );
   }
