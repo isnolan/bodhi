@@ -15,10 +15,16 @@ export class FileService {
 
   @Cron(CronExpression.EVERY_HOUR)
   async handleExpired() {
-    const files = await this.repository.find({ where: { expires_at: LessThan(new Date()), state: FileState.ACTIVE } });
+    const expires_at = moment.utc().toDate();
+    const files = await this.repository.find({ where: { expires_at: LessThan(expires_at), state: FileState.ACTIVE } });
     for (const file of files) {
       this.repository.update(file.id, { state: FileState.EXPIRED });
     }
+  }
+
+  async findExpired7Days() {
+    const expires_at = moment.utc().add(7, 'days').toDate();
+    return this.repository.find({ where: { expires_at: LessThan(expires_at), state: FileState.EXPIRED } });
   }
 
   async create(opts: Partial<File>) {
@@ -85,10 +91,5 @@ export class FileService {
 
   async findActiveByFileID(file_id: string) {
     return this.repository.findOne({ where: { file_id, state: FileState.ACTIVE } });
-  }
-
-  async findExpired7Days() {
-    const expires_at = moment.utc().add(7, 'days').toDate();
-    return this.repository.find({ where: { expires_at: MoreThan(expires_at), state: FileState.EXPIRED } });
   }
 }
