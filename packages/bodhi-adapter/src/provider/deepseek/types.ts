@@ -1,6 +1,4 @@
-import * as types from '@/types';
-
-export namespace kimi {
+export namespace deepseek {
   /**
    * Request
    */
@@ -47,6 +45,5 @@ export namespace kimi {
       content: string;
     };
     finish_reason: string | null; // length, content_filter, tool_calls
-    usage?: Usage;
   };
 }
