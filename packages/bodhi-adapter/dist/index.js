@@ -11,6 +11,7 @@ var Provider = /* @__PURE__ */ ((Provider2) => {
   Provider2['ALIYUN_WANX'] = 'aliyun-wanx';
   Provider2['QCLOUD_HUNYUAN'] = 'qcloud-hunyuan';
   Provider2['MOONSHOT_KIMI'] = 'moonshot-kimi';
+  Provider2['DEEPSEEK'] = 'deepseek';
   return Provider2;
 })(Provider || {});
 
@@ -1278,12 +1279,13 @@ var MoonshotKimiAPI = class extends ChatBaseAPI {
       if (!res.ok) {
         const reason = await res.json();
         reject(new chat.ChatError(reason.error?.message || 'request error', res.status));
+        return;
       }
+      let usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
       if (params.stream === false) {
         const result = await res.json();
         const choices = this.convertChoices(result.choices);
-        const usage = result?.usage;
-        resolove({ id: uuidv45(), model: opts.model, choices, usage });
+        resolove({ id: uuidv45(), model: opts.model, choices, usage: result.usage });
       } else {
         const body = res.body;
         body.on('error', (err) => reject(new chat.ChatError(err.message, 500)));
@@ -1292,8 +1294,9 @@ var MoonshotKimiAPI = class extends ChatBaseAPI {
           if (event.type === 'event') {
             if (event.data !== '[DONE]') {
               try {
-                const res2 = JSON.parse(event.data);
-                const choices = this.convertChoices(res2.choices);
+                const result = JSON.parse(event.data);
+                const choices = this.convertChoices(result.choices);
+                usage = this.convertChoicesUsage(result.choices, usage);
                 onProgress?.(choices);
                 choicesList.push(...choices);
               } catch (e) {}
@@ -1308,7 +1311,6 @@ var MoonshotKimiAPI = class extends ChatBaseAPI {
         });
         body.on('end', async () => {
           const choices = this.combineChoices(choicesList);
-          const usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
           resolove({ id: uuidv45(), model: opts.model, choices, usage });
         });
       }
@@ -1330,7 +1332,7 @@ var MoonshotKimiAPI = class extends ChatBaseAPI {
       max_tokens: opts?.max_tokens || 1e3,
       n: opts.n || 1,
       stop: opts?.stop_sequences || void 0,
-      stream: true,
+      stream: opts?.stream != void 0 ? opts.stream : true,
     };
     if (opts.tools && opts.tools.length > 0) {
       Object.assign(params, { tools: opts.tools, stream: false });
@@ -1373,6 +1375,16 @@ var MoonshotKimiAPI = class extends ChatBaseAPI {
       console.warn(err);
     }
     return choices;
+  }
+  convertChoicesUsage(candidates, initial) {
+    candidates.map(({ usage }) => {
+      if (usage) {
+        initial.prompt_tokens += usage.prompt_tokens;
+        initial.completion_tokens += usage.completion_tokens;
+        initial.total_tokens += usage.total_tokens;
+      }
+    });
+    return initial;
   }
 };
 
@@ -1476,6 +1488,131 @@ var QcloudHunyuanAPI = class extends ChatBaseAPI {
   }
 };
 
+// src/provider/deepseek/deepseek.ts
+import fetchSSE10 from 'node-fetch';
+import { v4 as uuidv47 } from 'uuid';
+import { HttpsProxyAgent as HttpsProxyAgent11 } from 'https-proxy-agent';
+import { createParser as createParser9 } from 'eventsource-parser';
+var DeepSeekAPI = class extends ChatBaseAPI {
+  constructor(opts) {
+    const options = Object.assign({ baseURL: 'https://api.deepseek.com' }, opts);
+    super(options);
+    this.provider = 'moonshot';
+  }
+  models() {
+    return ['deepseek-chat'];
+  }
+  async sendMessage(opts) {
+    const { onProgress = () => {}, ...options } = opts;
+    return new Promise(async (resolove, reject) => {
+      const url = `${this.baseURL}/chat/completions`;
+      const params = await this.convertParams(options);
+      const res = await fetchSSE10(url, {
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.apiKey}` },
+        body: JSON.stringify(params),
+        agent: this.agent ? new HttpsProxyAgent11(this.agent) : void 0,
+        method: 'POST',
+      });
+      if (!res.ok) {
+        const reason = await res.json();
+        reject(new chat.ChatError(reason.error?.message || 'request error', res.status));
+      }
+      if (params.stream === false) {
+        const result = await res.json();
+        const choices = this.convertChoices(result.choices);
+        const usage = result?.usage;
+        resolove({ id: uuidv47(), model: opts.model, choices, usage });
+      } else {
+        const body = res.body;
+        body.on('error', (err) => reject(new chat.ChatError(err.message, 500)));
+        let result;
+        const choicesList = [];
+        const parser = createParser9((event) => {
+          if (event.type === 'event') {
+            if (event.data !== '[DONE]') {
+              try {
+                result = JSON.parse(event.data);
+                const choices = this.convertChoices(result.choices);
+                onProgress?.(choices);
+                choicesList.push(...choices);
+              } catch (e) {}
+            }
+          }
+        });
+        body.on('readable', async () => {
+          let chunk;
+          while ((chunk = body.read())) {
+            parser.feed(chunk.toString());
+          }
+        });
+        body.on('end', async () => {
+          const choices = this.combineChoices(choicesList);
+          resolove({ id: uuidv47(), model: opts.model, choices, usage: result.usage });
+        });
+      }
+    });
+  }
+  /**
+   * https://platform.deepseek.com/api-docs/zh-cn/api/create-chat-completion/index.html
+   * @returns
+   */
+  async convertParams(opts) {
+    const params = {
+      model: opts.model || 'moonshot-v1-8k',
+      messages: await this.corvertContents(opts),
+      temperature: opts?.temperature || 0.9,
+      top_p: opts?.top_p || 1,
+      // frequency_penalty: 0,
+      // presence_penalty: 0,
+      max_tokens: opts?.max_tokens || 1e3,
+      // n: opts.n || 1,
+      stop: opts?.stop_sequences || void 0,
+      stream: true,
+    };
+    if (opts.tools && opts.tools.length > 0) {
+      Object.assign(params, { tools: opts.tools, stream: false });
+    }
+    return params;
+  }
+  async corvertContents(opts) {
+    return Promise.all(
+      opts.messages.map(async (item) => {
+        const parts = [];
+        await Promise.all(
+          item.parts.map(async (part) => {
+            if (part.type === 'text') {
+              parts.push(part.text);
+            }
+            if (part.type === 'file' && part?.extract) {
+              parts.push(part.extract);
+            }
+          }),
+        );
+        return { role: item.role, content: parts.join('\n') };
+      }),
+    );
+  }
+  convertChoices(candidates) {
+    const choices = [];
+    try {
+      candidates.map(({ index, delta, message, finish_reason }) => {
+        const parts = [];
+        let { content } = message || delta;
+        if (delta) {
+          content = delta.content;
+        }
+        if (content) {
+          parts.push({ type: 'text', text: content });
+        }
+        choices.push({ index, role: 'assistant', parts, finish_reason });
+      });
+    } catch (err) {
+      console.warn(err);
+    }
+    return choices;
+  }
+};
+
 // src/api/chat.ts
 var ChatAPI = class {
   constructor(provider, opts) {
@@ -1513,6 +1650,9 @@ var ChatAPI = class {
         break;
       case 'moonshot-kimi' /* MOONSHOT_KIMI */:
         this.provider = new MoonshotKimiAPI(opts);
+        break;
+      case 'deepseek' /* DEEPSEEK */:
+        this.provider = new DeepSeekAPI(opts);
         break;
       default:
         throw new Error(`Unsupported supplier: ${provider}`);

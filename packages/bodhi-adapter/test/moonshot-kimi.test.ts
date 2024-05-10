@@ -21,7 +21,7 @@ describe('chat', () => {
     const res = await api.sendMessage({
       model: 'moonshot-v1-8k',
       messages: [
-        // { role: 'system', parts: [{ type: 'text', text: '你是一位资深的儿童作家，擅长写作高情商儿童故事' }] },
+        { role: 'system', parts: [{ type: 'text', text: '你是一位资深的儿童作家，擅长写作高情商儿童故事' }] },
         { role: 'user', parts: [{ type: 'text', text: '白雪公主与七个小矮人' }] },
         {
           role: 'assistant',
@@ -33,13 +33,16 @@ describe('chat', () => {
           ],
         },
         { role: 'user', parts: [{ type: 'text', text: '再来一个英文版本的？' }] },
+        // { role: 'user', parts: [{ type: 'text', text: 'hi' }] },
       ],
+      // n: 2,
+      // stream: false,
       onProgress: (choices) => {
         console.log(`[kimi]process`, JSON.stringify(choices));
         expect(choices).toBeInstanceOf(Object);
       },
     });
-    console.log(`[kimi]process`, JSON.stringify(res, null, 2));
+    console.log(`[kimi]result`, JSON.stringify(res, null, 2));
     expect(res).toBeInstanceOf(Object);
   }, 50000);
 

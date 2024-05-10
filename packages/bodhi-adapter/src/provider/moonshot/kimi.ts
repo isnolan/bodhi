@@ -37,14 +37,15 @@ export class MoonshotKimiAPI extends ChatBaseAPI {
       if (!res.ok) {
         const reason = await res.json();
         reject(new types.chat.ChatError(reason.error?.message || 'request error', res.status));
+        return;
       }
 
       // not stream
+      let usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
       if (params.stream === false) {
         const result = await res.json();
         const choices = this.convertChoices(result.choices);
-        const usage = result?.usage;
-        resolove({ id: uuidv4(), model: opts.model, choices, usage });
+        resolove({ id: uuidv4(), model: opts.model, choices, usage: result.usage });
       } else {
         // streaming
         const body: NodeJS.ReadableStream = res.body;
@@ -55,8 +56,9 @@ export class MoonshotKimiAPI extends ChatBaseAPI {
           if (event.type === 'event') {
             if (event.data !== '[DONE]') {
               try {
-                const res = JSON.parse(event.data);
-                const choices = this.convertChoices(res.choices);
+                const result = JSON.parse(event.data);
+                const choices = this.convertChoices(result.choices);
+                usage = this.convertChoicesUsage(result.choices, usage);
                 onProgress?.(choices);
                 choicesList.push(...choices);
               } catch (e) {
@@ -75,8 +77,6 @@ export class MoonshotKimiAPI extends ChatBaseAPI {
         // console.log(`->`, choicesList);
         body.on('end', async () => {
           const choices: types.chat.Choice[] = this.combineChoices(choicesList);
-          // TODO: Google AI Gemini not found usageMetadata, but vertex founded.
-          const usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
           resolove({ id: uuidv4(), model: opts.model, choices, usage });
         });
       }
@@ -99,7 +99,7 @@ export class MoonshotKimiAPI extends ChatBaseAPI {
       max_tokens: opts?.max_tokens || 1000,
       n: opts.n || 1,
       stop: opts?.stop_sequences || undefined,
-      stream: true,
+      stream: opts?.stream != undefined ? opts.stream : true,
     };
     // tools
     if (opts.tools && opts.tools.length > 0) {
@@ -149,5 +149,16 @@ export class MoonshotKimiAPI extends ChatBaseAPI {
       console.warn(err);
     }
     return choices;
+  }
+
+  protected convertChoicesUsage(candidates: kimi.Choice[], initial: types.chat.Usage): types.chat.Usage {
+    candidates.map(({ usage }: kimi.Choice) => {
+      if (usage) {
+        initial.prompt_tokens += usage.prompt_tokens;
+        initial.completion_tokens += usage.completion_tokens;
+        initial.total_tokens += usage.total_tokens;
+      }
+    });
+    return initial;
   }
 }

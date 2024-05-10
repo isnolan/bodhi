@@ -32,6 +32,7 @@ export namespace chat {
     n?: number;
     max_tokens?: number;
     stop_sequences?: string[];
+    stream?: boolean;
     onProgress?: (event: any) => void;
   };
 

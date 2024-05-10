@@ -10,6 +10,7 @@ declare enum Provider {
   ALIYUN_WANX = 'aliyun-wanx',
   QCLOUD_HUNYUAN = 'qcloud-hunyuan',
   MOONSHOT_KIMI = 'moonshot-kimi',
+  DEEPSEEK = 'deepseek',
 }
 
 /**
@@ -41,6 +42,7 @@ declare namespace chat {
     n?: number;
     max_tokens?: number;
     stop_sequences?: string[];
+    stream?: boolean;
     onProgress?: (event: any) => void;
   };
   type Message = {
