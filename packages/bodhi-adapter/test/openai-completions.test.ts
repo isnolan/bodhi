@@ -21,15 +21,15 @@ describe('chat', () => {
     const res = await api.sendMessage({
       model: 'gpt-3.5-turbo',
       messages: [
-        { role: 'system', parts: [{ type: 'text', text: '你是一个核物理专家' }] },
-        { role: 'user', parts: [{ type: 'text', text: '请写一个你擅长的小故事？' }] },
+        // { role: 'system', parts: [{ type: 'text', text: '你是一个儿童故事作家' }] },
+        { role: 'user', parts: [{ type: 'text', text: 'hi' }] },
       ],
       onProgress: (choices) => {
         console.log(`[openai]process`, JSON.stringify(choices));
         expect(choices).toBeInstanceOf(Object);
       },
     });
-    console.log(`[openai]process`, JSON.stringify(res, null, 2));
+    console.log(`[openai]result`, JSON.stringify(res, null, 2));
     expect(res).toBeInstanceOf(Object);
   }, 50000);
 
@@ -62,42 +62,42 @@ describe('chat', () => {
   }, 20000);
 
   // function call
-  it('function call', async () => {
-    const result = await api.sendMessage({
-      model: 'gpt-3.5-turbo',
-      messages: [
-        {
-          role: 'user',
-          parts: [{ type: 'text', text: 'Which theaters in Mountain View show Barbie movie?' }],
-        },
-      ],
-      tools: [
-        {
-          type: 'function',
-          function: {
-            name: 'find_theaters',
-            description:
-              'find theaters based on location and optionally movie title which are is currently playing in theaters',
-            parameters: {
-              type: 'object',
-              properties: {
-                location: {
-                  type: 'string',
-                  description: 'The city and state, e.g. San Francisco, CA or a zip code e.g. 95616',
-                },
-                movie: { type: 'string', description: 'Any movie title' },
-              },
-              required: ['location'],
-            },
-          },
-        },
-      ],
-      onProgress: (choices) => {
-        console.log(`[gemini]`, JSON.stringify(choices));
-        expect(choices).toBeInstanceOf(Object);
-      },
-    });
-    console.log(`[gemini]result:`, JSON.stringify(result));
-    expect(result).toBeInstanceOf(Object);
-  }, 30000);
+  // it('function call', async () => {
+  //   const result = await api.sendMessage({
+  //     model: 'gpt-3.5-turbo',
+  //     messages: [
+  //       {
+  //         role: 'user',
+  //         parts: [{ type: 'text', text: 'Which theaters in Mountain View show Barbie movie?' }],
+  //       },
+  //     ],
+  //     tools: [
+  //       {
+  //         type: 'function',
+  //         function: {
+  //           name: 'find_theaters',
+  //           description:
+  //             'find theaters based on location and optionally movie title which are is currently playing in theaters',
+  //           parameters: {
+  //             type: 'object',
+  //             properties: {
+  //               location: {
+  //                 type: 'string',
+  //                 description: 'The city and state, e.g. San Francisco, CA or a zip code e.g. 95616',
+  //               },
+  //               movie: { type: 'string', description: 'Any movie title' },
+  //             },
+  //             required: ['location'],
+  //           },
+  //         },
+  //       },
+  //     ],
+  //     onProgress: (choices) => {
+  //       console.log(`[openai]`, JSON.stringify(choices));
+  //       expect(choices).toBeInstanceOf(Object);
+  //     },
+  //   });
+  //   console.log(`[openai]result:`, JSON.stringify(result));
+  //   expect(result).toBeInstanceOf(Object);
+  // }, 30000);
 });

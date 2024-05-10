@@ -5,27 +5,18 @@ import { createParser, type ParseEvent, type ReconnectInterval } from 'eventsour
 
 import * as types from '@/types';
 import { ChatBaseAPI } from '../base';
-import { openai } from './types';
+import { groq } from './types';
 
-export class OpenAICompletionsAPI extends ChatBaseAPI {
-  protected provider: string = 'openai';
+export class GroqCompletionsAPI extends ChatBaseAPI {
+  protected provider: string = 'groq';
 
   constructor(opts: types.chat.ChatOptions) {
-    const options = Object.assign({ baseURL: 'https://api.openai.com/v1' }, opts);
+    const options = Object.assign({ baseURL: 'https://api.groq.com/openai/v1' }, opts);
     super(options);
   }
 
   public models(): string[] {
-    return [
-      'gpt-3.5-turbo',
-      'gpt-3.5-turbo-0125',
-      'gpt-3.5-turbo-16k',
-      'gpt-3.5-turbo-instruct',
-      'gpt-4',
-      'gpt-4-0125-preview',
-      'gpt-4-turbo-preview',
-      'gpt-4-32k',
-    ];
+    return ['llama3-8b-8192', 'llama3-70b-8192', 'mixtral-8x7b-32768', 'gemma-7b-it'];
   }
 
   async sendMessage(opts: types.chat.SendOptions) {
@@ -33,7 +24,7 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
 
     return new Promise(async (resolove, reject) => {
       const url = `${this.baseURL}/chat/completions`;
-      const params: openai.Request = await this.convertParams(options);
+      const params: groq.Request = await this.convertParams(options);
       // console.log(`[fetch]params`, JSON.stringify(params, null, 2));
       const res = await fetchSSE(url, {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.apiKey}` },
@@ -58,12 +49,13 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
         const body: NodeJS.ReadableStream = res.body;
         body.on('error', (err) => reject(new types.chat.ChatError(err.message, 500)));
 
+        let result;
         const choicesList: types.chat.Choice[] = [];
         const parser = createParser((event: ParseEvent | ReconnectInterval) => {
           if (event.type === 'event') {
             if (event.data !== '[DONE]') {
               try {
-                const result = JSON.parse(event.data);
+                result = JSON.parse(event.data);
                 const choices = this.convertChoices(result.choices);
                 onProgress?.(choices);
                 choicesList.push(...choices);
@@ -82,7 +74,8 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
 
         body.on('end', async () => {
           const choices: types.chat.Choice[] = this.combineChoices(choicesList);
-          const usage = this.caclulateUsage(opts.messages, choices);
+          const { prompt_tokens, completion_tokens, total_tokens } = result?.x_groq?.usage;
+          const usage = { prompt_tokens, completion_tokens, total_tokens };
           resolove({ id: uuidv4(), model: opts.model, choices, usage });
         });
       }
@@ -91,11 +84,11 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
 
   /**
    * 转换为 Gemini 要求的请求参数
-   * https://platform.openai.com/docs/api-reference/chat/create
+   * https://platform.groq.com/docs/api-reference/chat/create
    * @returns
    */
-  private async convertParams(opts: types.chat.SendOptions): Promise<openai.Request> {
-    const params: openai.Request = {
+  private async convertParams(opts: types.chat.SendOptions): Promise<groq.Request> {
+    const params: groq.Request = {
       model: opts.model || 'gpt-3.5-turbo-0125',
       messages: await this.corvertContents(opts),
       temperature: opts?.temperature || 0.9,
@@ -114,11 +107,11 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
     return params;
   }
 
-  private async corvertContents(opts: types.chat.SendOptions): Promise<openai.Message[]> {
+  private async corvertContents(opts: types.chat.SendOptions): Promise<groq.Message[]> {
     return Promise.all(
       opts.messages.map(async (item) => {
-        const parts: openai.Part[] = [];
-        const tool_calls: openai.ToolCallPart[] = [];
+        const parts: groq.Part[] = [];
+        const tool_calls: groq.ToolCallPart[] = [];
         await Promise.all(
           item.parts.map(async (part: types.chat.Part) => {
             // text
@@ -129,10 +122,9 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
             if (part.type === 'file' && part?.extract) {
               parts.push({ type: 'text', text: part.extract });
             }
+
             // file, only support image, now
             if (part.type === 'file' && part.mimetype?.startsWith('image')) {
-              // TODO: fetch 下载图片并转化buffer为base64
-              // parts.push({ type: 'image_url', image_url: (part as types.chat.FilePart).url });
               parts.push({ type: 'image_url', image_url: { url: (part as types.chat.FilePart).url } });
             }
             // tools
@@ -143,31 +135,31 @@ export class OpenAICompletionsAPI extends ChatBaseAPI {
           }),
         );
         if (item.role === 'system') {
-          return { role: 'system', content: this.filterTextPartsToString(parts) } as openai.Message;
+          return { role: 'system', content: this.filterTextPartsToString(parts) } as groq.Message;
         }
         if (item.role === 'assistant') {
           return {
             role: 'assistant',
             content: parts,
             tool_calls: tool_calls.length > 0 ? tool_calls : undefined,
-          } as openai.Message;
+          } as groq.Message;
         }
-        return { role: 'user', content: parts } as openai.Message;
+        return { role: 'user', content: parts } as groq.Message;
       }),
     );
   }
 
-  private filterTextPartsToString(parts: openai.Part[]): string {
+  private filterTextPartsToString(parts: groq.Part[]): string {
     return parts
       .filter((p) => p.type === 'text')
-      .map((p) => (p as openai.TextPart).text)
+      .map((p) => (p as groq.TextPart).text)
       .join('');
   }
 
-  protected convertChoices(candidates: openai.Choice[]): types.chat.Choice[] {
+  protected convertChoices(candidates: groq.Choice[]): types.chat.Choice[] {
     const choices: types.chat.Choice[] = [];
     try {
-      candidates.map(({ index, delta, message, finish_reason }: openai.Choice) => {
+      candidates.map(({ index, delta, message, finish_reason }: groq.Choice) => {
         const parts: types.chat.Part[] = [];
         let { content, tool_calls } = message || delta;
         if (delta) {

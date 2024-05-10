@@ -87,6 +87,19 @@ export class ChatBaseAPI {
     }, []);
   }
 
+  protected caclulateUsage(messages: types.chat.Message[], choices: types.chat.Choice[]): types.chat.Usage {
+    const parts: types.chat.Part[] = messages.flatMap((item) => item.parts);
+    const prompt_tokens = parts
+      .filter((p) => p.type === 'text' || (p.type === 'file' && p.extract))
+      .reduce((acc: number, item) => {
+        return acc + this.getTokenCount((item as types.chat.TextPart)?.text || (item as types.chat.FilePart)?.extract);
+      }, 0);
+    const completion_tokens = choices.reduce((acc: number, item: types.chat.Choice) => {
+      return acc + this.getTokenCount(item.parts.map((part) => (part as types.chat.TextPart).text).join(''));
+    }, 0);
+    return { prompt_tokens, completion_tokens, total_tokens: prompt_tokens + completion_tokens };
+  }
+
   protected getTokenCount(text: string) {
     return get_encoding('cl100k_base').encode(text).length;
   }

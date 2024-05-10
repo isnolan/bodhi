@@ -56,6 +56,7 @@ var Provider = /* @__PURE__ */ ((Provider2) => {
   Provider2['QCLOUD_HUNYUAN'] = 'qcloud-hunyuan';
   Provider2['MOONSHOT_KIMI'] = 'moonshot-kimi';
   Provider2['DEEPSEEK'] = 'deepseek';
+  Provider2['GROQ'] = 'groq';
   return Provider2;
 })(Provider || {});
 
@@ -151,6 +152,18 @@ var ChatBaseAPI = class {
       return acc;
     }, []);
   }
+  caclulateUsage(messages, choices) {
+    const parts = messages.flatMap((item) => item.parts);
+    const prompt_tokens = parts
+      .filter((p) => p.type === 'text' || (p.type === 'file' && p.extract))
+      .reduce((acc, item) => {
+        return acc + this.getTokenCount(item?.text || item?.extract);
+      }, 0);
+    const completion_tokens = choices.reduce((acc, item) => {
+      return acc + this.getTokenCount(item.parts.map((part) => part.text).join(''));
+    }, 0);
+    return { prompt_tokens, completion_tokens, total_tokens: prompt_tokens + completion_tokens };
+  }
   getTokenCount(text) {
     return (0, import_tiktoken.get_encoding)('cl100k_base').encode(text).length;
   }
@@ -203,8 +216,8 @@ var OpenAICompletionsAPI = class extends ChatBaseAPI {
           if (event.type === 'event') {
             if (event.data !== '[DONE]') {
               try {
-                const res2 = JSON.parse(event.data);
-                const choices = this.convertChoices(res2.choices);
+                const result = JSON.parse(event.data);
+                const choices = this.convertChoices(result.choices);
                 onProgress?.(choices);
                 choicesList.push(...choices);
               } catch (e) {}
@@ -219,7 +232,7 @@ var OpenAICompletionsAPI = class extends ChatBaseAPI {
         });
         body.on('end', async () => {
           const choices = this.combineChoices(choicesList);
-          const usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+          const usage = this.caclulateUsage(opts.messages, choices);
           resolove({ id: (0, import_uuid.v4)(), model: opts.model, choices, usage });
         });
       }
@@ -257,6 +270,9 @@ var OpenAICompletionsAPI = class extends ChatBaseAPI {
           item.parts.map(async (part) => {
             if (part.type === 'text') {
               parts.push({ type: 'text', text: part.text });
+            }
+            if (part.type === 'file' && part?.extract) {
+              parts.push({ type: 'text', text: part.extract });
             }
             if (part.type === 'file' && part.mimetype?.startsWith('image')) {
               parts.push({ type: 'image_url', image_url: { url: part.url } });
@@ -1662,6 +1678,165 @@ var DeepSeekAPI = class extends ChatBaseAPI {
   }
 };
 
+// src/provider/groq/completions.ts
+var import_node_fetch12 = __toESM(require('node-fetch'), 1);
+var import_uuid8 = require('uuid');
+var import_https_proxy_agent12 = require('https-proxy-agent');
+var import_eventsource_parser10 = require('eventsource-parser');
+var GroqCompletionsAPI = class extends ChatBaseAPI {
+  constructor(opts) {
+    const options = Object.assign({ baseURL: 'https://api.groq.com/openai/v1' }, opts);
+    super(options);
+    this.provider = 'groq';
+  }
+  models() {
+    return ['llama3-8b-8192', 'llama3-70b-8192', 'mixtral-8x7b-32768', 'gemma-7b-it'];
+  }
+  async sendMessage(opts) {
+    const { onProgress = () => {}, ...options } = opts;
+    return new Promise(async (resolove, reject) => {
+      const url = `${this.baseURL}/chat/completions`;
+      const params = await this.convertParams(options);
+      const res = await (0, import_node_fetch12.default)(url, {
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.apiKey}` },
+        body: JSON.stringify(params),
+        agent: this.agent ? new import_https_proxy_agent12.HttpsProxyAgent(this.agent) : void 0,
+        method: 'POST',
+      });
+      if (!res.ok) {
+        const reason = await res.json();
+        reject(new chat.ChatError(reason.error?.message || 'request error', res.status));
+      }
+      if (params.stream === false) {
+        const result = await res.json();
+        const choices = this.convertChoices(result.choices);
+        const usage = result?.usage;
+        resolove({ id: (0, import_uuid8.v4)(), model: opts.model, choices, usage });
+      } else {
+        const body = res.body;
+        body.on('error', (err) => reject(new chat.ChatError(err.message, 500)));
+        let result;
+        const choicesList = [];
+        const parser = (0, import_eventsource_parser10.createParser)((event) => {
+          if (event.type === 'event') {
+            if (event.data !== '[DONE]') {
+              try {
+                result = JSON.parse(event.data);
+                const choices = this.convertChoices(result.choices);
+                onProgress?.(choices);
+                choicesList.push(...choices);
+              } catch (e) {}
+            }
+          }
+        });
+        body.on('readable', async () => {
+          let chunk;
+          while ((chunk = body.read())) {
+            parser.feed(chunk.toString());
+          }
+        });
+        body.on('end', async () => {
+          const choices = this.combineChoices(choicesList);
+          const { prompt_tokens, completion_tokens, total_tokens } = result?.x_groq?.usage;
+          const usage = { prompt_tokens, completion_tokens, total_tokens };
+          resolove({ id: (0, import_uuid8.v4)(), model: opts.model, choices, usage });
+        });
+      }
+    });
+  }
+  /**
+   * 转换为 Gemini 要求的请求参数
+   * https://platform.groq.com/docs/api-reference/chat/create
+   * @returns
+   */
+  async convertParams(opts) {
+    const params = {
+      model: opts.model || 'gpt-3.5-turbo-0125',
+      messages: await this.corvertContents(opts),
+      temperature: opts?.temperature || 0.9,
+      top_p: opts?.top_p || 1,
+      // frequency_penalty: 0,
+      // presence_penalty: 0,
+      max_tokens: opts?.max_tokens || 1e3,
+      n: opts.n || 1,
+      stop: opts?.stop_sequences || void 0,
+      stream: true,
+    };
+    if (opts.tools && opts.tools.length > 0) {
+      Object.assign(params, { tools: opts.tools, stream: false });
+    }
+    return params;
+  }
+  async corvertContents(opts) {
+    return Promise.all(
+      opts.messages.map(async (item) => {
+        const parts = [];
+        const tool_calls = [];
+        await Promise.all(
+          item.parts.map(async (part) => {
+            if (part.type === 'text') {
+              parts.push({ type: 'text', text: part.text });
+            }
+            if (part.type === 'file' && part?.extract) {
+              parts.push({ type: 'text', text: part.extract });
+            }
+            if (part.type === 'file' && part.mimetype?.startsWith('image')) {
+              parts.push({ type: 'image_url', image_url: { url: part.url } });
+            }
+            if (part.type === 'function_call' && part.id) {
+              const { name, args } = part.function_call;
+              tool_calls.push({ id: part.id, type: 'function', function: { name, arguments: args } });
+            }
+          }),
+        );
+        if (item.role === 'system') {
+          return { role: 'system', content: this.filterTextPartsToString(parts) };
+        }
+        if (item.role === 'assistant') {
+          return {
+            role: 'assistant',
+            content: parts,
+            tool_calls: tool_calls.length > 0 ? tool_calls : void 0,
+          };
+        }
+        return { role: 'user', content: parts };
+      }),
+    );
+  }
+  filterTextPartsToString(parts) {
+    return parts
+      .filter((p) => p.type === 'text')
+      .map((p) => p.text)
+      .join('');
+  }
+  convertChoices(candidates) {
+    const choices = [];
+    try {
+      candidates.map(({ index, delta, message, finish_reason }) => {
+        const parts = [];
+        let { content, tool_calls } = message || delta;
+        if (delta) {
+          content = delta.content;
+          tool_calls = delta.tool_calls;
+        }
+        if (content) {
+          parts.push({ type: 'text', text: content });
+        }
+        if (tool_calls) {
+          tool_calls.map((call) => {
+            const { name, arguments: args } = call.function;
+            parts.push({ type: 'function_call', function_call: { name, args }, id: call.id });
+          });
+        }
+        choices.push({ index, role: 'assistant', parts, finish_reason });
+      });
+    } catch (err) {
+      console.warn(err);
+    }
+    return choices;
+  }
+};
+
 // src/api/chat.ts
 var ChatAPI = class {
   constructor(provider, opts) {
@@ -1702,6 +1877,9 @@ var ChatAPI = class {
         break;
       case 'deepseek' /* DEEPSEEK */:
         this.provider = new DeepSeekAPI(opts);
+        break;
+      case 'groq' /* GROQ */:
+        this.provider = new GroqCompletionsAPI(opts);
         break;
       default:
         throw new Error(`Unsupported supplier: ${provider}`);

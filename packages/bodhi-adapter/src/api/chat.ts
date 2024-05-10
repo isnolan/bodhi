@@ -4,6 +4,7 @@ import { GoogleVertexAPI, GoogleGeminiAPI } from '@/provider';
 import { AnthropicClaudeAPI, AnthropicBedrockAPI } from '@/provider';
 import { AliyunQwenAPI, AliyunWanxAPI } from '@/provider';
 import { ChatBaseAPI } from '@/provider/base';
+import { GroqCompletionsAPI } from '@/provider/groq';
 import * as types from '@/types';
 
 export class ChatAPI {
@@ -46,6 +47,9 @@ export class ChatAPI {
         break;
       case types.Provider.DEEPSEEK:
         this.provider = new DeepSeekAPI(opts);
+        break;
+      case types.Provider.GROQ:
+        this.provider = new GroqCompletionsAPI(opts);
         break;
       default:
         throw new Error(`Unsupported supplier: ${provider}`);

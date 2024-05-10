@@ -11,4 +11,5 @@ export enum Provider {
   QCLOUD_HUNYUAN = 'qcloud-hunyuan',
   MOONSHOT_KIMI = 'moonshot-kimi',
   DEEPSEEK = 'deepseek',
+  GROQ = 'groq',
 }
