@@ -19,13 +19,10 @@ import { FilesService } from './files.service';
 @ApiSecurity('api-key', [])
 @Controller('files')
 export class FilesController {
-  private readonly cdn: string;
   constructor(
     private readonly config: ConfigService,
     private readonly service: FilesService,
-  ) {
-    this.cdn = this.config.get('cdn');
-  }
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get Files', description: 'Get Files' })
@@ -36,7 +33,7 @@ export class FilesController {
     try {
       const rows = await this.service.findActiveByUserId(user_id, client_user_id);
       return rows.map((item) => {
-        const url = `${this.cdn}/${item.path}`;
+        const url = `${this.config.get('cdn')}/${item.path}`;
         const { name, size, mimetype, expires_at } = item;
         const id = this.service.encodeId(item.id);
         return { id, name, size, mimetype, url, expires_at };
@@ -86,7 +83,7 @@ export class FilesController {
     try {
       const id = this.service.decodeId(file_id);
       const file = await this.service.findById(id, user_id, client_user_id);
-      const url = `${this.cdn}/${file.path}`;
+      const url = `${this.config.get('cdn')}/${file.path}`;
       delete file.path;
 
       return { ...file, id: file_id, url };
