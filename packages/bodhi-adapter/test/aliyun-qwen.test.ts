@@ -19,7 +19,7 @@ describe('chat', () => {
 
   it('text: streaming', async () => {
     const res = await api.sendMessage({
-      model: 'qwen-turbo',
+      model: 'qwen1.5-110b-chat', // qwen-turbo
       messages: [
         // { role: 'system', content: 'You are a helpful assistant.' },
         // { role: 'user', content: '你好，哪个公园距离我最近？' },
@@ -42,7 +42,7 @@ describe('chat', () => {
   // image, from url
   it('image: from url', async () => {
     const res = await api.sendMessage({
-      model: 'qwen-plus',
+      model: 'qwen-plus', //
       messages: [
         {
           role: 'system',
@@ -52,7 +52,9 @@ describe('chat', () => {
           role: 'user',
           parts: [
             {
-              type: 'image',
+              id: '1',
+              type: 'file',
+              mimetype: 'image/jpeg',
               url: 'https://dashscope.oss-cn-beijing.aliyuncs.com/images/dog_and_girl.jpeg',
             },
             { type: 'text', text: 'Describe this image' },
