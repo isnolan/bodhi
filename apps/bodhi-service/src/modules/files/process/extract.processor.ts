@@ -36,12 +36,13 @@ export class ExtractProcessor {
       // text/plain, application/json
 
       // application/pdf
+
       const token = await this.auth.getAccessToken();
       const { bucket, processor } = this.config.get('gcloud');
       const res = await fetch(`${processor}:process`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        agent: new HttpsProxyAgent(process.env.HTTP_PROXY as string),
+        agent: process.env.HTTP_PROXY ? new HttpsProxyAgent(process.env.HTTP_PROXY as string) : undefined,
         body: JSON.stringify({
           skipHumanReview: true,
           gcsDocument: { mimeType, gcsUri: `gs://${bucket}/${filePath}` },
