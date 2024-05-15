@@ -36,12 +36,11 @@ export class FileService {
     return this.repository.update(query, { state: FileState.DELETED });
   }
 
-  async findActiveByUserId(user_id: number, client_user_id?: string) {
+  async findActiveByUserId(user_id: number, client_user_id?: string): Promise<File[]> {
     const query = { user_id, state: FileState.ACTIVE };
     client_user_id && (query['client_user_id'] = client_user_id);
-
     return this.repository.find({
-      select: ['id', 'name', 'path', 'size', 'mimetype', 'hash', 'expires_at'],
+      select: ['id', 'name', 'path', 'size', 'mimetype', 'hash', 'expires_at', 'state'],
       where: [
         { expires_at: MoreThan(new Date()), ...query },
         { expires_at: IsNull(), ...query },
@@ -73,7 +72,7 @@ export class FileService {
   async findActiveByHash(hash: string) {
     const query = { hash, state: FileState.ACTIVE };
     return this.repository.findOne({
-      select: ['id', 'name', 'path', 'size', 'mimetype', 'hash', 'expires_at'],
+      select: ['id', 'name', 'path', 'size', 'mimetype', 'hash', 'expires_at', 'state'],
       where: [
         { expires_at: MoreThan(new Date()), ...query },
         { expires_at: IsNull(), ...query },

@@ -26,6 +26,9 @@ export class FileDto {
 
   @ApiProperty()
   url: string;
+
+  @ApiProperty()
+  state: string;
 }
 
 export class FileSimpleDto {

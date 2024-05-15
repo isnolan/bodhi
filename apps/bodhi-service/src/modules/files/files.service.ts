@@ -62,8 +62,9 @@ export class FilesService {
     // check file is exists
     let f = await this.file.findActiveByHash(hash);
     if (f) {
+      const state = f.state;
       const url = `${this.cdn}/${f.path}`;
-      return { id: this.encodeId(f.id), name, size, mimetype, url, expires_at: f.expires_at };
+      return { id: this.encodeId(f.id), name, size, mimetype, url, expires_at: f.expires_at, state };
     }
 
     // create file
@@ -88,8 +89,9 @@ export class FilesService {
       // update state
       this.file.update(f.id, options);
 
+      const state = options.state;
       const url = `${this.cdn}/${filePath}`;
-      return { id: this.encodeId(f.id), name, url, size, mimetype, expires_at: f.expires_at } as FileDto;
+      return { id: this.encodeId(f.id), name, url, size, mimetype, expires_at: f.expires_at, state } as FileDto;
     } catch (err) {
       console.warn(err);
 

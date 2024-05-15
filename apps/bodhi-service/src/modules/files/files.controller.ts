@@ -1,8 +1,8 @@
 import { Body, Delete, NotFoundException, Param, Put, Req, UploadedFile } from '@nestjs/common';
-import { UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { UseGuards, UseInterceptors } from '@nestjs/common';
 import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { createHash } from 'crypto';
@@ -34,9 +34,9 @@ export class FilesController {
       const rows = await this.service.findActiveByUserId(user_id, client_user_id);
       return rows.map((item) => {
         const url = `${this.config.get('cdn')}/${item.path}`;
-        const { name, size, mimetype, expires_at } = item;
+        const { name, size, mimetype, expires_at, state } = item;
         const id = this.service.encodeId(item.id);
-        return { id, name, size, mimetype, url, expires_at };
+        return { id, name, size, mimetype, url, expires_at, state };
       });
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.FORBIDDEN);
