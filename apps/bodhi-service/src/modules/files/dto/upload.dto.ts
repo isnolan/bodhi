@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UploadFileReq {
   @ApiProperty({ type: 'string', format: 'binary', required: true })
-  files: Express.Multer.File[];
+  file: Express.Multer.File;
 
   @ApiPropertyOptional()
   purpose: undefined | 'file-extract' | 'fine-tune';

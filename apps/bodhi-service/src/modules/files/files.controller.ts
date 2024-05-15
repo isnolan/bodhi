@@ -1,8 +1,8 @@
-import { Body, Delete, NotFoundException, Param, Put, Req } from '@nestjs/common';
+import { Body, Delete, NotFoundException, Param, Put, Req, UploadedFile } from '@nestjs/common';
 import { UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { createHash } from 'crypto';
@@ -47,28 +47,25 @@ export class FilesController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: UploadFileReq })
   @ApiOperation({ summary: 'Upload File', description: 'Upload File' })
-  @ApiResponse({ status: 200, description: 'success', type: [FileDto] })
-  @UseInterceptors(FilesInterceptor('files'))
-  async upload(@Req() req: RequestWithUser, @UploadedFiles() files, @Body() body: UploadFileReq) {
+  @ApiResponse({ status: 200, description: 'success', type: FileDto })
+  @UseInterceptors(FileInterceptor('file'))
+  async upload(@Req() req: RequestWithUser, @UploadedFile() file, @Body() body: UploadFileReq) {
     const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
     const { purpose } = body;
-    const expires_at = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 15 days
 
     try {
       // 计算并检查hash
-      return Promise.all(
-        files.map((file: Express.Multer.File) => {
-          const hashhex = createHash('md5');
-          hashhex.update(file.buffer);
-          const hash = hashhex.digest('hex');
-          const mimetype = file.mimetype;
-          const size = file.size;
-          const name = Buffer.from(file.originalname, 'latin1').toString('utf8');
+      const hashhex = createHash('md5');
+      hashhex.update(file.buffer);
+      const hash = hashhex.digest('hex');
+      const mimetype = file.mimetype;
+      const size = file.size;
+      const name = Buffer.from(file.originalname, 'latin1').toString('utf8');
+      const expires_at = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 15 days
 
-          const opts = { hash, name, mimetype, size, expires_at, user_id, client_user_id };
-          return this.service.uploadFile(file, opts, purpose);
-        }),
-      );
+      const opts = { hash, name, mimetype, size, expires_at, user_id, client_user_id };
+
+      return this.service.uploadFile(file, opts, purpose);
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
     }
