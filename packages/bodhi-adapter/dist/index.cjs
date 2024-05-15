@@ -371,8 +371,7 @@ var GoogleGeminiAPI = class extends ChatBaseAPI {
     const { onProgress = () => {}, ...options } = opts;
     return new Promise(async (resolove, reject) => {
       const params = await this.convertParams(options);
-      const hasFile = opts.messages.some((item) => item.parts.some((part) => part.type === 'file'));
-      const model = hasFile && opts.model === 'gemini-1.0-pro' ? 'gemini-pro-vision' : opts.model;
+      const model = this.detechModel(opts);
       const url = `${this.baseURL}/models/${model}:streamGenerateContent?alt=sse`;
       const res = await (0, import_node_fetch3.default)(url, {
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': this.apiKey },
@@ -407,6 +406,16 @@ var GoogleGeminiAPI = class extends ChatBaseAPI {
         resolove({ id: (0, import_uuid2.v4)(), model: opts.model, choices, usage });
       });
     });
+  }
+  detechModel(opts) {
+    const hasMedia = opts.messages.some((item) =>
+      item.parts.some(
+        (part) =>
+          part.type === 'file' &&
+          (part.mimetype.startsWith('image') || part.mimetype.startsWith('video') || part.mimetype.startsWith('audio')),
+      ),
+    );
+    return hasMedia && opts.model === 'gemini-1.0-pro' ? 'gemini-1.0-pro-vision' : opts.model;
   }
   /**
    * 转换为 Gemini 要求的请求参数
@@ -555,8 +564,7 @@ var GoogleVertexAPI = class extends GoogleGeminiAPI {
     const { onProgress = () => {}, ...options } = opts;
     return new Promise(async (resolove, reject) => {
       const token = await this.getToken();
-      const hasFile = opts.messages.some((item) => item.parts.some((part) => part.type === 'file'));
-      const model = hasFile && opts.model === 'gemini-1.0-pro' ? 'gemini-1.0-pro-vision' : opts.model;
+      const model = this.detechModel(opts);
       const url = `${this.baseURL}/publishers/google/models/${model}:streamGenerateContent?alt=sse`;
       const params = await this.convertParams(options);
       const res = await (0, import_node_fetch4.default)(url, {

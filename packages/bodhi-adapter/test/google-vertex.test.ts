@@ -23,57 +23,22 @@ describe('chat', () => {
   });
 
   // 发送聊天消息
-  // it('text: streaming', async () => {
-  //   const res = await api.sendMessage({
-  //     model: 'gemini-pro',
-  //     messages: [
-  //       {
-  //         role: 'system',
-  //         parts: [
-  //           {
-  //             type: 'text',
-  //             text: "You are a professional children's literature writer, good at writing children's stories.",
-  //           },
-  //         ],
-  //       },
-  //       // { role: 'user', parts: [{ type: 'text', text: 'Hello, 我们家有两只狗' }] },
-  //       // { role: 'assistant', parts: [{ type: 'text', text: 'Great to meet you. What would you like to know?' }] },
-  //       { role: 'user', parts: [{ type: 'text', text: '请写一篇关于我家小狗子的故事，要求字数不少于200字' }] },
-  //     ],
-  //     onProgress: (choices) => {
-  //       console.log(`[vertex]progress:`, JSON.stringify(choices));
-  //       expect(choices).toBeInstanceOf(Object);
-  //     },
-  //   });
-
-  //   console.log(`[vertex]result:`, JSON.stringify(res));
-  //   expect(res).toBeInstanceOf(Object);
-  // }, 30000);
-
-  it('file: document', async () => {
+  it('text: streaming', async () => {
     const res = await api.sendMessage({
-      model: 'gemini-1.0-pro', // gemini-1.5-pro-preview-0409
+      model: 'gemini-1.0-pro',
       messages: [
-        {
-          role: 'user',
-          parts: [
-            {
-              id: 'document_1',
-              type: 'file',
-              mimetype: 'application/pdf',
-              // url: 'gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf',
-              url: 'gs://bodhi-storage/uploads/202405/0db16ca633824283d07cf3774f886cef/0.pdf',
-              // url: 'https://s.chatonce.cn/bodhi/uploads/202405/0db16ca633824283d07cf3774f886cef/0.pdf',
-            },
-            {
-              type: 'text',
-              text: '这个文档都讲了什么呢？',
-            },
-          ],
-        },
+        // {
+        //   role: 'system',
+        //   parts: [
+        //     {
+        //       type: 'text',
+        //       text: "You are a professional children's literature writer, good at writing children's stories.",
+        //     },
+        //   ],
+        // },
         // { role: 'user', parts: [{ type: 'text', text: 'Hello, 我们家有两只狗' }] },
         // { role: 'assistant', parts: [{ type: 'text', text: 'Great to meet you. What would you like to know?' }] },
-        // { role: 'user', parts: [{ type: 'text', text: '请写一篇关于我家小狗子的故事，要求字数不少于200字' }] },
+        { role: 'user', parts: [{ type: 'text', text: 'Hi' }] },
       ],
       onProgress: (choices) => {
         console.log(`[vertex]progress:`, JSON.stringify(choices));
@@ -83,7 +48,42 @@ describe('chat', () => {
 
     console.log(`[vertex]result:`, JSON.stringify(res));
     expect(res).toBeInstanceOf(Object);
-  }, 60000);
+  }, 30000);
+
+  // it('file: document', async () => {
+  //   const res = await api.sendMessage({
+  //     model: 'gemini-1.0-pro', // gemini-1.5-pro-preview-0409
+  //     messages: [
+  //       {
+  //         role: 'user',
+  //         parts: [
+  //           {
+  //             id: 'document_1',
+  //             type: 'file',
+  //             mimetype: 'application/pdf',
+  //             // url: 'gs://cloud-samples-data/generative-ai/pdf/2403.05530.pdf',
+  //             url: 'gs://bodhi-storage/uploads/202405/0db16ca633824283d07cf3774f886cef/0.pdf',
+  //             // url: 'https://s.chatonce.cn/bodhi/uploads/202405/0db16ca633824283d07cf3774f886cef/0.pdf',
+  //           },
+  //           {
+  //             type: 'text',
+  //             text: '这个文档都讲了什么呢？',
+  //           },
+  //         ],
+  //       },
+  //       // { role: 'user', parts: [{ type: 'text', text: 'Hello, 我们家有两只狗' }] },
+  //       // { role: 'assistant', parts: [{ type: 'text', text: 'Great to meet you. What would you like to know?' }] },
+  //       // { role: 'user', parts: [{ type: 'text', text: '请写一篇关于我家小狗子的故事，要求字数不少于200字' }] },
+  //     ],
+  //     onProgress: (choices) => {
+  //       console.log(`[vertex]progress:`, JSON.stringify(choices));
+  //       expect(choices).toBeInstanceOf(Object);
+  //     },
+  //   });
+
+  //   console.log(`[vertex]result:`, JSON.stringify(res));
+  //   expect(res).toBeInstanceOf(Object);
+  // }, 60000);
 
   // vision: image part, from inline data
   it('file: image', async () => {
@@ -116,7 +116,7 @@ describe('chat', () => {
   // vision: video part, from Google Cloud Storage
   it('file: video', async () => {
     const result = await api.sendMessage({
-      model: 'gemini-1.0-pro',
+      model: 'gemini-1.5-pro-preview-0409',
       messages: [
         {
           role: 'user',

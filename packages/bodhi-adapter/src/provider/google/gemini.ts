@@ -29,9 +29,7 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
     const { onProgress = () => {}, ...options } = opts;
     return new Promise(async (resolove, reject) => {
       const params: gemini.Request = await this.convertParams(options);
-      // if have media, use gemini-pro-vision
-      const hasFile = opts.messages.some((item) => item.parts.some((part) => part.type === 'file'));
-      const model = hasFile && opts.model === 'gemini-1.0-pro' ? 'gemini-pro-vision' : opts.model;
+      const model = this.detechModel(opts);
       const url = `${this.baseURL}/models/${model}:streamGenerateContent?alt=sse`;
       // console.log(`[fetch]params`, url, JSON.stringify(params, null, 2));
 
@@ -78,6 +76,17 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
         resolove({ id: uuidv4(), model: opts.model, choices, usage });
       });
     });
+  }
+
+  protected detechModel(opts: types.chat.SendOptions): string {
+    const hasMedia = opts.messages.some((item) =>
+      item.parts.some(
+        (part) =>
+          part.type === 'file' &&
+          (part.mimetype.startsWith('image') || part.mimetype.startsWith('video') || part.mimetype.startsWith('audio')),
+      ),
+    );
+    return hasMedia && opts.model === 'gemini-1.0-pro' ? 'gemini-1.0-pro-vision' : opts.model;
   }
 
   /**
