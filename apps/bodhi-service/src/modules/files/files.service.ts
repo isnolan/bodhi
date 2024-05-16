@@ -6,6 +6,8 @@ import { Queue } from 'bull';
 import Hashids from 'hashids';
 import * as mime from 'mime-types';
 import * as moment from 'moment-timezone';
+import { PDFDocument } from 'pdf-lib';
+import { cli } from 'winston/lib/winston/config';
 
 import { FileDto } from './dto/upload.dto';
 import { File, FileState } from './entity/file.entity';
@@ -40,9 +42,13 @@ export class FilesService {
     return this.file.findActiveByUserId(user_id, client_user_id);
   }
 
-  async findById(id: number, user_id?: number, client_user_id?: string) {
-    return this.file.find(id, user_id, client_user_id);
+  async findActiveById(id: number, user_id?: number, client_user_id?: string) {
+    return this.file.findActiveById(id, user_id, client_user_id);
   }
+
+  // async findById(id: number, user_id?: number, client_user_id?: string) {
+  //   return this.file.find(id, user_id, client_user_id);
+  // }
 
   async findExtractByFileIds(file_ids: string[]) {
     const ids = file_ids.map((i) => this.decodeId(i));
@@ -52,9 +58,9 @@ export class FilesService {
     }));
   }
 
-  async delete(id: number, user_id: number) {
+  async delete(id: number) {
     this.queue.add('file-clean', { id });
-    return this.file.delete(id, user_id);
+    return this.file.delete(id);
   }
 
   async uploadFile(file: Express.Multer.File, opts: Partial<File>, purpose: string): Promise<FileDto> {
@@ -82,8 +88,12 @@ export class FilesService {
 
       // file extract
       if (['application/pdf', 'text/plain', 'application/json'].includes(mimetype) && purpose === 'file-extract') {
-        this.queue.add('file-extract', { id: f.id, mimeType: mimetype, filePath });
+        this.queue.add('file-extract-async', { id: f.id, mimeType: mimetype, filePath });
         Object.assign(options, { state: FileState.PROGRESS });
+
+        const pdfDoc = await PDFDocument.load(file.buffer);
+        const pageCount = pdfDoc.getPages().length;
+        console.log(`[files]pageCount`, pageCount);
       }
 
       // update state

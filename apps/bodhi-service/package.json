@@ -59,6 +59,7 @@
     "passport-headerapikey": "^1.2.2",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
+    "pdf-lib": "^1.17.1",
     "pdf2pic": "^3.1.1",
     "redis": "^4.6.4",
     "reflect-metadata": "^0.1.13",

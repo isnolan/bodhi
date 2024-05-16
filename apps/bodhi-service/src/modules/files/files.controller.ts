@@ -79,7 +79,7 @@ export class FilesController {
 
     try {
       const id = this.service.decodeId(file_id);
-      const file = await this.service.findById(id, user_id, client_user_id);
+      const file = await this.service.findActiveById(id, user_id, client_user_id);
       const url = `${this.config.get('cdn')}/${file.path}`;
       delete file.path;
 
@@ -97,9 +97,9 @@ export class FilesController {
 
     try {
       const id = this.service.decodeId(file_id);
-      const file = await this.service.findById(id, user_id, client_user_id);
-      if (file && ['active', 'expired', 'created'].includes(file.state)) {
-        this.service.delete(id, user_id);
+      const file = await this.service.findActiveById(id, user_id, client_user_id);
+      if (file) {
+        this.service.delete(id);
         return;
       }
       throw new NotFoundException();

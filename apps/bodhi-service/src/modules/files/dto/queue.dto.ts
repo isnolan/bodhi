@@ -28,3 +28,8 @@ export class CleanQueueDto {
   @ApiProperty()
   id: number;
 }
+
+export class StateQueueDto {
+  @ApiProperty()
+  name: string;
+}

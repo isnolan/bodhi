@@ -24,7 +24,7 @@ export class CleanProcessor {
   /**
    * Auto clean expired files
    */
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_MINUTE)
   async handleDailyCleanExpired() {
     const files = await this.file.findExpired7Days();
     for (const file of files) {
@@ -42,13 +42,14 @@ export class CleanProcessor {
     const { id } = job.data;
     try {
       const file = await this.file.find(id);
-      if (file && file.mimetype === 'application/pdf') {
+      if (file) {
         const { bucket } = this.config.get('gcloud');
         const prefix = path.dirname(file.path);
         this.storage.bucket(bucket).deleteFiles({ prefix, force: true });
+        this.file.delete(id);
       }
     } catch (err) {
-      console.warn(`[file]progress:clean`, err.message);
+      console.warn(`[file]progress:clean`, `err`, err.message);
     }
   }
 }
