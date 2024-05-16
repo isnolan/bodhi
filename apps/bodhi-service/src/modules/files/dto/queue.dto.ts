@@ -22,6 +22,9 @@ export class ExtractQueueDto {
 
   @ApiProperty()
   filePath: string;
+
+  @ApiProperty()
+  buffer: Buffer;
 }
 
 export class CleanQueueDto {

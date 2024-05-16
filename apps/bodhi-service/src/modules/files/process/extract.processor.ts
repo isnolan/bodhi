@@ -6,6 +6,7 @@ import { GoogleAuth } from 'google-auth-library';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import fetch from 'node-fetch';
 import path from 'path';
+import { PDFDocument } from 'pdf-lib';
 
 import { ExtractQueueDto, StateQueueDto } from '../dto/queue.dto';
 import { FileState } from '../entity/file.entity';
@@ -27,39 +28,84 @@ export class ExtractProcessor {
     this.storage = new Storage({ credentials });
   }
 
-  @Process('file-extract-sync')
+  @Process('file-extract')
   async fileExtractSync(job: Job<ExtractQueueDto>) {
-    const { id, mimeType, filePath } = job.data;
-    console.log(`[files]extract`, id, filePath);
+    const { id, mimeType, filePath, buffer } = job.data;
+    console.log(`[files]extract`, id, filePath, buffer);
 
     try {
       // application/pdf
-      const token = await this.auth.getAccessToken();
-      const { bucket, processor } = this.config.get('gcloud');
-      const res = await fetch(`${processor}:process`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        agent: process.env.HTTP_PROXY ? new HttpsProxyAgent(process.env.HTTP_PROXY as string) : undefined,
-        body: JSON.stringify({
-          skipHumanReview: true,
-          gcsDocument: { mimeType, gcsUri: `gs://${bucket}/${filePath}` },
-          fieldMask: 'text',
-        }),
-      }).then((res) => res.json());
+      const { bucket } = this.config.get('gcloud');
+      const source = await PDFDocument.load(Buffer.from(buffer));
+      const totalPages = source.getPageCount();
 
-      console.log(`[files]extract1`, res);
-      // {"error":{"code":400,"message":"Document pages exceed the limit: 15 got 31","status":"INVALID_ARGUMENT","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"PAGE_LIMIT_EXCEEDED","domain":"documentai.googleapis.com","metadata":{"pages":"31","page_limit":"15"}}]}}
-      if (!res.error) {
-        // 存储原始JSON
+      if (totalPages < 15) {
+        // 直接处理
         const folderUri = `${path.dirname(filePath)}/1.json`;
+        const res = await this.extractText(filePath, mimeType);
         await this.storage.bucket(bucket).file(folderUri).save(JSON.stringify(res));
-
-        // 存储文本
         this.file.update(id, { extract: res?.document?.text, state: FileState.ACTIVE });
+      } else {
+        // 分片处理
+        const folderPath = path.dirname(filePath);
+
+        // const docShardings = [];
+        const numberOfFiles = Math.ceil(totalPages / 15);
+        for (let i = 0; i < numberOfFiles; i++) {
+          const newPdfDoc = await PDFDocument.create();
+          for (let j = 0; j < 15; j++) {
+            const pageIndex = i * 15 + j;
+            if (pageIndex < totalPages) {
+              const [copiedPage] = await newPdfDoc.copyPages(source, [pageIndex]);
+              newPdfDoc.addPage(copiedPage);
+            }
+          }
+          // upload sharding to gcs
+          const shardingPath = `${folderPath}/s_${i}.pdf`;
+          const newPdfBytes = await newPdfDoc.save();
+          await this.storage.bucket(bucket).file(shardingPath).save(Buffer.from(newPdfBytes));
+          // docShardings.push(await newPdfDoc.save());
+          console.log(`->sharding`, shardingPath, newPdfBytes);
+        }
+
+        // Extract text from each sharding in parallel and keep their order
+        // const texts: string[] = await Promise.all(
+        //   docShardings.map((sharding, index) => {
+        //     const shardingFilePath = `${filePath}_${index}.pdf`;
+        //     return this.extractText(shardingFilePath, mimeType);
+        //   }),
+        // );
       }
+
+      //   // 存储原始JSON
+      //   const folderUri = `${path.dirname(filePath)}/1.json`;
+      //   await this.storage.bucket(bucket).file(folderUri).save(JSON.stringify(res));
+      //   this.file.update(id, { extract: res?.document?.text, state: FileState.ACTIVE });
     } catch (err) {
-      console.warn(`[files]extract: error`, err);
+      console.warn(err);
     }
+  }
+
+  async extractText(filePath: string, mimeType: string) {
+    const token = await this.auth.getAccessToken();
+    const { bucket, processor } = this.config.get('gcloud');
+    const res = await fetch(`${processor}:process`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      agent: process.env.HTTP_PROXY ? new HttpsProxyAgent(process.env.HTTP_PROXY as string) : undefined,
+      body: JSON.stringify({
+        skipHumanReview: true,
+        gcsDocument: { mimeType, gcsUri: `gs://${bucket}/${filePath}` },
+        fieldMask: 'text',
+      }),
+    }).then((res) => res.json());
+
+    if (res.error) {
+      throw new Error(res.error.message);
+    }
+
+    return res;
+    // return res?.document?.text;
   }
 
   @Process('file-extract-async')

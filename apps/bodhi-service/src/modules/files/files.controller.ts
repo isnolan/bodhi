@@ -65,7 +65,7 @@ export class FilesController {
 
       const opts = { hash, name, mimetype, size, expires_at, user_id, client_user_id };
 
-      return this.service.uploadFile(file, opts, purpose);
+      return this.service.uploadFile(file.buffer, opts, purpose);
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
     }
@@ -80,10 +80,12 @@ export class FilesController {
     try {
       const id = this.service.decodeId(file_id);
       const file = await this.service.findActiveById(id, user_id, client_user_id);
-      const url = `${this.config.get('cdn')}/${file.path}`;
-      delete file.path;
-
-      return { ...file, id: file_id, url };
+      if (file) {
+        const url = `${this.config.get('cdn')}/${file.path}`;
+        delete file.path;
+        return { ...file, id: file_id, url };
+      }
+      throw new NotFoundException();
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.FORBIDDEN);
     }
