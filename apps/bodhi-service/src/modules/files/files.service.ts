@@ -6,6 +6,7 @@ import { Queue } from 'bull';
 import Hashids from 'hashids';
 import * as mime from 'mime-types';
 import * as moment from 'moment-timezone';
+import { PDFDocument } from 'pdf-lib';
 
 import { FileDto } from './dto/upload.dto';
 import { File, FileState } from './entity/file.entity';
@@ -82,8 +83,11 @@ export class FilesService {
 
       // file extract
       if (['application/pdf', 'text/plain', 'application/json'].includes(mimetype) && purpose === 'file-extract') {
-        this.queue.add('file-extract', { id: f.id, mimeType: mimetype, filePath, buffer });
         Object.assign(options, { state: FileState.PROGRESS });
+
+        const source = await PDFDocument.load(Buffer.from(buffer));
+        const totalPages = source.getPageCount();
+        this.queue.add('file-extract', { id: f.id, mimeType: mimetype, filePath, totalPages });
       }
 
       // update state

@@ -24,7 +24,7 @@ export class ExtractQueueDto {
   filePath: string;
 
   @ApiProperty()
-  buffer: Buffer;
+  totalPages: number;
 }
 
 export class CleanQueueDto {

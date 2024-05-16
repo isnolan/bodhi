@@ -42,7 +42,7 @@ export class File extends Base {
   @Column({ type: 'varchar', length: 100, comment: 'GURI', default: '' })
   file_uri;
 
-  @Column({ type: 'text', comment: 'extract', default: null })
+  @Column({ type: 'longtext', comment: 'extract', default: null })
   extract: string;
 
   @Column({ type: 'enum', enum: FileState, comment: '状态', default: FileState.CREATED })
