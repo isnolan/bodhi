@@ -32,7 +32,7 @@ export class GoogleClaudeAPI extends ChatBaseAPI {
   }
 
   public models(): string[] {
-    return ['claude-3-sonnet@20240229', 'claude-3-haiku@20240307'];
+    return ['claude-3-sonnet@20240229', 'claude-3-haiku@20240307', 'gemini-1.5-flash-preview-0514'];
   }
 
   /**
