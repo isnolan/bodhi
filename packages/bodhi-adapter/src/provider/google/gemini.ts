@@ -178,6 +178,7 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
 
   protected convertChoices(candidates: gemini.Candidate[]): types.chat.Choice[] {
     const choices: types.chat.Choice[] = [];
+
     try {
       candidates.map(({ index, content, finishReason }: gemini.Candidate) => {
         const parts: types.chat.Part[] = [];
@@ -192,7 +193,9 @@ export class GoogleGeminiAPI extends ChatBaseAPI {
         choices.push({ index, role: 'assistant', parts, finish_reason: 'stop' });
       });
     } catch (err) {
+      console.log(`->candidates1`, JSON.stringify(candidates, null, 2));
       console.warn(err);
+      console.log(`->candidates2`);
     }
     return choices;
   }

@@ -476,7 +476,9 @@ ${part.text}
         choices.push({ index, role: 'assistant', parts, finish_reason: 'stop' });
       });
     } catch (err) {
+      console.log(`->candidates1`, JSON.stringify(candidates, null, 2));
       console.warn(err);
+      console.log(`->candidates2`);
     }
     return choices;
   }
@@ -540,7 +542,10 @@ var GoogleVertexAPI = class extends GoogleGeminiAPI {
       const parser = createParser3((event) => {
         if (event.type === 'event') {
           const res2 = JSON.parse(event.data);
-          const choices = this.convertChoices(res2.candidates);
+          if (!res2.candidates) {
+            console.log(`[vertex]debug`, res2);
+          }
+          const choices = this.convertChoices(res2.candidates || []);
           if (res2.usageMetadata) {
             Object.assign(usage, {
               prompt_tokens: res2.usageMetadata.promptTokenCount,
@@ -591,7 +596,7 @@ var GoogleClaudeAPI = class extends ChatBaseAPI {
     return await auth.getAccessToken();
   }
   models() {
-    return ['claude-3-sonnet@20240229', 'claude-3-haiku@20240307'];
+    return ['claude-3-sonnet@20240229', 'claude-3-haiku@20240307', 'gemini-1.5-flash-preview-0514'];
   }
   /**
    * Send message

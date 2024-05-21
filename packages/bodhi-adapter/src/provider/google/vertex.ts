@@ -77,7 +77,11 @@ export class GoogleVertexAPI extends GoogleGeminiAPI {
       const parser = createParser((event: ParseEvent | ReconnectInterval) => {
         if (event.type === 'event') {
           const res = JSON.parse(event.data);
-          const choices = this.convertChoices(res.candidates);
+          // TODO: res 可能为空
+          if (!res.candidates) {
+            console.log(`[vertex]debug`, res);
+          }
+          const choices = this.convertChoices(res.candidates || []);
           if (res.usageMetadata) {
             Object.assign(usage, {
               prompt_tokens: res.usageMetadata.promptTokenCount,

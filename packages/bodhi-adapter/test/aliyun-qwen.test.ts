@@ -19,7 +19,7 @@ describe('chat', () => {
 
   it('text: streaming', async () => {
     const res = await api.sendMessage({
-      model: 'qwen1.5-110b-chat', // qwen-turbo
+      model: 'qwen-turbo', // qwen-turbo
       messages: [
         // { role: 'system', content: 'You are a helpful assistant.' },
         // { role: 'user', content: '你好，哪个公园距离我最近？' },
@@ -68,6 +68,21 @@ describe('chat', () => {
     });
 
     console.log(`[qwen]muliti`, JSON.stringify(res));
+    expect(res).toBeInstanceOf(Object);
+  }, 30000);
+
+  it('text: max', async () => {
+    const res = await api.sendMessage({
+      model: 'qwen-max', // qwen-turbo
+      messages: [{ role: 'user', parts: [{ type: 'text', text: '今天最新AI科技新闻是什么？' }] }],
+      top_k: 1.0,
+      // top_p
+      onProgress: (choices) => {
+        console.log(`[qwen]streaming`, JSON.stringify(choices));
+        expect(choices).toBeInstanceOf(Object);
+      },
+    });
+    console.log(`[qwen]`, JSON.stringify(res));
     expect(res).toBeInstanceOf(Object);
   }, 30000);
 });
