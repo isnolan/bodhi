@@ -1,0 +1,48 @@
+{
+  "name": "@isnolan/bodhi-social",
+  "version": "0.0.1",
+  "description": "social",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "version": "pnpm version patch",
+    "pub": "tsup && pnpm publish --access public",
+    "test": "jest"
+  },
+  "type": "module",
+  "source": "src/index.ts",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.cjs",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "https-proxy-agent": "^7.0.2",
+    "node-fetch": "^2.7.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@babel/preset-typescript": "^7.23.3",
+    "@jest/globals": "^29.7.0",
+    "@types/jest": "^29.5.11",
+    "@types/node-fetch": "^2.6.10",
+    "@types/uuid": "^9.0.7",
+    "babel-plugin-module-resolver": "^5.0.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "tsup": "^8.0.1",
+    "typescript": "~5.1.6"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
