@@ -6,7 +6,4 @@ export class SubscriptionConsumed {
 
   @ApiPropertyOptional()
   tokens?: number;
-
-  @ApiPropertyOptional()
-  credits?: number;
 }

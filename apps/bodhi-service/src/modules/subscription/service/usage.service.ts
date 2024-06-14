@@ -111,9 +111,5 @@ export class SubscriptionUsageService {
     if (c.times && c.tokens > 0) {
       await this.repository.increment({ id }, 'tokens_consumed', c.tokens);
     }
-
-    if (c.times && c.credits > 0) {
-      await this.repository.increment({ id }, 'credits_consumed', c.credits);
-    }
   }
 }

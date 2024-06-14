@@ -33,9 +33,6 @@ export class SubscriptionUsage extends Base {
   @Column({ type: 'int', comment: 'times', default: 0 })
   times_consumed: number; // 在当前周期内已使用的调用次数
 
-  @Column({ type: 'int', comment: 'credits', default: 0 })
-  credits_consumed: number; // 在当前周期内已消耗的信用额度
-
   @Column({ type: 'bigint', comment: 'tokens', default: 0 })
   tokens_consumed: number; // 在当前周期内已消耗的Token数量
 

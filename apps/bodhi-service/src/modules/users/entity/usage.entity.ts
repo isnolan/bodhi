@@ -18,6 +18,9 @@ export class UserUsage extends Base {
   @Column({ type: 'simple-json', comment: 'models', default: null })
   models: string[];
 
+  @Column({ type: 'int', comment: 'credit blance', default: 0 })
+  credit_balance: number;
+
   @Column({ type: 'int', comment: 'times limit', default: -1 })
   times_limit: number; // -1: unlimited, 0: disabled, >0: available
 
