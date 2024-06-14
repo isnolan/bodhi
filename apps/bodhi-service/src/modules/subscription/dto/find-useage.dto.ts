@@ -10,6 +10,6 @@ export interface UsageWithQuota extends Usage {
     id: number;
     providers: number[];
     times_limit: number;
-    token_limit: number;
+    tokens_limit: number;
   };
 }

@@ -29,7 +29,7 @@ export class SupplierArchivesProcessor {
     return new Promise(async (resolve) => {
       const conversation = await this.chat.findConversation(conversation_id);
       const { user_id, usage_id, provider_id, user_usage_id } = conversation;
-      // archive message
+
       // user message have been archived in the first time.
       if (role === 'assistant') {
         const d3 = { conversation_id, role, parts, message_id, parent_id, status };
@@ -51,7 +51,8 @@ export class SupplierArchivesProcessor {
       }
 
       if (usage_id > 0) {
-        this.subscription.comsumeUsageQuote(usage_id, role === 'assistant' ? 1 : 0, tokens);
+        const consumed = { times: role === 'assistant' ? 1 : 0, tokens };
+        this.subscription.comsumeUsageQuote(usage_id, consumed);
       }
 
       // sync to webhooks

@@ -5,7 +5,7 @@ class SubscriptionQuotas {
   times_limit: number;
 
   @ApiProperty()
-  token_limit: number;
+  tokens_limit: number;
 
   // @ApiProperty()
   // bots: BotsSimpleDto[];

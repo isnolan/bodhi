@@ -2,6 +2,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bull';
 
+import { SubscriptionConsumed } from './dto/consume.dto';
 import { UsageWithQuota } from './dto/find-useage.dto';
 import { SubscriptionSubscribed } from './entity';
 import { SubscriptionPlanService, SubscriptionSubscribedService, SubscriptionUsageService } from './service';
@@ -48,7 +49,7 @@ export class SubscriptionService {
       usages.map((u) => {
         if (
           (u.quota.times_limit === -1 || u.quota.times_limit >= u.times_consumed) &&
-          (u.quota.token_limit == -1 || u.quota.token_limit >= u.tokens_consumed)
+          (u.quota.tokens_limit == -1 || u.quota.tokens_limit >= u.tokens_consumed)
         ) {
           rows.push(u);
         }
@@ -58,7 +59,7 @@ export class SubscriptionService {
     return usages;
   }
 
-  async comsumeUsageQuote(usage_id: number, times: number, tokens: number) {
-    return this.usage.consumeQuote(usage_id, times, tokens);
+  async comsumeUsageQuote(usage_id: number, consumed: SubscriptionConsumed) {
+    return this.usage.consumeQuote(usage_id, consumed);
   }
 }

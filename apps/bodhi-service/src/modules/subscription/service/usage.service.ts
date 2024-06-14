@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import moment from 'moment-timezone';
 import { In, LessThan, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
+import { SubscriptionConsumed } from '../dto/consume.dto';
 import { SubscribedState, SubscriptionUsage } from '../entity';
 
 @Injectable()
@@ -90,7 +91,7 @@ export class SubscriptionUsageService {
         quota_id: true,
         times_consumed: true,
         tokens_consumed: true,
-        quota: { id: true, providers: true, times_limit: true, token_limit: true },
+        quota: { id: true, providers: true, times_limit: true, tokens_limit: true },
       },
       where: {
         user_id,
@@ -102,13 +103,17 @@ export class SubscriptionUsageService {
     });
   }
 
-  public async consumeQuote(id: number, times: number, tokens: number) {
-    if (times > 0) {
-      await this.repository.increment({ id }, 'times_consumed', times);
+  public async consumeQuote(id: number, c: SubscriptionConsumed) {
+    if (c.times && c.times > 0) {
+      await this.repository.increment({ id }, 'times_consumed', c.times);
     }
 
-    if (tokens > 0) {
-      await this.repository.increment({ id }, 'tokens_consumed', tokens);
+    if (c.times && c.tokens > 0) {
+      await this.repository.increment({ id }, 'tokens_consumed', c.tokens);
+    }
+
+    if (c.times && c.credits > 0) {
+      await this.repository.increment({ id }, 'credits_consumed', c.credits);
     }
   }
 }

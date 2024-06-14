@@ -25,8 +25,11 @@ export class SubscriptionQuota extends Base {
   @Column('int', { comment: 'times limit', default: 0 })
   times_limit: number; // -1: unlimited, 0: disabled, >0: available
 
+  @Column('int', { comment: 'credits limit', default: 0 })
+  credits_limit: number; // -1: unlimited, 0: disabled, >0: available
+
   @Column('bigint', { comment: 'tokens limit', default: 0 })
-  token_limit: number; // -1: unlimited, 0: disabled, >0: available
+  tokens_limit: number; // -1: unlimited, 0: disabled, >0: available
 
   @ManyToOne(() => SubscriptionPlan)
   @JoinColumn({ name: 'plan_id', referencedColumnName: 'id' })
