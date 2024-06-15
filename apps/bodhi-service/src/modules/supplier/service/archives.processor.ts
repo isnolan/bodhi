@@ -4,6 +4,7 @@ import { Job } from 'bull';
 
 import { ChatService } from '@/modules/chat/chat.service';
 import { CreateMessageDto } from '@/modules/chat/dto/create-message.dto';
+import { ProviderService } from '@/modules/provider/service';
 import { SubscriptionService } from '@/modules/subscription/subscription.service';
 import { UsersService } from '@/modules/users/users.service';
 
@@ -14,6 +15,7 @@ export class SupplierArchivesProcessor {
     private readonly chat: ChatService,
     private readonly users: UsersService,
     private readonly subscription: SubscriptionService,
+    private readonly provider: ProviderService,
   ) {}
 
   /**
@@ -45,9 +47,9 @@ export class SupplierArchivesProcessor {
       this.chat.updateConversationAttr(conversation_id, attr);
 
       // consume keys quotes, if exists
+      const { sale_credit } = await this.provider.findById(provider_id);
       if (user_usage_id > 0) {
-        // console.log(`[archives]key usage`, user_usage_id, tokens);
-        this.users.consumeUsage(user_usage_id, role === 'assistant' ? 1 : 0, tokens);
+        this.users.consumeUsage(user_usage_id, sale_credit);
       }
 
       if (usage_id > 0) {

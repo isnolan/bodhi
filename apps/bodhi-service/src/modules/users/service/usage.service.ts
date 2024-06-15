@@ -29,34 +29,27 @@ export class UserUsageService {
       return -1;
     }
 
-    if (
-      (row.times_limit == -1 || row.times_limit >= row.times_consumed) &&
-      (row.tokens_limit == -1 || row.tokens_limit >= row.tokens_consumed)
-    ) {
+    if (row.credit_balance == -1 || row.credit_balance >= row.credit_consumed) {
       return row.id;
     }
 
     return 0;
   }
 
-  async consume(usage_id: number, times: number = 0, tokens: number = 0) {
-    if (times > 0) {
-      await this.repository.increment({ id: usage_id }, 'times_consumed', times);
-    }
-    if (tokens > 0) {
-      await this.repository.increment({ id: usage_id }, 'tokens_consumed', tokens);
+  async consume(usage_id: number, credits: number = 0) {
+    if (credits > 0) {
+      await this.repository.increment({ id: usage_id }, 'credit_consumed', credits);
     }
   }
 
   async allocate(user_id: number, opts: Partial<UserUsage>): Promise<UserUsage> {
-    const { client_user_id, client_usage_id, times_limit = -1, tokens_limit = -1 } = opts;
+    const { client_user_id, client_usage_id, credit_balance = -1 } = opts;
     const where = { user_id, client_user_id, client_usage_id, state: KeyUsageState.VALID };
     const usage = await this.repository.findOne({ where });
 
     if (usage) {
       const d = {};
-      times_limit > 0 && Object.assign(d, { times_limit: usage.times_limit + times_limit });
-      tokens_limit > 0 && Object.assign(d, { tokens_limit: usage.tokens_limit + tokens_limit });
+      credit_balance > 0 && Object.assign(d, { credit_balance: usage.credit_balance + credit_balance });
       await this.repository.update(usage.id, d);
       return usage;
     } else {

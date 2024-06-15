@@ -34,8 +34,8 @@ export class UsersService {
     return this.keys.validateKey(secret_key);
   }
 
-  async consumeUsage(usage_id: number, times: number, tokens: number) {
-    return this.usage.consume(usage_id, times, tokens);
+  async consumeUsage(usage_id: number, credits: number) {
+    return this.usage.consume(usage_id, credits);
   }
 
   async allocateUsage(user_id: number, opts: Partial<UserUsage>) {

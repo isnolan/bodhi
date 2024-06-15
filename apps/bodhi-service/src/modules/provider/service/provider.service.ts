@@ -22,6 +22,11 @@ export class ProviderService {
     });
   }
 
+  async findById(id: number, is_relation?: boolean): Promise<Provider> {
+    const relations = is_relation ? ['model', 'instance', 'credential'] : [];
+    return this.repository.findOne({ where: { id }, relations });
+  }
+
   /**
    * Find active providers, by purchased
    */
