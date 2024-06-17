@@ -32,13 +32,20 @@ export class Provider extends Base {
   credential_id: number;
 
   /* Cost */
-  @Column({ type: 'decimal', precision: 10, scale: 2, comment: 'cost in', default: 0 })
+  @Column({ type: 'decimal', precision: 10, scale: 5, comment: 'cost in', default: 0 })
   cost_in_usd: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, comment: 'cost out', default: 0 })
+  @Column({ type: 'decimal', precision: 10, scale: 5, comment: 'cost out', default: 0 })
   cost_out_usd: number;
 
-  @Column({ type: 'int', comment: 'sale credit', default: 0 })
+  /* Sale */
+  @Column({ type: 'decimal', precision: 10, scale: 5, comment: 'cost in', default: 0 })
+  sale_in_usd: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 5, comment: 'cost out', default: 0 })
+  sale_out_usd: number;
+
+  @Column({ type: 'int', comment: 'sale credit', default: 30 })
   sale_credit: number;
 
   /* Weight */
