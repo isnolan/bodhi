@@ -122,7 +122,7 @@ export class ChatController {
     const { model = 'gpt-3.5-turbo', conversation_id, prompt = '' } = payload;
 
     try {
-      // validate subscription
+      // validate available quota
       const subscription = await this.validateSubscription(user_id, model, client_user_id, []);
       const { usages, provider_ids, user_usage_id } = subscription;
 

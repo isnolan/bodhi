@@ -20,7 +20,7 @@ export class ApiKeyStrategy extends PassportStrategy(HeaderAPIKeyStrategy, 'api-
       //   done(new HttpException('You exceeded your current quota, please check your plan.', 402), null);
       //   return;
       // }
-      done(null, { user_id: key.user_id, client_user_id: key.client_user_id });
+      done(null, { user_id: key.user_id, key_id: key.id });
       return;
     }
     done(new UnauthorizedException(), null);

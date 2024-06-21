@@ -34,8 +34,8 @@ export class UserKeyService {
     return null;
   }
 
-  async findActive(user_id: number, client_user_id: string): Promise<UserKey> {
-    return this.repository.findOne({ where: { user_id, client_user_id, state: UserKeyState.VALID } });
+  async findActive(user_id: number, id: number): Promise<UserKey> {
+    return this.repository.findOne({ where: { user_id, id, state: UserKeyState.VALID } });
   }
 
   /**
@@ -43,8 +43,8 @@ export class UserKeyService {
    * @returns
    */
   async createKey(user_id: number, opts: Partial<UserKey>): Promise<UserKey> {
-    const { client_user_id } = opts;
-    const exist = await this.repository.findOne({ where: { user_id, client_user_id, state: UserKeyState.VALID } });
+    const { name, balance } = opts;
+    const exist = await this.repository.findOne({ where: { user_id, name, balance, state: UserKeyState.VALID } });
     if (exist) {
       return exist;
     }
@@ -56,7 +56,7 @@ export class UserKeyService {
 
   async getList(user_id: number): Promise<UserKey[]> {
     return this.repository.find({
-      select: ['id', 'client_user_id', 'secret_key', 'remark', 'expires_at', 'update_at'],
+      select: ['id', 'name', 'secret_key', 'balance', 'remark', 'expires_at', 'update_at'],
       where: { user_id },
     });
   }

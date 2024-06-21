@@ -33,9 +33,9 @@ export class UsersController {
   @ApiResponse({ status: 201, description: 'success', type: GetKeysDto })
   async createKey(@Request() req, @Body() payload: CreateKeysDto): Promise<GetKeysDto> {
     const { user_id } = req.user;
-    const { client_user_id, remark, expires_at } = payload;
-    const { id, secret_key, update_at } = await this.keys.createKey(user_id, { client_user_id, remark, expires_at });
-    return { id, client_user_id, secret_key, remark, expires_at, update_at };
+    const { balance, name, remark, expires_at } = payload;
+    const { id, secret_key, update_at } = await this.keys.createKey(user_id, { name, remark, balance, expires_at });
+    return { id, secret_key, name, remark, balance, expires_at, update_at };
   }
 
   @Delete('keys/delete')
@@ -43,9 +43,9 @@ export class UsersController {
   @ApiResponse({ status: 201, description: 'success' })
   async deleteKey(@Request() req, @Body() payload: DeleteKeysDto) {
     const { user_id } = req.user;
-    const { client_user_id } = payload;
+    const { id } = payload;
     try {
-      const key = await this.keys.findActive(user_id, client_user_id);
+      const key = await this.keys.findActive(user_id, id);
       if (!key) {
         throw new Error('key not found');
       }

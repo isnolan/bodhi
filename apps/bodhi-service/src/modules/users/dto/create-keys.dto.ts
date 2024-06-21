@@ -1,11 +1,16 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateKeysDto {
-  @ApiPropertyOptional({ description: 'foreign id', example: '' })
+  @ApiProperty({ description: 'balance', example: 10 })
   @IsNotEmpty()
+  @IsNumber()
+  balance: number;
+
+  @ApiPropertyOptional({ description: 'name', example: '' })
+  @IsOptional()
   @IsString()
-  client_user_id: string;
+  name: string;
 
   @ApiPropertyOptional({ description: 'remark', example: '' })
   @IsOptional()

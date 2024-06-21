@@ -8,11 +8,15 @@ export class GetKeysDto {
 
   @ApiProperty()
   @IsString()
-  client_user_id: string;
+  name: string;
 
   @ApiProperty()
   @IsString()
   secret_key: string;
+
+  @ApiProperty()
+  @IsNumber()
+  balance: number;
 
   @ApiProperty()
   @IsString()
