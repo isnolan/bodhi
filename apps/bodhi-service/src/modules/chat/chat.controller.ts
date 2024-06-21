@@ -1,6 +1,6 @@
 /* eslint max-params: */
 import { chat } from '@isnolan/bodhi-adapter';
-import { Body, Controller, Get, HttpException, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
@@ -38,16 +38,8 @@ export class ChatController {
   @Get('models')
   @ApiOperation({ description: 'find purchased models', summary: 'find purchased models' })
   @ApiResponse({ status: 201, description: 'success' })
-  async models(@Req() req: RequestWithUser) {
-    const { user_id } = req.user;
-
-    try {
-      const usages = await this.subscription.findActiveUsageWithQuota(user_id);
-      const providers = usages.flatMap((usage) => usage.quota.providers);
-      return this.provider.findModelsByProviders(providers);
-    } catch (err) {
-      throw new HttpException(err.message, HttpStatus.FORBIDDEN);
-    }
+  async models() {
+    return this.provider.findModels();
   }
 
   /**
