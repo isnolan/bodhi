@@ -33,20 +33,20 @@ export class Provider extends Base {
 
   /* Cost */
   @Column({ type: 'decimal', precision: 10, scale: 5, comment: 'cost in', default: 0 })
-  cost_in_usd: number;
+  cost_in_usd: number; // per input 1k tokens
 
   @Column({ type: 'decimal', precision: 10, scale: 5, comment: 'cost out', default: 0 })
-  cost_out_usd: number;
+  cost_out_usd: number; // per ouput 1k tokens
 
   /* Sale */
   @Column({ type: 'decimal', precision: 10, scale: 5, comment: 'cost in', default: 0 })
-  sale_in_usd: number;
+  sale_in_usd: number; // per input 1k tokens
 
   @Column({ type: 'decimal', precision: 10, scale: 5, comment: 'cost out', default: 0 })
-  sale_out_usd: number;
+  sale_out_usd: number; // per ouput 1k tokens
 
   @Column({ type: 'int', comment: 'sale credit', default: 30 })
-  sale_credit: number;
+  sale_credit: number; // per request
 
   /* Weight */
   @Column({ type: 'decimal', precision: 2, scale: 1, comment: 'weight', default: 1 })

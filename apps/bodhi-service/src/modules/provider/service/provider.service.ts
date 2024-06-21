@@ -50,7 +50,7 @@ export class ProviderService {
   async findModels(): Promise<any[]> {
     const query = { status: CredentialsState.ACTIVE };
     const providers = await this.repository.find({
-      select: ['id', 'slug', 'model_id', 'cost_in_usd', 'cost_out_usd', 'sale_credit', 'expires_at'],
+      select: ['id', 'slug', 'model_id', 'sale_in_usd', 'sale_out_usd', 'sale_credit', 'expires_at'],
       where: [
         { expires_at: MoreThan(new Date()), ...query },
         { expires_at: IsNull(), ...query },
