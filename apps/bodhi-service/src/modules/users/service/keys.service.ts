@@ -64,4 +64,9 @@ export class UserKeyService {
   async delete(id: number) {
     return this.repository.update(id, { state: UserKeyState.DELETED });
   }
+
+  async updateBalance(user_id: number, opts: Partial<UserKey>) {
+    const { id, balance } = opts;
+    return this.repository.update({ user_id, id }, { balance });
+  }
 }

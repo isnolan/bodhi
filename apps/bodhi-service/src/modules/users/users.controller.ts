@@ -55,13 +55,13 @@ export class UsersController {
     }
   }
 
-  @Post('usage/allocate')
-  @ApiOperation({ summary: 'Allocate usage to client user', description: 'Allocate usage to client user' })
+  @Post('keys/balance')
+  @ApiOperation({ summary: 'update balance to the key', description: 'update balance to the key' })
   @ApiResponse({ status: 201, description: 'success' })
-  async allocateUsage(@Request() req, @Body() payload: LimitKeysDto) {
+  async updateKeyBalance(@Request() req, @Body() payload: LimitKeysDto) {
     const { user_id } = req.user;
     try {
-      return this.users.allocateUsage(user_id, payload);
+      return this.users.updateKeyBalance(user_id, payload);
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
     }
