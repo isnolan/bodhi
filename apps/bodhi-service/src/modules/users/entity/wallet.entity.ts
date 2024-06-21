@@ -10,8 +10,8 @@ export enum TradeType {
   WITHDRAW = 'withdraw', // 提现
 }
 
-@Entity('bodhi_billing_wallet')
-export class BillingWallet extends Base {
+@Entity('bodhi_users_wallet')
+export class UserWallet extends Base {
   @ApiProperty()
   @Column({ type: 'int', comment: 'user_id', default: 0 })
   user_id: number;
