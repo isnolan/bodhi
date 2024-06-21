@@ -30,6 +30,7 @@ export class AuthSessionService {
 
   async validateSession(id: number): Promise<AuthSession | null> {
     const session = await this.repository.findOne({ where: { id } });
+    // console.log(`->session`, session);
     if (session.expires_at < new Date() || session.status < 1) {
       return null;
     }

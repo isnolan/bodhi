@@ -20,10 +20,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate({ user_id, session_id, iat }: any) {
+    // console.log(`[auth]jwt`, user_id, session_id, iat);
     // 验证session是否有效
     const session = await this.session.validateSession(session_id);
+    // console.log(`[auth]jwt`, session);
     if (session) {
-      // const plans =
       return { user_id, session_id, iat };
     }
     throw new UnauthorizedException();

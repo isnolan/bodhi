@@ -5,15 +5,13 @@ import { AuthGuard } from '@nestjs/passport';
 export class JwtOrApiKeyGuard extends AuthGuard(['jwt', 'api-key']) {
   async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
+    // console.log(`[auth]strategy`, request.headers['x-api-key'], request.headers['authorization']);
 
-    // api-key strategies
     if (request.headers['x-api-key']) {
       (this as any).strategy = 'api-key';
     } else {
-      // jwt strategies
       (this as any).strategy = 'jwt';
     }
-
     return (await super.canActivate(context)) as boolean;
   }
 
