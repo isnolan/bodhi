@@ -61,7 +61,8 @@ export class UsersController {
   async updateKeyBalance(@Request() req, @Body() payload: LimitKeysDto) {
     const { user_id } = req.user;
     try {
-      return this.users.updateKeyBalance(user_id, payload);
+      const { id, balance } = payload;
+      return this.users.resetKeyBalance(user_id, id, balance);
     } catch (err) {
       throw new HttpException(err.message, HttpStatus.BAD_REQUEST);
     }

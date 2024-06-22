@@ -4,7 +4,7 @@ import moment from 'moment-timezone';
 import { In, LessThan, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 
 import { SubscriptionConsumed } from '../dto/consume.dto';
-import { SubscribedState, SubscriptionUsage } from '../entity';
+import { QuotaType, SubscribedState, SubscriptionUsage } from '../entity';
 
 @Injectable()
 export class SubscriptionUsageService {
@@ -83,21 +83,17 @@ export class SubscriptionUsageService {
     throw new Error(`Unknown reset period: ${resetPeriod}`);
   }
 
-  public async findActiveWithQuota(user_id: number): Promise<SubscriptionUsage[]> {
+  public async findActiveWithQuota(user_id: number, type = QuotaType.CHAT): Promise<SubscriptionUsage[]> {
     const today = moment().startOf('day').toDate();
+    const quota = { id: true, type: true, quotas: true };
     return this.repository.find({
-      select: {
-        id: true,
-        quota_id: true,
-        times_consumed: true,
-        tokens_consumed: true,
-        quota: { id: true, providers: true, times_limit: true, tokens_limit: true },
-      },
+      select: { id: true, quota_id: true, consumed: true, quota },
       where: {
         user_id,
         period_at: LessThanOrEqual(today),
         expires_at: MoreThanOrEqual(today),
         state: In([SubscribedState.ACTIVE, SubscribedState.PENDING]),
+        quota: { type },
       },
       relations: ['quota'],
     });

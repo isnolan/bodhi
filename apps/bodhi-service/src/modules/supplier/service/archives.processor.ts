@@ -30,7 +30,7 @@ export class SupplierArchivesProcessor {
     /* eslint no-async-promise-executor: */
     return new Promise(async (resolve) => {
       const conversation = await this.chat.findConversation(conversation_id);
-      const { user_id, usage_id, provider_id, user_usage_id } = conversation;
+      const { user_id, usage_id, provider_id, key_id } = conversation;
 
       // user message have been archived in the first time.
       if (role === 'assistant') {
@@ -48,8 +48,8 @@ export class SupplierArchivesProcessor {
 
       // consume keys quotes, if exists
       const { sale_credit } = await this.provider.findById(provider_id);
-      if (user_usage_id > 0) {
-        this.users.consumeUsage(user_usage_id, sale_credit);
+      if (key_id > 0) {
+        this.users.consumeUsage(user_id, key_id, sale_credit);
       }
 
       if (usage_id > 0) {
@@ -60,28 +60,27 @@ export class SupplierArchivesProcessor {
       // sync to webhooks
       try {
         const webhook = await this.users.findActiveWebhook(user_id);
-        if (webhook && user_usage_id > 0) {
-          const usage = await this.users.findUsageById(user_usage_id);
-          if (usage) {
-            const { client_usage_id, client_user_id } = usage;
-
-            const res = await fetch(webhook.url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'X-SECRET-KEY': webhook.secret_key },
-              body: JSON.stringify({
-                client_user_id,
-                client_usage_id,
-                conversation: {
-                  id: conversation.conversation_id,
-                  model: conversation.model,
-                  tokens: conversation.tokens,
-                },
-                message: { message_id, parent_id, role, parts, tokens, status },
-              }),
-            });
-
-            console.log(`[archives]webhook`, res.status, res.statusText);
-          }
+        if (webhook && key_id > 0) {
+          // TODO:  sync
+          // const usage = await this.users.findUsageById(user_usage_id);
+          // if (usage) {
+          //   const { client_usage_id, client_user_id } = usage;
+          //   const res = await fetch(webhook.url, {
+          //     method: 'POST',
+          //     headers: { 'Content-Type': 'application/json', 'X-SECRET-KEY': webhook.secret_key },
+          //     body: JSON.stringify({
+          //       client_user_id,
+          //       client_usage_id,
+          //       conversation: {
+          //         id: conversation.conversation_id,
+          //         model: conversation.model,
+          //         tokens: conversation.tokens,
+          //       },
+          //       message: { message_id, parent_id, role, parts, tokens, status },
+          //     }),
+          //   });
+          //   console.log(`[archives]webhook`, res.status, res.statusText);
+          // }
         } else {
           console.log(`[archives]webhook`, 'skip, no webhook or no usage');
         }

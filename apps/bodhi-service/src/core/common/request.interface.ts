@@ -2,7 +2,7 @@ import { Request } from 'express';
 
 interface User {
   user_id: number;
-  client_user_id?: string;
+  key_id?: number;
   session_id?: number;
 }
 

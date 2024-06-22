@@ -91,7 +91,7 @@ export class ChatService {
    */
   async completion(channel: string, conversation: ChatConversation, options: SendMessageDto) {
     const { id: conversation_id, user_id } = conversation;
-    const { usages, provider_ids, messages, message_id, status = 1 } = options;
+    const { providers, billing, messages, message_id, status = 1 } = options;
     const { parent_id = '' } = options;
     // archive message
     await Promise.all(
@@ -105,18 +105,16 @@ export class ChatService {
 
     try {
       // Assign valid provisioning credentials
-      const provider = await this.supplier.distribute(provider_ids, conversation);
-      // usage
-      const usage = usages.filter((u) => u.quota.providers.includes(provider.id))[0];
+      const provider = await this.supplier.distribute(providers, conversation);
       // console.log(`[chat]distribute`, provider.id, usage.id);
       if (provider.id !== conversation.provider_id) {
-        this.conversation.updateAttribute(conversation.id, { provider_id: provider.id, usage_id: usage.id });
+        this.conversation.updateAttribute(conversation.id, { provider_id: provider.id });
       }
 
       const s1: QueueMessageDto = { channel, provider_id: provider.id, conversation_id, parent_id: message_id, status };
       // console.log(`[chat]send`, provider, s1);
       if (provider.instance.type === InstanceType.SESSION) {
-        await this.redis.publish('puppet', JSON.stringify({ ...s1, provider_ids }));
+        await this.redis.publish('puppet', JSON.stringify({ ...s1, providers }));
       }
 
       if (provider.instance.type === InstanceType.API) {

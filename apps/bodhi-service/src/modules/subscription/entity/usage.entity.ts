@@ -30,11 +30,8 @@ export class SubscriptionUsage extends Base {
   @Column({ type: 'datetime', precision: 0, comment: 'expires', nullable: true })
   expires_at: Date; // 当前周期结束时间
 
-  @Column({ type: 'int', comment: 'times', default: 0 })
-  times_consumed: number; // 在当前周期内已使用的调用次数
-
-  @Column({ type: 'bigint', comment: 'tokens', default: 0 })
-  tokens_consumed: number; // 在当前周期内已消耗的Token数量
+  @Column({ type: 'int', comment: 'comsumed', default: 0 })
+  consumed: number; // 在当前周期内已消耗的Token数量
 
   @Column({ type: 'enum', enum: UsageState, comment: 'state', default: UsageState.PENDING })
   state: UsageState;

@@ -22,9 +22,7 @@ export class SubscriptionPlanService {
   async findActive() {
     return this.repository.find({
       select: ['id', 'title', 'description', 'price', 'annual_price'],
-      where: {
-        status: In([PlanState.ACTIVE]),
-      },
+      where: { status: PlanState.ACTIVE },
     });
   }
 

@@ -14,7 +14,7 @@ import { SubscriptionService } from '../subscription/subscription.service';
 import { UsersService } from '../users/users.service';
 import { ChatService } from './chat.service';
 import { CreateAgentDto, CreateCompletionsDto, CreateConversationDto } from './dto/create-completions.dto';
-import { SendMessageDto } from './dto/send-message.dto';
+import { BillingDto, SendMessageDto } from './dto/send-message.dto';
 import { ChatConversationService } from './service';
 
 @ApiTags('chat')
@@ -32,14 +32,11 @@ export class ChatController {
     private readonly file: FilesService,
   ) {}
 
-  /**
-   * Find subscribed models
-   */
   @Get('models')
-  @ApiOperation({ description: 'find purchased models', summary: 'find purchased models' })
+  @ApiOperation({ description: 'find models', summary: 'find models' })
   @ApiResponse({ status: 201, description: 'success' })
   async models() {
-    return this.provider.findModels();
+    return this.provider.findList();
   }
 
   /**
@@ -55,18 +52,18 @@ export class ChatController {
   @ApiResponse({ status: 429, description: 'Not enough quota' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async conversation(@Req() req: RequestWithUser, @Res() res: Response, @Body() payload: CreateConversationDto) {
-    const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
+    const { user_id, key_id = 0 } = req.user; // from jwt or apikey
     const { model, messages, conversation_id = uuidv4(), message_id = uuidv4() } = payload;
     const { stream = true, parent_id, temperature, top_p, top_k, context_limit, n } = payload;
 
     try {
       // validate subscription
       const abilities = this.checkAbilities(messages);
-      const subscription = await this.validateSubscription(user_id, model, client_user_id, abilities);
-      const { usages, provider_ids, user_usage_id } = subscription;
+
+      const { providers, billing } = await this.validateSubscription(user_id, model, key_id, abilities);
       // console.log(`->`, provider_ids);
       // find or create conversation
-      const d = { model, temperature, top_p, top_k, user_id, user_usage_id, context_limit, n };
+      const d = { model, temperature, top_p, top_k, user_id, key_id, context_limit, n };
       const conversation = await this.conversations.findAndCreateOne(conversation_id, d);
       const channel = `conversation:${conversation.id}`;
       const listener = this.createListener(channel, res, stream);
@@ -96,7 +93,7 @@ export class ChatController {
       }
 
       // 发送消息
-      const options: SendMessageDto = { usages, provider_ids, messages: [], message_id, parent_id };
+      const options: SendMessageDto = { providers, billing, messages: [], message_id, parent_id };
       Object.assign(options, { messages });
       await this.service.completion(channel, conversation, options);
     } catch (err) {
@@ -118,15 +115,13 @@ export class ChatController {
   @ApiResponse({ status: 200, description: 'success' })
   @ApiResponse({ status: 400, description: 'exception' })
   async agent(@Req() req: RequestWithUser, @Res() res: Response, @Body() payload: CreateAgentDto) {
-    const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
+    const { user_id, key_id = 0 } = req.user; // from jwt or apikey
     const { model = 'gpt-3.5-turbo', conversation_id, prompt = '' } = payload;
 
     try {
       // validate available quota
-      const subscription = await this.validateSubscription(user_id, model, client_user_id, []);
-      const { usages, provider_ids, user_usage_id } = subscription;
-
-      const d = { model, user_id, user_usage_id };
+      const { providers, billing } = await this.validateSubscription(user_id, model, key_id, []);
+      const d = { model, user_id, key_id };
       const conversation = await this.conversations.findAndCreateOne(conversation_id, d);
       if (!conversation) {
         throw new Error('Invalid conversation');
@@ -138,7 +133,7 @@ export class ChatController {
       req.on('close', () => this.service.unsubscribe(channel, listener));
 
       const messages = [{ role: 'user', parts: [{ type: 'text', text: prompt }] }];
-      const options: SendMessageDto = { usages, provider_ids, messages: [], message_id: uuidv4() }; //
+      const options: SendMessageDto = { providers, billing, messages: [], message_id: uuidv4() }; //
       Object.assign(options, { messages, status: 0 });
       await this.service.completion(channel, conversation, options);
     } catch (err) {
@@ -158,20 +153,19 @@ export class ChatController {
   @ApiResponse({ status: 200, description: 'success' })
   @ApiResponse({ status: 400, description: 'exception' })
   async completions(@Req() req: RequestWithUser, @Res() res: Response, @Body() payload: CreateCompletionsDto) {
-    const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
+    const { user_id, key_id = 0 } = req.user; // from jwt or apikey
     const { model = 'gemini-pro', messages = [], stream = true } = payload;
     const { temperature = 0.8, top_p = 1, top_k = 1, n = 1 } = payload;
 
     try {
       // validate subscription
       const abilities = this.checkAbilities(messages);
-      const subscription = await this.validateSubscription(user_id, model, client_user_id, abilities);
-      const { usages, provider_ids, user_usage_id } = subscription;
+      const { providers, billing } = await this.validateSubscription(user_id, model, key_id, abilities);
 
       // Get or create conversation
       const conversation_id = uuidv4();
       const context_limit = messages.length;
-      const d = { model, temperature, top_p, top_k, context_limit, n, user_id, user_usage_id };
+      const d = { model, temperature, top_p, top_k, context_limit, n, user_id, key_id };
       const conversation = await this.conversations.findAndCreateOne(conversation_id, d);
       if (!conversation) {
         throw new Error('Invalid conversation');
@@ -182,7 +176,7 @@ export class ChatController {
       this.service.subscribe(channel, listener);
       req.on('close', () => this.service.unsubscribe(channel, listener));
 
-      const options: SendMessageDto = { usages, provider_ids, messages, message_id: uuidv4() };
+      const options: SendMessageDto = { providers, billing, messages, message_id: uuidv4() };
       await this.service.completion(channel, conversation, options);
     } catch (err) {
       if (err instanceof HttpException) {
@@ -220,33 +214,30 @@ export class ChatController {
     return Array.from(abilities) as string[];
   }
 
-  private async validateSubscription(user_id: number, model: string, client_user_id: string, abilities?: string[]) {
-    // validate subscription
-    const usages = await this.subscription.findActiveUsageWithQuota(user_id, true);
-    if (usages.length === 0) {
-      throw new HttpException(`No active subscription or available quota.`, 402);
-    }
+  private async validateSubscription(user_id: number, model: string, key_id: number, abilities?: string[]) {
+    // provider: validate model & abilities
+    const providers = await this.provider.filterProviderByModel(model, abilities);
+    console.log(`->validate`, abilities, providers);
 
-    // validate provider
-    const ids = [...new Set(usages.flatMap((usage) => usage.quota.providers))];
-    const provider_ids = await this.provider.filterProviderByModel(ids as [], model, abilities);
-    console.log(`->validate`, abilities, provider_ids);
-    if (provider_ids.length === 0) {
+    if (providers.length === 0) {
       throw new HttpException(`No valid supplier for model:${model}`, 403);
     }
 
-    // check keys limit
-    let user_usage_id = 0;
-    if (client_user_id) {
-      const kui = await this.users.checkAvailableQuota(client_user_id, model);
-      if (kui > 0) {
-        user_usage_id = kui;
-      } else {
-        throw new HttpException(`Not enough quota for the key.`, 429);
+    // 无有效订阅 & 余额不足
+    const wallet = await this.users.checkAvailableBalance(user_id);
+    if (!wallet || wallet.balance <= 0) {
+      throw new HttpException(`No active subscription or insufficient funds`, 402);
+    }
+
+    // validate key balance, if key_id is provided
+    if (key_id > 0) {
+      const key = await this.users.checkAvailableQuota(user_id, key_id);
+      if (!key || key.balance < providers[0].sale_credit) {
+        throw new HttpException(`Not enough balance for the key.`, 429);
       }
     }
 
-    return { usages, provider_ids, user_usage_id };
+    return { providers: providers.map((provider) => provider.id), billing: { user_id, key_id } };
   }
 
   private createListener(channel: string, res, stream: boolean = true) {

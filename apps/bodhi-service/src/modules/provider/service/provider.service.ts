@@ -4,14 +4,12 @@ import { In, IsNull, MoreThan, Repository } from 'typeorm';
 
 import { ProviderWithRelations } from '../dto/find-provider.dto';
 import { CredentialsState, Provider } from '../entity';
-import { ProviderModelsService } from './models.service';
 
 @Injectable()
 export class ProviderService {
   constructor(
     @InjectRepository(Provider)
     private readonly repository: Repository<Provider>,
-    private readonly models: ProviderModelsService,
   ) {}
 
   async findByUserId(user_id: number, is_relation?: boolean): Promise<Provider[]> {
@@ -47,7 +45,7 @@ export class ProviderService {
     });
   }
 
-  async findModels(): Promise<any[]> {
+  async findList(): Promise<any[]> {
     const query = { status: CredentialsState.ACTIVE };
     const providers = await this.repository.find({
       select: ['id', 'slug', 'model_id', 'sale_in_usd', 'sale_out_usd', 'sale_credit', 'expires_at'],
@@ -76,20 +74,11 @@ export class ProviderService {
     return models;
   }
 
-  async filterProviderByModel(ids: number[], name: string, abilities: string[]): Promise<number[]> {
-    // const where = { id: In(ids), slug: Equal(name), model: { status: CredentialsState.ACTIVE } };
-    // if (abilities.length > 0) {
-    //   abilities.includes('tools') && Object.assign(where.model, { is_tools: 1 });
-    //   abilities.includes('vision') && Object.assign(where.model, { is_vision: 1 });
-    // }
-    // const providers = await this.repository.find({ select: ['id'], where, relations: ['model'] });
-    // return providers.map((provider) => provider.id);
-
+  async filterProviderByModel(name: string, abilities: string[]) {
     const query = this.repository
       .createQueryBuilder('provider')
-      .select('provider.id')
+      .select('provider.id, provider.sale_credit')
       .innerJoin('provider.model', 'model')
-      .where('provider.id IN (:...ids)', { ids })
       .andWhere('provider.slug = :name', { name })
       .andWhere('model.status = :status', { status: CredentialsState.ACTIVE });
 
@@ -99,8 +88,7 @@ export class ProviderService {
       });
     }
 
-    const providers = await query.getMany();
-    return providers.map((provider) => provider.id);
+    return query.getMany();
   }
 
   async findProvidersByNode(node: string): Promise<Provider[]> {

@@ -11,22 +11,26 @@ export enum QuotaPeriod {
   YEARLY = 'yearly',
 }
 
+export enum QuotaType {
+  CHAT = 'chat',
+  FILE = 'file',
+  TTS = 'tts',
+  IMAGE = 'image',
+}
+
 @Entity('bodhi_subscription_quotas')
 export class SubscriptionQuota extends Base {
   @Column({ type: 'int', comment: 'plan' })
   plan_id: number;
 
-  @Column({ type: 'simple-json', comment: 'providers', default: null })
-  providers: number[]; // provider id list
-
   @Column({ type: 'enum', enum: QuotaPeriod, comment: 'period', default: QuotaPeriod.DAILY })
   period: QuotaPeriod; // 配额时间周期
 
-  @Column('int', { comment: 'times limit', default: 0 })
-  times_limit: number; // -1: unlimited, 0: disabled, >0: available
+  @Column({ type: 'enum', enum: QuotaType, comment: 'type', default: QuotaType.CHAT })
+  type: QuotaType;
 
-  @Column('bigint', { comment: 'tokens limit', default: 0 })
-  tokens_limit: number; // -1: unlimited, 0: disabled, >0: available
+  @Column('int', { comment: 'quotas', default: 0 })
+  quotas: number; // -1: unlimited, 0: disabled, 1: available
 
   @ManyToOne(() => SubscriptionPlan)
   @JoinColumn({ name: 'plan_id', referencedColumnName: 'id' })

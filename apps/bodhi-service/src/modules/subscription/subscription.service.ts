@@ -42,21 +42,15 @@ export class SubscriptionService {
     return this.subscribed.findActiveWithPlanAndUsage(user_id);
   }
 
-  async findActiveUsageWithQuota(user_id: number, is_available?: boolean | undefined): Promise<UsageWithQuota[]> {
+  async findActiveUsageWithQuota(user_id: number, budget = 0): Promise<UsageWithQuota[]> {
     const usages = await this.usage.findActiveWithQuota(user_id);
-    if (is_available) {
-      const rows: UsageWithQuota[] = [];
-      usages.map((u) => {
-        if (
-          (u.quota.times_limit === -1 || u.quota.times_limit >= u.times_consumed) &&
-          (u.quota.tokens_limit == -1 || u.quota.tokens_limit >= u.tokens_consumed)
-        ) {
-          rows.push(u);
-        }
-      });
-      return rows;
-    }
-    return usages;
+    const rows: UsageWithQuota[] = [];
+    usages.map((u) => {
+      if (u.quota.quotas === -1 || u.quota.quotas - u.consumed >= budget) {
+        rows.push(u);
+      }
+    });
+    return rows;
   }
 
   async comsumeUsageQuote(usage_id: number, consumed: SubscriptionConsumed) {

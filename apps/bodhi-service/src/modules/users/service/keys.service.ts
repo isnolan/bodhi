@@ -65,8 +65,15 @@ export class UserKeyService {
     return this.repository.update(id, { state: UserKeyState.DELETED });
   }
 
-  async updateBalance(user_id: number, opts: Partial<UserKey>) {
-    const { id, balance } = opts;
-    return this.repository.update({ user_id, id }, { balance });
+  async resetBalance(user_id: number, key_id: number, balance: number) {
+    return this.repository.update({ user_id, id: key_id }, { balance });
+  }
+
+  async incrementBalance(user_id: number, key_id: number, credits: number) {
+    return this.repository.increment({ user_id, id: key_id }, 'balance', credits);
+  }
+
+  async decrementBalance(user_id: number, key_id: number, credits: number) {
+    return this.repository.decrement({ user_id, id: key_id }, 'balance', credits);
   }
 }

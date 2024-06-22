@@ -2,10 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 
 class SubscriptionQuotas {
   @ApiProperty()
-  times_limit: number;
+  type: string;
 
   @ApiProperty()
-  tokens_limit: number;
+  quotas: number;
 
   // @ApiProperty()
   // bots: BotsSimpleDto[];

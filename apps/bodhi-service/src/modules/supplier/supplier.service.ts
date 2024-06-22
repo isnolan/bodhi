@@ -63,6 +63,7 @@ export class SupplierService {
    * @returns
    */
   public async findInactive(product_ids, conversation, isDowngrade = false): Promise<ProviderWithRelations> {
+    // 获取可用Provider列表
     const services = await this.provider.findActive(product_ids);
     // console.log(`[supplier]findInactive`, product_ids, services);
 

@@ -4,6 +4,7 @@ import { UserKey } from './entity';
 import { Users } from './entity/users.entity';
 import { UserKeyService, UserWebhookService } from './service';
 import { UsersUserService } from './service/user.service';
+import { UserWalletService } from './service/wallet.service';
 
 @Injectable()
 export class UsersService {
@@ -11,6 +12,7 @@ export class UsersService {
     private readonly user: UsersUserService,
     private readonly keys: UserKeyService,
     private readonly webhook: UserWebhookService,
+    private readonly wallet: UserWalletService,
   ) {}
 
   async findOne(id: number): Promise<Users> {
@@ -29,11 +31,23 @@ export class UsersService {
     return this.keys.validateKey(secret_key);
   }
 
-  async updateKeyBalance(user_id: number, opts: Partial<UserKey>) {
-    return this.keys.updateBalance(user_id, opts);
+  async resetKeyBalance(user_id: number, key_id: number, balance: number) {
+    return this.keys.resetBalance(user_id, key_id, balance);
   }
 
   async findActiveWebhook(user_id: number) {
     return this.webhook.findActive(user_id);
+  }
+
+  async checkAvailableQuota(user_id: number, key_id: number) {
+    return this.keys.findActive(user_id, key_id);
+  }
+
+  async checkAvailableBalance(user_id: number) {
+    return this.wallet.findOneByUser(user_id);
+  }
+
+  async consumeUsage(user_id: number, key_id: number, sale_credit: number) {
+    return this.keys.decrementBalance(user_id, key_id, sale_credit);
   }
 }
