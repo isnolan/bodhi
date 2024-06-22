@@ -37,12 +37,12 @@ export class FilesService {
     return this.hashids.decode(id)[0] as number;
   }
 
-  async findActiveByUserId(user_id: number, client_user_id?: string) {
-    return this.file.findActiveByUserId(user_id, client_user_id);
+  async findActiveByUserId(user_id: number, key_id?: number) {
+    return this.file.findActiveByUserId(user_id, key_id);
   }
 
-  async findActiveById(id: number, user_id?: number, client_user_id?: string) {
-    return this.file.findActiveById(id, user_id, client_user_id);
+  async findActiveById(id: number, user_id?: number, key_id?: number) {
+    return this.file.findActiveById(id, user_id, key_id);
   }
 
   async findExtractByFileIds(file_ids: string[]) {

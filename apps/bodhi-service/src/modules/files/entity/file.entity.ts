@@ -15,8 +15,8 @@ export class File extends Base {
   @Column({ type: 'int', comment: 'user_id', default: 0 })
   user_id: number;
 
-  @Column({ type: 'varchar', length: 40, comment: 'client', default: '' })
-  client_user_id: string;
+  @Column({ type: 'int', comment: 'key_id', default: 0 })
+  key_id: number;
 
   @Column({ type: 'varchar', length: 32, comment: 'hash', default: '' })
   hash: string;

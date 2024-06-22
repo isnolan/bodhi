@@ -28,10 +28,10 @@ export class FilesController {
   @ApiOperation({ summary: 'Get Files', description: 'Get Files' })
   @ApiResponse({ status: 200, description: 'success', type: [FileDto] })
   async files(@Req() req: RequestWithUser): Promise<FileDto[]> {
-    const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
+    const { user_id, key_id = 0 } = req.user; // from jwt or apikey
 
     try {
-      const rows = await this.service.findActiveByUserId(user_id, client_user_id);
+      const rows = await this.service.findActiveByUserId(user_id, key_id);
       return rows.map((item) => {
         const url = `${this.config.get('cdn')}/${item.path}`;
         const { name, size, mimetype, expires_at, state } = item;
@@ -50,7 +50,7 @@ export class FilesController {
   @ApiResponse({ status: 200, description: 'success', type: FileDto })
   @UseInterceptors(FileInterceptor('file'))
   async upload(@Req() req: RequestWithUser, @UploadedFile() file, @Body() body: UploadFileReq) {
-    const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
+    const { user_id, key_id = 0 } = req.user; // from jwt or apikey
     const { purpose } = body;
 
     try {
@@ -63,7 +63,7 @@ export class FilesController {
       const name = Buffer.from(file.originalname, 'latin1').toString('utf8');
       const expires_at = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 15 days
 
-      const opts = { hash, name, mimetype, size, expires_at, user_id, client_user_id };
+      const opts = { hash, name, mimetype, size, expires_at, user_id, key_id };
 
       return this.service.uploadFile(file.buffer, opts, purpose);
     } catch (err) {
@@ -75,11 +75,11 @@ export class FilesController {
   @ApiOperation({ summary: 'Find file detail', description: 'Find file detail' })
   @ApiResponse({ status: 200, description: 'success', type: FileDto })
   async find(@Req() req: RequestWithUser, @Param('id') file_id: string): Promise<FileDto> {
-    const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
+    const { user_id, key_id = 0 } = req.user; // from jwt or apikey
 
     try {
       const id = this.service.decodeId(file_id);
-      const file = await this.service.findActiveById(id, user_id, client_user_id);
+      const file = await this.service.findActiveById(id, user_id, key_id);
       if (file) {
         const url = `${this.config.get('cdn')}/${file.path}`;
         delete file.path;
@@ -95,11 +95,11 @@ export class FilesController {
   @ApiOperation({ summary: 'Delete File', description: 'Delete File' })
   @ApiResponse({ status: 200, description: 'success' })
   async delete(@Req() req: RequestWithUser, @Param('id') file_id: string) {
-    const { user_id, client_user_id = '' } = req.user; // from jwt or apikey
+    const { user_id, key_id = 0 } = req.user; // from jwt or apikey
 
     try {
       const id = this.service.decodeId(file_id);
-      const file = await this.service.findActiveById(id, user_id, client_user_id);
+      const file = await this.service.findActiveById(id, user_id, key_id);
       if (file) {
         this.service.delete(id);
         return;

@@ -39,9 +39,9 @@ export class FileService {
     return this.repository.findOne({ where: { id } });
   }
 
-  async findActiveByUserId(user_id: number, client_user_id?: string): Promise<File[]> {
+  async findActiveByUserId(user_id: number, key_id?: number): Promise<File[]> {
     const query = { user_id, state: FileState.ACTIVE };
-    client_user_id && (query['client_user_id'] = client_user_id);
+    key_id && (query['key_id'] = key_id);
     return this.repository.find({
       select: ['id', 'name', 'path', 'size', 'mimetype', 'expires_at', 'state'],
       where: [
@@ -51,10 +51,10 @@ export class FileService {
     });
   }
 
-  async findActiveById(id: number, user_id?: number, client_user_id?: string) {
+  async findActiveById(id: number, user_id?: number, key_id?: number) {
     const query = { id };
     user_id && (query['user_id'] = user_id);
-    client_user_id && (query['client_user_id'] = client_user_id);
+    key_id && (query['key_id'] = key_id);
 
     return this.repository.findOne({
       select: ['id', 'name', 'path', 'size', 'mimetype', 'expires_at', 'state'],
