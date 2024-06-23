@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 class CreateChatDto {
   /* 基本内容 */
-  @ApiProperty({ default: 'gemini-1.0-pro' })
+  @ApiProperty({ default: 'qwen-turbo' })
   @IsNotEmpty()
   @IsString()
   model: string;
@@ -76,7 +76,7 @@ export class CreateConversationDto extends CreateChatDto {
 }
 
 export class CreateAgentDto {
-  @ApiProperty({ default: 'gemini-pro' })
+  @ApiProperty({ default: 'qwen-turbo' })
   @IsOptional()
   @IsString()
   model: string;

@@ -113,7 +113,7 @@ export class AliyunQwenAPI extends ChatBaseAPI {
       },
       parameters: {
         temperature: (opts.temperature || 0.85) * 2 - 0.1,
-        top_p: opts.top_p || 0.8,
+        top_p: opts.top_p < 0 || opts.top_p >= 1 ? 0.8 : opts.top_p,
         // top_k: Math.round((opts.top_k || 0.025) * 100) || undefined,
         max_tokens: opts.max_tokens || 1500,
         incremental_output: true,

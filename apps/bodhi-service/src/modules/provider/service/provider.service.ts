@@ -77,7 +77,7 @@ export class ProviderService {
   async filterProviderByModel(name: string, abilities: string[]) {
     const query = this.repository
       .createQueryBuilder('provider')
-      .select('provider.id, provider.sale_credit')
+      .select(['provider.id', 'provider.sale_credit'])
       .innerJoin('provider.model', 'model')
       .andWhere('provider.slug = :name', { name })
       .andWhere('model.status = :status', { status: CredentialsState.ACTIVE });

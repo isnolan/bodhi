@@ -12,6 +12,10 @@ export class UserWalletService {
   ) {}
 
   async findOneByUser(user_id: number) {
-    return this.repository.findOne({ where: { user_id }, order: { id: 'DESC' } });
+    return this.repository.findOne({
+      select: ['id', 'user_id', 'amount', 'balance', 'trade_type'],
+      where: { user_id },
+      order: { id: 'DESC' },
+    });
   }
 }

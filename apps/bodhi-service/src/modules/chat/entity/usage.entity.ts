@@ -2,6 +2,11 @@ import { Column, Entity } from 'typeorm';
 
 import { Base } from '@/core/common/base.entity';
 
+export enum MessageType {
+  INPUT = 1,
+  OUTPUT = 2,
+}
+
 @Entity('bodhi_chat_usage')
 export class ChatUsage extends Base {
   @Column({ type: 'int', comment: 'user_id', default: 0 })
@@ -18,6 +23,9 @@ export class ChatUsage extends Base {
 
   @Column({ type: 'varchar', length: 40, comment: 'slug', default: '' })
   model: string;
+
+  @Column({ type: 'enum', enum: MessageType, comment: 'type', default: MessageType.INPUT })
+  type: MessageType;
 
   @Column({ type: 'int', comment: 'tokens', default: 0 })
   tokens: number;

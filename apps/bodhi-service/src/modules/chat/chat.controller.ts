@@ -58,7 +58,7 @@ export class ChatController {
       // validate subscription
       const abilities = this.checkAbilities(messages);
       const { providers, billing } = await this.validateSubscription(user_id, model, key_id, abilities);
-      console.log(`->`, providers);
+      // console.log(`->`, providers);
       // find or create conversation
       const d = { model, temperature, top_p, top_k, user_id, key_id, context_limit, n };
       const conversation = await this.conversations.findAndCreateOne(conversation_id, d);
@@ -214,8 +214,6 @@ export class ChatController {
   private async validateSubscription(user_id: number, model: string, key_id: number, abilities?: string[]) {
     // provider: validate model & abilities
     const providers = await this.provider.filterProviderByModel(model, abilities);
-    console.log(`->validate`, abilities, providers);
-
     if (providers.length === 0) {
       throw new HttpException(`No valid supplier for model:${model}`, 403);
     }
@@ -223,14 +221,14 @@ export class ChatController {
     // 无有效订阅 & 余额不足
     const wallet = await this.users.checkAvailableBalance(user_id);
     if (!wallet || wallet.balance <= 0) {
-      throw new HttpException(`No active subscription or insufficient funds`, 402);
+      throw new HttpException(`Insufficient funds`, 402);
     }
 
     // validate key balance, if key_id is provided
     if (key_id > 0) {
       const key = await this.users.checkAvailableQuota(user_id, key_id);
       if (!key || key.balance < providers[0].sale_credit) {
-        throw new HttpException(`Not enough balance for the key.`, 429);
+        throw new HttpException(`Not enough credits balance.`, 402);
       }
     }
 
