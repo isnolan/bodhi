@@ -45,9 +45,9 @@ export class ChatController {
   @ApiBody({ type: CreateConversationDto })
   @ApiResponse({ status: 200, description: 'success' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 402, description: 'No active subscription or available quota' })
-  @ApiResponse({ status: 403, description: 'No valid supplier for model' })
-  @ApiResponse({ status: 429, description: 'Not enough quota' })
+  @ApiResponse({ status: 402, description: 'No available quotas.' })
+  @ApiResponse({ status: 403, description: 'No valid supplier for model.' })
+  @ApiResponse({ status: 429, description: 'Not enough quota.' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async conversation(@Req() req: RequestWithUser, @Res() res: Response, @Body() payload: CreateConversationDto) {
     const { user_id, key_id = 0 } = req.user; // from jwt or apikey
@@ -57,9 +57,8 @@ export class ChatController {
     try {
       // validate subscription
       const abilities = this.checkAbilities(messages);
-
       const { providers, billing } = await this.validateSubscription(user_id, model, key_id, abilities);
-      // console.log(`->`, provider_ids);
+      console.log(`->`, providers);
       // find or create conversation
       const d = { model, temperature, top_p, top_k, user_id, key_id, context_limit, n };
       const conversation = await this.conversations.findAndCreateOne(conversation_id, d);

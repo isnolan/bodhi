@@ -48,7 +48,7 @@ export class ProviderService {
   async findList(): Promise<any[]> {
     const query = { status: CredentialsState.ACTIVE };
     const providers = await this.repository.find({
-      select: ['id', 'slug', 'model_id', 'sale_in_usd', 'sale_out_usd', 'sale_credit', 'expires_at'],
+      select: ['id', 'slug', 'model_id', 'sale_credit', 'expires_at'],
       where: [
         { expires_at: MoreThan(new Date()), ...query },
         { expires_at: IsNull(), ...query },
@@ -67,8 +67,8 @@ export class ProviderService {
         existing.abilities = [...new Set([...existing.abilities, ...abilities])];
       } else {
         const { icon, context_tokens } = provider.model;
-        const { cost_in_usd, cost_out_usd, expires_at } = provider;
-        models.push({ model: provider.slug, icon, context_tokens, abilities, cost_in_usd, cost_out_usd, expires_at });
+        const { sale_credit, expires_at } = provider;
+        models.push({ model: provider.slug, icon, context_tokens, abilities, sale_credit, expires_at });
       }
     });
     return models;
