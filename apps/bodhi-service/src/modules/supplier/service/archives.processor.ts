@@ -5,7 +5,6 @@ import { Job } from 'bull';
 import { ChatService } from '@/modules/chat/chat.service';
 import { CreateMessageDto } from '@/modules/chat/dto/create-message.dto';
 import { ProviderService } from '@/modules/provider/service';
-import { SubscriptionService } from '@/modules/subscription/subscription.service';
 import { UsersService } from '@/modules/users/users.service';
 
 @Processor('bodhi')
@@ -14,7 +13,6 @@ export class SupplierArchivesProcessor {
     @Inject(forwardRef(() => ChatService))
     private readonly chat: ChatService,
     private readonly users: UsersService,
-    private readonly subscription: SubscriptionService,
     private readonly provider: ProviderService,
   ) {}
 
@@ -30,12 +28,12 @@ export class SupplierArchivesProcessor {
     /* eslint no-async-promise-executor: */
     return new Promise(async (resolve) => {
       const conversation = await this.chat.findConversation(conversation_id);
-      const { user_id, usage_id, provider_id, key_id } = conversation;
+      const { user_id, provider_id, key_id } = conversation;
 
       // user message have been archived in the first time.
       if (role === 'assistant') {
         const d3 = { conversation_id, role, parts, message_id, parent_id, status };
-        Object.assign(d3, { usage_id, provider_id, tokens });
+        Object.assign(d3, { provider_id, tokens });
         const d4 = await this.chat.createMessage(d3);
         tokens = d4.tokens;
       }
@@ -50,11 +48,6 @@ export class SupplierArchivesProcessor {
       const { sale_credit } = await this.provider.findById(provider_id);
       if (key_id > 0) {
         this.users.consumeUsage(user_id, key_id, sale_credit);
-      }
-
-      if (usage_id > 0) {
-        const consumed = { times: role === 'assistant' ? 1 : 0, tokens };
-        this.subscription.comsumeUsageQuote(usage_id, consumed);
       }
 
       // sync to webhooks

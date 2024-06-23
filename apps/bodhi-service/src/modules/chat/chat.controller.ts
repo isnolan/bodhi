@@ -14,7 +14,7 @@ import { SubscriptionService } from '../subscription/subscription.service';
 import { UsersService } from '../users/users.service';
 import { ChatService } from './chat.service';
 import { CreateAgentDto, CreateCompletionsDto, CreateConversationDto } from './dto/create-completions.dto';
-import { BillingDto, SendMessageDto } from './dto/send-message.dto';
+import { SendMessageDto } from './dto/send-message.dto';
 import { ChatConversationService } from './service';
 
 @ApiTags('chat')
@@ -28,7 +28,6 @@ export class ChatController {
     private readonly service: ChatService,
     private readonly provider: ProviderService,
     private readonly conversations: ChatConversationService,
-    private readonly subscription: SubscriptionService,
     private readonly file: FilesService,
   ) {}
 

@@ -5,7 +5,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ChatModule } from '../chat/chat.module';
 import { FilesModule } from '../files/files.module';
 import { ProviderModule } from '../provider/provider.module';
-import { SubscriptionModule } from '../subscription/subscription.module';
 import { UsersModule } from '../users/users.module';
 import Service from './service/';
 import { SupplierService } from './supplier.service';
@@ -27,7 +26,6 @@ import { SupplierService } from './supplier.service';
 
     ProviderModule,
     UsersModule,
-    SubscriptionModule,
   ],
   controllers: [],
   providers: [SupplierService, ...Service],

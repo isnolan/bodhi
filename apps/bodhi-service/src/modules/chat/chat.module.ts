@@ -5,7 +5,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { FilesModule } from '../files/files.module';
 import { ProviderModule } from '../provider/provider.module';
-import { SubscriptionModule } from '../subscription/subscription.module';
 import { SupplierModule } from '../supplier/supplier.module';
 import { UsersModule } from '../users/users.module';
 import { ChatController } from './chat.controller';
@@ -32,8 +31,6 @@ import Service from './service';
 
     forwardRef(() => SupplierModule),
     ProviderModule,
-
-    SubscriptionModule,
 
     UsersModule,
 
