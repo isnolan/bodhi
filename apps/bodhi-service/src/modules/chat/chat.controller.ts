@@ -10,7 +10,6 @@ import { RequestWithUser } from '@/core/common/request.interface';
 import { JwtOrApiKeyGuard } from '../auth/guard/mixed.guard';
 import { FilesService } from '../files/files.service';
 import { ProviderService } from '../provider/service';
-import { SubscriptionService } from '../subscription/subscription.service';
 import { UsersService } from '../users/users.service';
 import { ChatService } from './chat.service';
 import { CreateAgentDto, CreateCompletionsDto, CreateConversationDto } from './dto/create-completions.dto';

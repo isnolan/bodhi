@@ -10,10 +10,10 @@ import { LimitKeysDto } from './dto/limit-keys.dto';
 import { UserKeyService } from './service';
 import { UsersService } from './users.service';
 
-@ApiTags('users')
+@ApiTags('user')
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
-@Controller('users')
+@Controller('user')
 export class UsersController {
   constructor(
     private readonly users: UsersService,

@@ -9,14 +9,13 @@ import { SupplierModule } from '../supplier/supplier.module';
 import { UsersModule } from '../users/users.module';
 import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
-import { ChatConversation } from './entity/conversation.entity';
-import { ChatMessage } from './entity/message.entity';
+import Entity from './entity';
 import Service from './service';
 
 @Module({
   imports: [
     // MySQL
-    TypeOrmModule.forFeature([ChatConversation, ChatMessage]),
+    TypeOrmModule.forFeature(Entity),
 
     // Redis Queue
     BullModule.registerQueueAsync({

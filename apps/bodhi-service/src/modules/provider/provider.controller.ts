@@ -16,19 +16,19 @@ export class ProviderController {
     private readonly credential: ProviderCredentialsService,
   ) {}
 
-  @Get('product')
-  @ApiOperation({ summary: 'Get product list', description: 'Get product list' })
-  @ApiResponse({ status: 200, description: 'success' })
-  async findProducts(@Request() req) {
-    const { user_id } = req.user;
-    return this.provider.findByUserId(user_id);
-  }
+  // @Get('product')
+  // @ApiOperation({ summary: 'Get product list', description: 'Get product list' })
+  // @ApiResponse({ status: 200, description: 'success' })
+  // async findProducts(@Request() req) {
+  //   const { user_id } = req.user;
+  //   return this.provider.findByUserId(user_id);
+  // }
 
-  @Get('credentials')
-  @ApiOperation({ summary: 'Get credential list', description: 'Get credential list' })
-  @ApiResponse({ status: 200, description: 'success' })
-  async findCredentials(@Request() req) {
-    const { user_id } = req.user;
-    return this.credential.findByUserId(user_id);
-  }
+  // @Get('credentials')
+  // @ApiOperation({ summary: 'Get credential list', description: 'Get credential list' })
+  // @ApiResponse({ status: 200, description: 'success' })
+  // async findCredentials(@Request() req) {
+  //   const { user_id } = req.user;
+  //   return this.credential.findByUserId(user_id);
+  // }
 }
