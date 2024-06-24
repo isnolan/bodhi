@@ -11,9 +11,10 @@ import { QueueMessageDto } from '../supplier/dto/queue-message.dto';
 import { SupplierService } from '../supplier/supplier.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { SendMessageDto } from './dto/send-message.dto';
+import { ChatUsage } from './entity';
 import { ChatConversation } from './entity/conversation.entity';
 import { ChatMessage } from './entity/message.entity';
-import { ChatConversationService, ChatMessageService } from './service';
+import { ChatConversationService, ChatMessageService, ChatUsageService } from './service';
 
 @Injectable()
 export class ChatService {
@@ -24,6 +25,7 @@ export class ChatService {
     private readonly queue: Queue,
     @InjectRedis()
     private readonly redis: Redis,
+    private readonly usage: ChatUsageService,
     @Inject(forwardRef(() => SupplierService))
     private readonly supplier: SupplierService,
     private readonly message: ChatMessageService,
@@ -79,8 +81,9 @@ export class ChatService {
     return this.message.save(opts);
   }
 
-  async getTokensByConversationId(conversation_id: number) {
-    return this.message.getTokensByConversationId(conversation_id);
+  async addChatUsage(opts: Partial<ChatUsage>) {
+    await this.usage.save(opts);
+    return this.usage.getTokensByConversationId(opts.conversation_id);
   }
 
   /**
@@ -90,28 +93,32 @@ export class ChatService {
    * @returns
    */
   async completion(channel: string, conversation: ChatConversation, options: SendMessageDto) {
-    const { id: conversation_id, user_id } = conversation;
-    const { providers, billing, messages, message_id, status = 1 } = options;
+    const { id: conversation_id } = conversation;
+    const { providers, messages, message_id } = options;
     const { parent_id = '' } = options;
+
+    // Assign valid provisioning credentials
+    const provider = await this.supplier.distribute(providers, conversation);
+    // console.log(`[chat]distribute`, provider.id, usage.id);
+    if (provider.id !== conversation.provider_id) {
+      await this.conversation.updateAttribute(conversation.id, { provider_id: provider.id });
+    }
+
     // archive message
     await Promise.all(
       messages.map(async (message) => {
         const { role, parts } = message;
-        const a1: CreateMessageDto = { conversation_id, message_id, user_id, role, parts, parent_id, status };
-        const { tokens } = await this.message.save({ ...a1, parent_id });
-        this.queue.add('archives', { ...a1, tokens });
+        const a1: CreateMessageDto = { conversation_id, message_id, role, parts, parent_id };
+        await this.message.save({ ...a1, parent_id });
+        this.queue.add('archives', { ...a1 });
       }),
     );
 
     try {
-      // Assign valid provisioning credentials
-      const provider = await this.supplier.distribute(providers, conversation);
-      // console.log(`[chat]distribute`, provider.id, usage.id);
-      if (provider.id !== conversation.provider_id) {
-        this.conversation.updateAttribute(conversation.id, { provider_id: provider.id });
-      }
+      const parent_id = message_id;
+      const provider_id = provider.id;
+      const s1: QueueMessageDto = { channel, provider_id, conversation_id, parent_id };
 
-      const s1: QueueMessageDto = { channel, provider_id: provider.id, conversation_id, parent_id: message_id, status };
       // console.log(`[chat]send`, provider, s1);
       if (provider.instance.type === InstanceType.SESSION) {
         await this.redis.publish('puppet', JSON.stringify({ ...s1, providers }));

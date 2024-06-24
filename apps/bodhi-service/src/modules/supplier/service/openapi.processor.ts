@@ -40,7 +40,7 @@ export class SupplierOpenAPIProcessor {
   @Process('openapi')
   async openai(job: Job<QueueMessageDto>) {
     console.log(`[api]job:`, job.data);
-    const { channel, provider_id, conversation_id, parent_id, status = 1 } = job.data;
+    const { channel, provider_id, conversation_id, parent_id } = job.data;
 
     try {
       const { credential, instance, model } = (await this.provider.findActive([provider_id]))[0];
@@ -54,7 +54,7 @@ export class SupplierOpenAPIProcessor {
       });
       // console.log(`->conversation`, conversation);
       const { context_limit } = conversation;
-      const messages = await this.chat.findLastMessagesByConversationId(conversation_id, context_limit, status);
+      const messages = await this.chat.findLastMessagesByConversationId(conversation_id, context_limit);
 
       console.log(`->message`, JSON.stringify(messages));
       const res = await api.sendMessage({
@@ -70,11 +70,12 @@ export class SupplierOpenAPIProcessor {
           this.chat.reply(channel, choices);
         },
       });
+
       // console.log(`->res`, JSON.stringify(res));
       // archive
       res.choices.map((row: any) => {
         const payload = { conversation_id, role: row.role, parts: row.parts, message_id: res.id };
-        this.queue.add('archives', { parent_id, ...payload, tokens: 0, status });
+        this.queue.add('archives', { parent_id, ...payload });
       });
 
       // 回复会话

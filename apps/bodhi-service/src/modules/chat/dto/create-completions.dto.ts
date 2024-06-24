@@ -75,26 +75,6 @@ export class CreateConversationDto extends CreateChatDto {
   parent_id?: string;
 }
 
-export class CreateAgentDto {
-  @ApiProperty({ default: 'qwen-turbo' })
-  @IsOptional()
-  @IsString()
-  model: string;
-
-  @ApiProperty({ default: '' })
-  @IsNotEmpty()
-  @IsString()
-  conversation_id: string;
-
-  @ApiProperty({
-    default:
-      'Generate a less than 50 character short and relevant title for this chat. No other text are allowed. Follow the language user use before.',
-  })
-  @IsNotEmpty()
-  @IsString()
-  prompt: string;
-}
-
 export interface Message {
   role: string;
   content: string;

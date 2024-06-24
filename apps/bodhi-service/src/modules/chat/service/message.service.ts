@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { get_encoding } from 'tiktoken';
 import { MoreThanOrEqual, Not, Repository } from 'typeorm';
 
 import { ChatMessage } from '../entity/message.entity';
@@ -14,21 +13,12 @@ export class ChatMessageService {
   ) {}
 
   async save(opts: Partial<ChatMessage>): Promise<ChatMessage> {
-    const { parent_id, parts } = opts; // 可选参数
-    let { tokens } = opts;
-    if (!opts.tokens) {
-      const content = parts
-        .filter((item) => item.type === 'text')
-        .map((item) => item.text)
-        .join('');
-      tokens = this.getTokenCount(content);
-    }
-    return await this.repository.save(this.repository.create({ ...opts, parent_id, tokens }));
+    return this.repository.save(this.repository.create(opts));
   }
 
   async findMyMessageId(message_id: string): Promise<ChatMessage> {
     // 获取最近消息
-    return await this.repository.findOne({ where: [{ message_id }] });
+    return this.repository.findOne({ where: [{ message_id }] });
   }
 
   /**
@@ -38,7 +28,7 @@ export class ChatMessageService {
    */
   async findLastMessage(conversation_id: number): Promise<ChatMessage> {
     // 获取最近消息
-    return await this.repository.findOne({
+    return this.repository.findOne({
       select: ['id', 'message_id', 'role', 'parts'],
       where: [{ conversation_id, role: 'assistant', status: 1 }],
       order: { id: 'DESC' },
@@ -89,22 +79,5 @@ export class ChatMessageService {
       where: { message_id },
       order: { id: 'ASC' },
     });
-  }
-
-  getTokenCount(text: string): number {
-    const encoding = get_encoding('cl100k_base');
-    const tokens = encoding.encode(text).length;
-    encoding.free();
-
-    return tokens;
-  }
-
-  async getTokensByConversationId(conversation_id: number): Promise<number> {
-    const { tokens } = await this.repository
-      .createQueryBuilder('message')
-      .select('SUM(message.tokens)', 'tokens')
-      .where('message.conversation_id = :conversation_id', { conversation_id })
-      .getRawOne();
-    return tokens;
   }
 }

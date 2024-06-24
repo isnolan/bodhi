@@ -49,4 +49,8 @@ export class UsersService {
   async consumeUsage(user_id: number, key_id: number, sale_credit: number) {
     return this.keys.decrementBalance(user_id, key_id, sale_credit);
   }
+
+  async consumeWallet(user_id: number, amount: number) {
+    return this.wallet.decrementBalance(user_id, amount);
+  }
 }

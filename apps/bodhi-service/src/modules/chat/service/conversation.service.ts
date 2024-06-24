@@ -12,11 +12,11 @@ export class ChatConversationService {
   ) {}
 
   async findOne(id: number): Promise<ChatConversation> {
-    return await this.repository.findOne({ where: { id } });
+    return this.repository.findOne({ where: { id } });
   }
 
   async findOneByConversationId(conversation_id: string): Promise<ChatConversation> {
-    return await this.repository.findOne({ where: { conversation_id } });
+    return this.repository.findOne({ where: { conversation_id } });
   }
 
   async findAndCreateOne(conversation_id: string, opts: Partial<ChatConversation>): Promise<ChatConversation> {
@@ -28,7 +28,7 @@ export class ChatConversationService {
       }
     }
     // create new one
-    return await this.repository.save(this.repository.create({ conversation_id, ...opts }));
+    return this.repository.save(this.repository.create({ conversation_id, ...opts }));
   }
 
   async updateAttribute(id: number, attribute: Partial<ChatConversation>) {

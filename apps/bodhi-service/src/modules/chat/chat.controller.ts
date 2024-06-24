@@ -12,7 +12,7 @@ import { FilesService } from '../files/files.service';
 import { ProviderService } from '../provider/service';
 import { UsersService } from '../users/users.service';
 import { ChatService } from './chat.service';
-import { CreateAgentDto, CreateCompletionsDto, CreateConversationDto } from './dto/create-completions.dto';
+import { CreateCompletionsDto, CreateConversationDto } from './dto/create-completions.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 import { ChatConversationService } from './service';
 
@@ -57,7 +57,7 @@ export class ChatController {
     try {
       // validate subscription
       const abilities = this.checkAbilities(messages);
-      const { providers, billing } = await this.validateSubscription(user_id, model, key_id, abilities);
+      const providers = await this.validateSubscription(user_id, model, key_id, abilities);
       // console.log(`->`, providers);
       // find or create conversation
       const d = { model, temperature, top_p, top_k, user_id, key_id, context_limit, n };
@@ -90,48 +90,8 @@ export class ChatController {
       }
 
       // 发送消息
-      const options: SendMessageDto = { providers, billing, messages: [], message_id, parent_id };
+      const options: SendMessageDto = { providers, messages: [], message_id, parent_id };
       Object.assign(options, { messages });
-      await this.service.completion(channel, conversation, options);
-    } catch (err) {
-      if (err instanceof HttpException) {
-        const code = err.getStatus();
-        res.status(code).json({ error: { message: err.getResponse(), code } });
-      } else {
-        res.status(500).json({ error: { message: err.message, code: 500 } });
-      }
-      // res.status(400).json({ error: { message: err.message, code: 400 } });
-    }
-  }
-
-  // Generate a less than 50 character short and relevant title for this chat. No other text are allowed. Follow the language user use before.
-  // Make 3 short and high relevant  tips base on  the latest chat to  keep conversation going .  No other text are allowed. Follow the language user use before..
-  @Post('agent')
-  @ApiOperation({ description: 'Chat conversation agent', summary: 'Chat conversation agent' })
-  @ApiBody({ type: CreateAgentDto })
-  @ApiResponse({ status: 200, description: 'success' })
-  @ApiResponse({ status: 400, description: 'exception' })
-  async agent(@Req() req: RequestWithUser, @Res() res: Response, @Body() payload: CreateAgentDto) {
-    const { user_id, key_id = 0 } = req.user; // from jwt or apikey
-    const { model = 'gpt-3.5-turbo', conversation_id, prompt = '' } = payload;
-
-    try {
-      // validate available quota
-      const { providers, billing } = await this.validateSubscription(user_id, model, key_id, []);
-      const d = { model, user_id, key_id };
-      const conversation = await this.conversations.findAndCreateOne(conversation_id, d);
-      if (!conversation) {
-        throw new Error('Invalid conversation');
-      }
-
-      const channel = `agent:${conversation_id}:${+new Date()}`;
-      const listener = this.createListener(channel, res, false);
-      this.service.subscribe(channel, listener);
-      req.on('close', () => this.service.unsubscribe(channel, listener));
-
-      const messages = [{ role: 'user', parts: [{ type: 'text', text: prompt }] }];
-      const options: SendMessageDto = { providers, billing, messages: [], message_id: uuidv4() }; //
-      Object.assign(options, { messages, status: 0 });
       await this.service.completion(channel, conversation, options);
     } catch (err) {
       if (err instanceof HttpException) {
@@ -157,7 +117,7 @@ export class ChatController {
     try {
       // validate subscription
       const abilities = this.checkAbilities(messages);
-      const { providers, billing } = await this.validateSubscription(user_id, model, key_id, abilities);
+      const providers = await this.validateSubscription(user_id, model, key_id, abilities);
 
       // Get or create conversation
       const conversation_id = uuidv4();
@@ -173,7 +133,7 @@ export class ChatController {
       this.service.subscribe(channel, listener);
       req.on('close', () => this.service.unsubscribe(channel, listener));
 
-      const options: SendMessageDto = { providers, billing, messages, message_id: uuidv4() };
+      const options: SendMessageDto = { providers, messages, message_id: uuidv4() };
       await this.service.completion(channel, conversation, options);
     } catch (err) {
       if (err instanceof HttpException) {
@@ -232,7 +192,7 @@ export class ChatController {
       }
     }
 
-    return { providers: providers.map((provider) => provider.id), billing: { user_id, key_id } };
+    return providers.map((provider) => provider.id);
   }
 
   private createListener(channel: string, res, stream: boolean = true) {

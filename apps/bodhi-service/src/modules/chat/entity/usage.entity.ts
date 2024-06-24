@@ -15,18 +15,21 @@ export class ChatUsage extends Base {
   @Column({ type: 'int', comment: 'key_id', default: 0 })
   key_id: number;
 
+  @Column({ type: 'int', comment: 'provider', default: 0 })
+  provider_id: number;
+
   @Column({ type: 'int', comment: 'conversation', default: 0 })
   conversation_id: number;
 
-  @Column({ type: 'int', comment: 'message', default: 0 })
-  message_id: number;
-
-  @Column({ type: 'varchar', length: 40, comment: 'slug', default: '' })
-  model: string;
+  @Column({ type: 'varchar', length: 40, comment: 'message id', default: '' })
+  message_id: string;
 
   @Column({ type: 'enum', enum: MessageType, comment: 'type', default: MessageType.INPUT })
   type: MessageType;
 
   @Column({ type: 'int', comment: 'tokens', default: 0 })
   tokens: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 8, comment: 'price', default: 0 })
+  price: number;
 }

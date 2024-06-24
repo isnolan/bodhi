@@ -6,6 +6,4 @@ export class QueueMessageDto {
   conversation_id: number;
 
   parent_id: string;
-
-  status?: number;
 }

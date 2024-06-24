@@ -2,6 +2,12 @@ import { Column, Entity } from 'typeorm';
 
 import { Base } from '@/core/common/base.entity';
 
+export enum ChatConversationState {
+  ACTIVE = 1,
+  INACTIVE = 0,
+  DELETE = -1,
+}
+
 @Entity('bodhi_chat_conversation')
 export class ChatConversation extends Base {
   @Column({ type: 'int', comment: 'usage', default: 0 })
@@ -43,6 +49,6 @@ export class ChatConversation extends Base {
   @Column({ type: 'varchar', length: 40, comment: '供应商会话ID', default: '' })
   parent_conversation_id: string;
 
-  @Column({ type: 'tinyint', comment: '状态', default: 1, nullable: true })
-  status: number;
+  @Column({ type: 'tinyint', comment: '状态', default: ChatConversationState.ACTIVE })
+  status: ChatConversationState;
 }

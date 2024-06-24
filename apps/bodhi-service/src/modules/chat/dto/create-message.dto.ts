@@ -10,23 +10,11 @@ export class CreateMessageDto {
   @IsString()
   message_id: string;
 
-  @IsOptional()
-  @IsNumber()
-  user_id?: number;
-
   @IsString()
   role: string;
 
   @IsArray()
   parts: chat.Part[];
-
-  @IsOptional()
-  @IsNumber()
-  tokens?: number;
-
-  @IsOptional()
-  @IsNumber()
-  status?: number;
 
   @IsOptional()
   @IsString()

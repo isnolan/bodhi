@@ -16,10 +16,10 @@ export class UserWallet extends Base {
   @Column({ type: 'int', comment: 'user_id', default: 0 })
   user_id: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, comment: 'cost in', default: 0 })
+  @Column({ type: 'decimal', precision: 10, scale: 3, comment: 'cost in', default: 0 })
   amount: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, comment: 'balance', default: 0 })
+  @Column({ type: 'decimal', precision: 10, scale: 3, comment: 'balance', default: 0 })
   balance: number;
 
   @Column({ type: 'enum', enum: TradeType, comment: 'trade type', default: TradeType.CONSUME })

@@ -13,12 +13,6 @@ export class ChatMessage extends Base {
   @Column({ comment: 'conversation', default: 0 })
   conversation_id: number;
 
-  @Column({ type: 'int', comment: 'usage', default: 0 })
-  usage_id: number;
-
-  @Column({ type: 'int', comment: 'provider', default: 0 })
-  provider_id: number;
-
   @Column({ type: 'enum', enum: RoleEnum, comment: 'role', default: RoleEnum.USER })
   role: string;
 
@@ -27,9 +21,6 @@ export class ChatMessage extends Base {
 
   @Column({ type: 'simple-json', comment: 'tools', default: null })
   tools: string[];
-
-  @Column({ comment: 'tokens', default: 0 })
-  tokens: number;
 
   @Column({ type: 'varchar', length: 40, comment: 'message id', default: '' })
   message_id: string;

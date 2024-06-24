@@ -1,6 +1,8 @@
+import { chat } from '@isnolan/bodhi-adapter';
 import { OnGlobalQueueCompleted, Process, Processor } from '@nestjs/bull';
 import { forwardRef, Inject } from '@nestjs/common';
 import { Job } from 'bull';
+import { get_encoding } from 'tiktoken';
 
 import { ChatService } from '@/modules/chat/chat.service';
 import { CreateMessageDto } from '@/modules/chat/dto/create-message.dto';
@@ -21,10 +23,10 @@ export class SupplierArchivesProcessor {
    */
   @Process('archives')
   async archives(job: Job<CreateMessageDto>) {
-    // console.log(`[archives]job:`, job.data);
+    console.log(`[archives]job:`, job.data);
     const { conversation_id, role, parts, message_id }: CreateMessageDto = job.data; // 必备
-    const { parent_conversation_id, parent_id, status }: any = job.data; // 可选
-    let { tokens } = job.data;
+    const { parent_conversation_id, parent_id }: any = job.data; // 可选
+
     /* eslint no-async-promise-executor: */
     return new Promise(async (resolve) => {
       const conversation = await this.chat.findConversation(conversation_id);
@@ -32,23 +34,29 @@ export class SupplierArchivesProcessor {
 
       // user message have been archived in the first time.
       if (role === 'assistant') {
-        const d3 = { conversation_id, role, parts, message_id, parent_id, status };
-        Object.assign(d3, { provider_id, tokens });
-        const d4 = await this.chat.createMessage(d3);
-        tokens = d4.tokens;
+        await this.chat.createMessage({ conversation_id, role, parts, message_id, parent_id });
       }
 
-      // update conversation attribute
-      const total_tokens = await this.chat.getTokensByConversationId(conversation_id);
+      // claulate tokens
+      const content = parts
+        .filter((item) => item.type === 'text')
+        .map((item) => (item as chat.TextPart).text)
+        .join('');
+      const tokens = this.getTokenCount(content);
+
+      // consume keys quotes, if exists
+      const { sale_credit, sale_in_usd, sale_out_usd } = await this.provider.findById(provider_id, false);
+      key_id > 0 && this.users.consumeUsage(user_id, key_id, sale_credit);
+
+      // usage
+      const price = (tokens / 1000) * (role === 'user' ? +sale_in_usd : +sale_out_usd);
+      const d = { conversation_id, user_id, key_id, provider_id, tokens, price };
+      const total_tokens = await this.chat.addChatUsage({ ...d, message_id });
+
+      // update conversation
       const attr = { tokens: total_tokens };
       parent_conversation_id && Object.assign(attr, { parent_conversation_id });
       this.chat.updateConversationAttr(conversation_id, attr);
-
-      // consume keys quotes, if exists
-      const { sale_credit } = await this.provider.findById(provider_id);
-      if (key_id > 0) {
-        this.users.consumeUsage(user_id, key_id, sale_credit);
-      }
 
       // sync to webhooks
       try {
@@ -88,5 +96,13 @@ export class SupplierArchivesProcessor {
   @OnGlobalQueueCompleted()
   async onGlobalCompleted(jobId: number) {
     console.log(`[process]completed`, jobId);
+  }
+
+  private getTokenCount(text: string): number {
+    const encoding = get_encoding('cl100k_base');
+    const tokens = encoding.encode(text).length;
+    encoding.free();
+
+    return tokens;
   }
 }

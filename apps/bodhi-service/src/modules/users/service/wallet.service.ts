@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { UserWallet } from '../entity';
+import { TradeType, UserWallet } from '../entity';
 
 @Injectable()
 export class UserWalletService {
@@ -17,5 +17,22 @@ export class UserWalletService {
       where: { user_id },
       order: { id: 'DESC' },
     });
+  }
+
+  async decrementBalance(user_id: number, amount: number, trade_id = 0, trade_reason = '') {
+    // 获取当前余额
+    const { balance } = await this.repository.findOne({ where: { user_id }, order: { id: 'DESC' } });
+    // 更新余额
+
+    return this.repository.save(
+      this.repository.create({
+        user_id,
+        amount: -amount,
+        balance: balance - amount,
+        trade_type: TradeType.CONSUME,
+        trade_id,
+        trade_reason,
+      }),
+    );
   }
 }
