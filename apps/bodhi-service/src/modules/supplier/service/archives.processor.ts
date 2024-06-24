@@ -47,7 +47,7 @@ export class SupplierArchivesProcessor {
       this.users.updateDraftBill(user_id, amount);
 
       // todo: 记录到账单
-      // key_id > 0 && this.users.consumeUsage(user_id, key_id, sale_credit);
+      key_id > 0 && this.users.consumeKeyCredits(user_id, key_id, price);
 
       // update conversation
       if (parent_conversation_id) {

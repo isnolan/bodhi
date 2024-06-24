@@ -19,8 +19,11 @@ export class UserKey extends Base {
   @Column({ type: 'varchar', length: 48, comment: 'secret key' })
   secret_key: string;
 
-  @Column({ type: 'int', comment: 'credits', default: 0 })
-  balance: number; // 信用预算
+  @Column({ type: 'decimal', precision: 6, scale: 3, comment: 'credits', default: 0 })
+  credits: number;
+
+  @Column({ type: 'decimal', precision: 12, scale: 8, comment: 'consumed', default: 0 })
+  consumed: number;
 
   @Column({ type: 'varchar', length: 100, comment: 'remark', default: '' })
   remark: string;

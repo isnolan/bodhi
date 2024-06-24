@@ -19,7 +19,7 @@ export class UserWalletService {
     });
   }
 
-  async decrementBalance(user_id: number, amount: number, trade_id = 0, trade_reason = '') {
+  async decrement(user_id: number, amount: number, trade_id = 0, trade_reason = '') {
     // 获取当前余额
     const { balance } = await this.repository.findOne({ where: { user_id }, order: { id: 'DESC' } });
     // 更新余额

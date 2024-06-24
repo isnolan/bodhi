@@ -5,7 +5,7 @@ export class CreateKeysDto {
   @ApiProperty({ description: 'balance', example: 10 })
   @IsNotEmpty()
   @IsNumber()
-  balance: number;
+  credits: number;
 
   @ApiPropertyOptional({ description: 'name', example: '' })
   @IsOptional()

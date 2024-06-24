@@ -17,7 +17,7 @@ export class UserBilling extends Base {
   @Column({ type: 'varchar', length: 6, comment: 'month', default: '' })
   month: string; // 账期
 
-  @Column({ type: 'decimal', precision: 10, scale: 5, comment: 'amount' })
+  @Column({ type: 'decimal', precision: 10, scale: 3, comment: 'amount' })
   amount: number; // 消费金额
 
   @Column({ type: 'enum', enum: BillingState, comment: '状态', default: BillingState.DRAFT })

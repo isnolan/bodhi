@@ -16,7 +16,7 @@ export class GetKeysDto {
 
   @ApiProperty()
   @IsNumber()
-  balance: number;
+  credits: number;
 
   @ApiProperty()
   @IsString()

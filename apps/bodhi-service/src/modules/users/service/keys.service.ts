@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { BigNumber } from 'bignumber.js';
 import * as moment from 'moment-timezone';
 import { IsNull, MoreThan, Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 
-import { UserKey, UserKeyState } from '../entity/keys.entity';
+import { UserKey, UserKeyState } from '../entity';
 
 @Injectable()
 export class UserKeyService {
@@ -43,8 +44,8 @@ export class UserKeyService {
    * @returns
    */
   async createKey(user_id: number, opts: Partial<UserKey>): Promise<UserKey> {
-    const { name, balance } = opts;
-    const exist = await this.repository.findOne({ where: { user_id, name, balance, state: UserKeyState.VALID } });
+    const { name, credits } = opts;
+    const exist = await this.repository.findOne({ where: { user_id, name, credits, state: UserKeyState.VALID } });
     if (exist) {
       return exist;
     }
@@ -56,7 +57,7 @@ export class UserKeyService {
 
   async getList(user_id: number): Promise<UserKey[]> {
     return this.repository.find({
-      select: ['id', 'name', 'secret_key', 'balance', 'remark', 'expires_at', 'update_at'],
+      select: ['id', 'name', 'secret_key', 'credits', 'remark', 'expires_at', 'update_at'],
       where: { user_id },
     });
   }
@@ -65,15 +66,12 @@ export class UserKeyService {
     return this.repository.update(id, { state: UserKeyState.DELETED });
   }
 
-  async resetBalance(user_id: number, key_id: number, balance: number) {
-    return this.repository.update({ user_id, id: key_id }, { balance });
+  async resetBalance(user_id: number, key_id: number, credits: number) {
+    return this.repository.update({ user_id, id: key_id }, { credits });
   }
 
-  async incrementBalance(user_id: number, key_id: number, credits: number) {
-    return this.repository.increment({ user_id, id: key_id }, 'balance', credits);
-  }
-
-  async decrementBalance(user_id: number, key_id: number, credits: number) {
-    return this.repository.decrement({ user_id, id: key_id }, 'balance', credits);
+  async consumeCredits(user_id: number, key_id: number, amount: number) {
+    const price = new BigNumber(amount).toFixed(8);
+    return this.repository.increment({ user_id, id: key_id }, 'consumed', price);
   }
 }
