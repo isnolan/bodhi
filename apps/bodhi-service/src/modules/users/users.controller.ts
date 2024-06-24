@@ -33,9 +33,9 @@ export class UsersController {
   @ApiResponse({ status: 201, description: 'success', type: GetKeysDto })
   async createKey(@Request() req, @Body() payload: CreateKeysDto): Promise<GetKeysDto> {
     const { user_id } = req.user;
-    const { credits, name, remark, expires_at } = payload;
-    const { id, sk, update_at } = await this.keys.createKey(user_id, { name, remark, credits, expires_at });
-    return { id, sk, name, remark, credits, expires_at, update_at };
+    const { credits, name, expires_at } = payload;
+    const { id, sk, update_at } = await this.keys.createKey(user_id, { name, credits, expires_at });
+    return { id, sk, name, credits, expires_at, update_at };
   }
 
   @Delete('keys/delete')

@@ -20,10 +20,6 @@ export class GetKeysDto {
 
   @ApiProperty()
   @IsString()
-  remark: string;
-
-  @ApiProperty()
-  @IsString()
   expires_at: Date;
 
   @ApiProperty()

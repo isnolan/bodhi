@@ -57,7 +57,7 @@ export class UserKeyService {
 
   async getList(user_id: number): Promise<UserKey[]> {
     return this.repository.find({
-      select: ['id', 'name', 'sk', 'credits', 'remark', 'expires_at', 'update_at'],
+      select: ['id', 'name', 'sk', 'credits', 'expires_at', 'update_at'],
       where: { user_id },
     });
   }

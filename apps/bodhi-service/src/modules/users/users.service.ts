@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { Users } from './entity/users.entity';
-import { UserKeyService, UserWebhookService } from './service';
+import { UserKeyService, UserProjectService } from './service';
 import { UserBillingService } from './service/billing.service';
 import { UsersUserService } from './service/user.service';
 import { UserWalletService } from './service/wallet.service';
@@ -12,7 +12,7 @@ export class UsersService {
   constructor(
     private readonly user: UsersUserService,
     private readonly keys: UserKeyService,
-    private readonly webhook: UserWebhookService,
+    private readonly project: UserProjectService,
     private readonly wallet: UserWalletService,
     private readonly billing: UserBillingService,
   ) {}
@@ -37,9 +37,9 @@ export class UsersService {
     return this.keys.resetBalance(user_id, key_id, balance);
   }
 
-  async findActiveWebhook(user_id: number) {
-    return this.webhook.findActive(user_id);
-  }
+  // async findActiveWebhook(user_id: number) {
+  // return this.webhook.findActive(user_id);
+  // }
 
   async checkAvailableQuota(user_id: number, key_id: number) {
     return this.keys.findActive(user_id, key_id);

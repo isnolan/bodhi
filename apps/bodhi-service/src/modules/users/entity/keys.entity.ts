@@ -13,8 +13,11 @@ export class UserKey extends Base {
   @Column({ comment: 'user_id' })
   user_id: number;
 
+  @Column({ type: 'int', comment: 'project_id', default: 0 })
+  user_project_id: number;
+
   @Column({ type: 'varchar', length: 40, comment: 'name', default: '' })
-  name: string; // 组织名称
+  name: string; // 密钥名称
 
   @Column({ type: 'varchar', length: 48, comment: 'secret key' })
   sk: string;
@@ -24,9 +27,6 @@ export class UserKey extends Base {
 
   @Column({ type: 'decimal', precision: 12, scale: 8, comment: 'consumed', default: 0 })
   consumed: number;
-
-  @Column({ type: 'varchar', length: 100, comment: 'remark', default: '' })
-  remark: string;
 
   @Column({ type: 'datetime', comment: 'expires', default: null, nullable: true })
   expires_at: Date;
