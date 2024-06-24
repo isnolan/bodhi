@@ -55,19 +55,8 @@ export class UserKeyService {
     return this.repository.save(this.repository.create({ user_id, ...opts, sk }));
   }
 
-  async getList(user_id: number): Promise<UserKey[]> {
-    return this.repository.find({
-      select: ['id', 'name', 'sk', 'credits', 'expires_at', 'update_at'],
-      where: { user_id },
-    });
-  }
-
-  async delete(id: number) {
-    return this.repository.update(id, { state: UserKeyState.DELETED });
-  }
-
-  async resetBalance(user_id: number, key_id: number, credits: number) {
-    return this.repository.update({ user_id, id: key_id }, { credits });
+  async updateCredits(user_id: number, sk: string, credits: number) {
+    return this.repository.update({ user_id, sk }, { credits });
   }
 
   async consumeCredits(user_id: number, key_id: number, amount: number) {

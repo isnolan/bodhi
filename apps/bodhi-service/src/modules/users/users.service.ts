@@ -33,8 +33,8 @@ export class UsersService {
     return this.keys.validateKey(sk);
   }
 
-  async resetKeyBalance(user_id: number, key_id: number, balance: number) {
-    return this.keys.resetBalance(user_id, key_id, balance);
+  async updateKeyCredits(user_id: number, sk: string, credits: number) {
+    return this.keys.updateCredits(user_id, sk, credits);
   }
 
   async checkAvailableQuota(user_id: number, key_id: number) {
