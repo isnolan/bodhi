@@ -178,7 +178,7 @@ export class ChatController {
       throw new HttpException(`No valid supplier for model:${model}`, 403);
     }
 
-    // 无有效订阅 & 余额不足
+    // 余额不足
     const wallet = await this.users.checkAvailableBalance(user_id);
     if (!wallet || wallet.balance <= 0) {
       throw new HttpException(`Insufficient funds`, 402);

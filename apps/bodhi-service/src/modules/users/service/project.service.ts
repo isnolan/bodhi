@@ -21,4 +21,8 @@ export class UserProjectService {
       where: { user_id, state: In([ProjectState.INVALID, ProjectState.VALID]) },
     });
   }
+
+  async findOne(id: number): Promise<UserProject> {
+    return this.repository.findOne({ where: { id } });
+  }
 }

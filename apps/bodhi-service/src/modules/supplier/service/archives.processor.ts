@@ -56,31 +56,27 @@ export class SupplierArchivesProcessor {
 
       // sync to webhooks
       try {
-        // const webhook = await this.users.findActiveWebhook(user_id);
-        // if (webhook && key_id > 0) {
-        // TODO:  sync
-        // const usage = await this.users.findUsageById(user_usage_id);
-        // if (usage) {
-        //   const { client_usage_id, client_user_id } = usage;
-        //   const res = await fetch(webhook.url, {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json', 'X-SECRET-KEY': webhook.sk },
-        //     body: JSON.stringify({
-        //       client_user_id,
-        //       client_usage_id,
-        //       conversation: {
-        //         id: conversation.conversation_id,
-        //         model: conversation.model,
-        //         tokens: conversation.tokens,
-        //       },
-        //       message: { message_id, parent_id, role, parts, tokens, status },
-        //     }),
-        //   });
-        //   console.log(`[archives]webhook`, res.status, res.statusText);
-        // }
-        // } else {
-        //   console.log(`[archives]webhook`, 'skip, no webhook or no usage');
-        // }
+        if (key_id > 0) {
+          const project = await this.users.findWebhookByKey(user_id, key_id);
+          // console.log(`->projec`, project);
+          if (project) {
+            const { webhook_url, webhook_secret } = project;
+            // TODO:  sync
+            // const usage = await this.users.findUsageById(user_usage_id);
+            // if (usage) {
+            //   const { client_usage_id, client_user_id } = usage;
+            const res = await fetch(webhook_url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'X-SECRET-KEY': webhook_secret },
+              body: JSON.stringify({
+                conversation: { id: conversation.conversation_id, model: conversation.model },
+                message: { message_id, parent_id, role, parts, tokens },
+              }),
+            });
+            console.log(`[archives]webhook`, res.status, res.statusText);
+            // }
+          }
+        }
       } catch (err) {
         console.log(`[archives]webhook`, err.message);
       }

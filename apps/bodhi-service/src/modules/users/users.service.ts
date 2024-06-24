@@ -42,8 +42,13 @@ export class UsersService {
     return this.keys.updateCredits(user_id, sk, credits);
   }
 
+  async findWebhookByKey(user_id, key_id: number) {
+    const key = await this.keys.findOne(user_id, key_id);
+    return this.project.findOne(key.project_id);
+  }
+
   async checkAvailableQuota(user_id: number, key_id: number) {
-    return this.keys.findActive(user_id, key_id);
+    return this.keys.findOne(user_id, key_id);
   }
 
   async checkAvailableBalance(user_id: number) {
