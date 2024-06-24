@@ -37,26 +37,22 @@ export class SupplierArchivesProcessor {
         await this.chat.createMessage({ conversation_id, role, parts, message_id, parent_id });
       }
 
-      // claulate tokens
-      const content = parts
-        .filter((item) => item.type === 'text')
-        .map((item) => (item as chat.TextPart).text)
-        .join('');
-      const tokens = this.getTokenCount(content);
+      // billing
+      const { price_in_usd, price_out_usd } = await this.provider.findById(provider_id, false); // provider
+      const texts = parts.filter((item) => item.type === 'text').map((item) => (item as chat.TextPart).text);
+      const tokens = this.getTokenCount(texts.join(''));
+      const price = (tokens / 1000000) * (role === 'user' ? +price_in_usd : +price_out_usd); // price
+      const usage = { conversation_id, key_id, provider_id, message_id, tokens, price };
+      const amount = await this.chat.insertChatUsage(user_id, usage); // usage
+      this.users.updateDraftBill(user_id, amount);
 
-      // consume keys quotes, if exists
-      const { sale_credit, sale_in_usd, sale_out_usd } = await this.provider.findById(provider_id, false);
-      key_id > 0 && this.users.consumeUsage(user_id, key_id, sale_credit);
-
-      // usage
-      const price = (tokens / 1000) * (role === 'user' ? +sale_in_usd : +sale_out_usd);
-      const d = { conversation_id, user_id, key_id, provider_id, tokens, price };
-      const total_tokens = await this.chat.addChatUsage({ ...d, message_id });
+      // todo: 记录到账单
+      // key_id > 0 && this.users.consumeUsage(user_id, key_id, sale_credit);
 
       // update conversation
-      const attr = { tokens: total_tokens };
-      parent_conversation_id && Object.assign(attr, { parent_conversation_id });
-      this.chat.updateConversationAttr(conversation_id, attr);
+      if (parent_conversation_id) {
+        this.chat.updateConversationAttr(conversation_id, { parent_conversation_id });
+      }
 
       // sync to webhooks
       try {

@@ -11,16 +11,18 @@ export class ChatUsageService {
     private readonly repository: Repository<ChatUsage>,
   ) {}
 
-  async save(opts: Partial<ChatUsage>): Promise<ChatUsage> {
-    return this.repository.save(this.repository.create(opts));
+  async save(user_id, opts: Partial<ChatUsage>): Promise<ChatUsage> {
+    return this.repository.save(this.repository.create({ user_id, ...opts }));
   }
 
-  async getTokensByConversationId(conversation_id: number): Promise<number> {
-    const { tokens } = await this.repository
+  async sumPriceByPeriod(user_id: number, period_at: Date, expires_at: Date): Promise<number> {
+    const result = await this.repository
       .createQueryBuilder('usage')
-      .select('SUM(usage.tokens)', 'tokens')
-      .where('usage.conversation_id = :conversation_id', { conversation_id })
+      .select('SUM(usage.price)', 'sum')
+      .where('usage.user_id = :user_id', { user_id })
+      .andWhere('usage.create_at BETWEEN :start AND :end', { start: period_at, end: expires_at })
       .getRawOne();
-    return tokens;
+
+    return parseFloat(result.sum);
   }
 }

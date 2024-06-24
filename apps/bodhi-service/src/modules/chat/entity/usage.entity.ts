@@ -30,6 +30,6 @@ export class ChatUsage extends Base {
   @Column({ type: 'int', comment: 'tokens', default: 0 })
   tokens: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 8, comment: 'price', default: 0 })
+  @Column({ type: 'decimal', precision: 12, scale: 10, comment: 'price', default: 0 })
   price: number;
 }

@@ -48,7 +48,7 @@ export class ProviderService {
   async findList(): Promise<any[]> {
     const query = { status: CredentialsState.ACTIVE };
     const providers = await this.repository.find({
-      select: ['id', 'slug', 'model_id', 'sale_credit', 'expires_at'],
+      select: ['id', 'slug', 'model_id', 'expires_at'],
       where: [
         { expires_at: MoreThan(new Date()), ...query },
         { expires_at: IsNull(), ...query },
@@ -67,8 +67,8 @@ export class ProviderService {
         existing.abilities = [...new Set([...existing.abilities, ...abilities])];
       } else {
         const { icon, context_tokens } = provider.model;
-        const { sale_credit, expires_at } = provider;
-        models.push({ model: provider.slug, icon, context_tokens, abilities, sale_credit, expires_at });
+        const { expires_at } = provider;
+        models.push({ model: provider.slug, icon, context_tokens, abilities, expires_at });
       }
     });
     return models;
@@ -77,7 +77,7 @@ export class ProviderService {
   async filterProviderByModel(name: string, abilities: string[]) {
     const query = this.repository
       .createQueryBuilder('provider')
-      .select(['provider.id', 'provider.sale_credit'])
+      .select(['provider.id'])
       .innerJoin('provider.model', 'model')
       .andWhere('provider.slug = :name', { name })
       .andWhere('model.status = :status', { status: CredentialsState.ACTIVE });

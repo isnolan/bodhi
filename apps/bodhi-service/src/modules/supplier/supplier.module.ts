@@ -21,11 +21,11 @@ import { SupplierService } from './supplier.service';
       }),
     }),
 
+    UsersModule,
+    ProviderModule,
+
     forwardRef(() => ChatModule),
     forwardRef(() => FilesModule),
-
-    ProviderModule,
-    UsersModule,
   ],
   controllers: [],
   providers: [SupplierService, ...Service],

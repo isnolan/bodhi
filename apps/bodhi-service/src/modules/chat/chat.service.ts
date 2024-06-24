@@ -5,6 +5,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bull';
 import Redis from 'ioredis';
+import moment from 'moment-timezone';
 
 import { InstanceType } from '../provider/entity';
 import { QueueMessageDto } from '../supplier/dto/queue-message.dto';
@@ -81,9 +82,12 @@ export class ChatService {
     return this.message.save(opts);
   }
 
-  async addChatUsage(opts: Partial<ChatUsage>) {
-    await this.usage.save(opts);
-    return this.usage.getTokensByConversationId(opts.conversation_id);
+  async insertChatUsage(user_id, opts: Partial<ChatUsage>) {
+    await this.usage.save(user_id, opts);
+
+    const period_at = moment.utc().startOf('month').toDate();
+    const expires_at = moment.utc().toDate();
+    return this.usage.sumPriceByPeriod(user_id, period_at, expires_at);
   }
 
   /**

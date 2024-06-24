@@ -187,9 +187,9 @@ export class ChatController {
     // validate key balance, if key_id is provided
     if (key_id > 0) {
       const key = await this.users.checkAvailableQuota(user_id, key_id);
-      if (!key || key.balance < providers[0].sale_credit) {
-        throw new HttpException(`Not enough credits balance.`, 402);
-      }
+      // if (!key || key.balance < providers[0].sale_credit) {
+      //   throw new HttpException(`Not enough credits balance.`, 402);
+      // }
     }
 
     return providers.map((provider) => provider.id);

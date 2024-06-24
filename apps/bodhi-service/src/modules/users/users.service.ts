@@ -2,16 +2,19 @@ import { Injectable } from '@nestjs/common';
 
 import { Users } from './entity/users.entity';
 import { UserKeyService, UserWebhookService } from './service';
+import { UserBillingService } from './service/billing.service';
 import { UsersUserService } from './service/user.service';
 import { UserWalletService } from './service/wallet.service';
 
 @Injectable()
 export class UsersService {
+  /* eslint max-params: */
   constructor(
     private readonly user: UsersUserService,
     private readonly keys: UserKeyService,
     private readonly webhook: UserWebhookService,
     private readonly wallet: UserWalletService,
+    private readonly billing: UserBillingService,
   ) {}
 
   async findOne(id: number): Promise<Users> {
@@ -50,7 +53,7 @@ export class UsersService {
     return this.keys.decrementBalance(user_id, key_id, sale_credit);
   }
 
-  async consumeWallet(user_id: number, amount: number) {
-    return this.wallet.decrementBalance(user_id, amount);
+  async updateDraftBill(user_id: number, amount: number) {
+    return this.billing.updateDraftBill(user_id, amount);
   }
 }

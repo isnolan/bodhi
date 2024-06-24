@@ -28,10 +28,9 @@ import Service from './service';
       }),
     }),
 
+    UsersModule,
     forwardRef(() => SupplierModule),
     ProviderModule,
-
-    UsersModule,
 
     FilesModule,
   ],

@@ -31,22 +31,12 @@ export class Provider extends Base {
   @Column({ type: 'int', comment: 'credential', default: 0 })
   credential_id: number;
 
-  /* Cost */
-  @Column({ type: 'decimal', precision: 10, scale: 5, comment: 'cost in', default: 0 })
-  cost_in_usd: number; // per input 1k tokens
-
-  @Column({ type: 'decimal', precision: 10, scale: 5, comment: 'cost out', default: 0 })
-  cost_out_usd: number; // per ouput 1k tokens
-
   /* Sale */
-  @Column({ type: 'decimal', precision: 10, scale: 5, comment: 'sale in', default: 0 })
-  sale_in_usd: number; // per input 1k tokens
+  @Column({ type: 'decimal', precision: 5, scale: 3, comment: 'sale in', default: 0 })
+  price_in_usd: number; // per input 1M tokens
 
-  @Column({ type: 'decimal', precision: 10, scale: 5, comment: 'sale out', default: 0 })
-  sale_out_usd: number; // per ouput 1k tokens
-
-  @Column({ type: 'int', comment: 'sale credit', default: 3 })
-  sale_credit: number; // per request
+  @Column({ type: 'decimal', precision: 5, scale: 3, comment: 'sale out', default: 0 })
+  price_out_usd: number; // per ouput 1M tokens
 
   /* Weight */
   @Column({ type: 'decimal', precision: 2, scale: 1, comment: 'weight', default: 1 })
