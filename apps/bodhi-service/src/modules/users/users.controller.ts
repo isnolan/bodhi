@@ -32,8 +32,8 @@ export class UsersController {
   @ApiResponse({ status: 201, description: 'success', type: KeyListDto })
   async createKey(@Request() req, @Body() payload: CreateKeyDto): Promise<KeyListDto> {
     const { user_id } = req.user;
-    const { credits, name, expires_at } = payload;
-    const { id, sk, update_at } = await this.keys.createKey(user_id, { name, credits, expires_at });
+    const { project_id, credits, name, expires_at } = payload;
+    const { id, sk, update_at } = await this.users.createKey(user_id, { project_id, name, credits, expires_at });
     return { id, sk, name, credits, expires_at, update_at };
   }
 

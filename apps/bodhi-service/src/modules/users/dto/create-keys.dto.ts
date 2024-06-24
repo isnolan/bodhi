@@ -12,12 +12,12 @@ export class CreateKeyDto {
   @IsNumber()
   credits: number;
 
-  @ApiPropertyOptional({ description: 'name', example: '' })
+  @ApiPropertyOptional({ description: 'name', example: 'ct_1' })
   @IsOptional()
   @IsString()
   name: string;
 
-  @ApiPropertyOptional({ description: 'expire at', example: new Date() })
+  @ApiPropertyOptional({ description: 'expire at', example: null })
   @IsOptional()
   @IsDateString()
   expires_at: Date | null;

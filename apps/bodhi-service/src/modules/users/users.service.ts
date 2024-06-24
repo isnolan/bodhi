@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
+import { UserKey } from './entity';
 import { Users } from './entity/users.entity';
 import { UserKeyService, UserProjectService } from './service';
 import { UserBillingService } from './service/billing.service';
@@ -31,6 +32,10 @@ export class UsersService {
 
   async validateKey(sk: string) {
     return this.keys.validateKey(sk);
+  }
+
+  async createKey(user_id: number, opts: Partial<UserKey>) {
+    return this.keys.createKey(user_id, opts);
   }
 
   async updateKeyCredits(user_id: number, sk: string, credits: number) {

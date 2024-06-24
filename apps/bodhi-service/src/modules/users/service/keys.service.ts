@@ -44,8 +44,8 @@ export class UserKeyService {
    * @returns
    */
   async createKey(user_id: number, opts: Partial<UserKey>): Promise<UserKey> {
-    const { name, credits } = opts;
-    const exist = await this.repository.findOne({ where: { user_id, name, credits, state: UserKeyState.VALID } });
+    const { project_id, name } = opts;
+    const exist = await this.repository.findOne({ where: { project_id, user_id, name, state: UserKeyState.VALID } });
     if (exist) {
       return exist;
     }
