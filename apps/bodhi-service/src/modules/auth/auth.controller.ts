@@ -76,9 +76,9 @@ export class AuthController {
 
     // Email
     if (validator.isEmail(account)) {
-      let user = await this.user.findOneByEmail(account);
+      let user = await this.user.findUserByEmail(account);
       if (!user) {
-        user = await this.user.createOneWithEmail(account, { locale });
+        user = await this.user.createUserWithEmail(account, { locale });
       }
       return this.auth.login(user.id, clientIp, locale);
     }

@@ -17,14 +17,14 @@ export class AuthService {
     // session
     const session = await this.session.createOne(userId, clientIp, locale);
     // profile & token
-    const user = await this.user.findOne(userId);
+    const user = await this.user.findUser(userId);
     const access_token = await this.jwt.signAsync({ user_id: userId, session_id: session.id });
     delete user['id'];
     return { profile: user, abilities: [], access_token };
   }
 
   async validateUser(email: string, pass: string): Promise<AuthResponse> {
-    const user = await this.user.findOneByEmail(email);
+    const user = await this.user.findUserByEmail(email);
     if (user && user.password === pass) {
       return await this.login(user.id);
     }
@@ -39,7 +39,7 @@ export class AuthService {
     }
 
     // profile & token
-    const user = await this.user.findOne(session.user_id);
+    const user = await this.user.findUser(session.user_id);
     delete user['id'];
     return { profile: user, abilities: [] };
   }

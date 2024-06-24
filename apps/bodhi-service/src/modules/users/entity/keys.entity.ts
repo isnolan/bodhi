@@ -14,7 +14,7 @@ export class UserKey extends Base {
   user_id: number;
 
   @Column({ type: 'int', comment: 'project_id', default: 0 })
-  user_project_id: number;
+  project_id: number;
 
   @Column({ type: 'varchar', length: 40, comment: 'name', default: '' })
   name: string; // 密钥名称

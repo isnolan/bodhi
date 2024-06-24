@@ -17,15 +17,15 @@ export class UsersService {
     private readonly billing: UserBillingService,
   ) {}
 
-  async findOne(id: number): Promise<Users> {
+  async findUser(id: number): Promise<Users> {
     return this.user.findOne(id);
   }
 
-  async findOneByEmail(email: string): Promise<Users> {
+  async findUserByEmail(email: string): Promise<Users> {
     return this.user.findOneByEmail(email);
   }
 
-  async createOneWithEmail(email: string, opts: Partial<Users>): Promise<Users> {
+  async createUserWithEmail(email: string, opts: Partial<Users>): Promise<Users> {
     return this.user.createOneWithEmail(email, opts);
   }
 
@@ -36,10 +36,6 @@ export class UsersService {
   async resetKeyBalance(user_id: number, key_id: number, balance: number) {
     return this.keys.resetBalance(user_id, key_id, balance);
   }
-
-  // async findActiveWebhook(user_id: number) {
-  // return this.webhook.findActive(user_id);
-  // }
 
   async checkAvailableQuota(user_id: number, key_id: number) {
     return this.keys.findActive(user_id, key_id);

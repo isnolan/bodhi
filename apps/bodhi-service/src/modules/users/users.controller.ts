@@ -20,6 +20,14 @@ export class UsersController {
     private readonly keys: UserKeyService,
   ) {}
 
+  @Get('project')
+  @ApiOperation({ summary: 'find project list', description: 'find project list' })
+  @ApiResponse({ status: 200, description: 'success', type: [GetKeysDto] })
+  async findProjectList(@Request() req): Promise<GetKeysDto[]> {
+    const { user_id } = req.user;
+    return this.keys.getList(user_id);
+  }
+
   @Get('keys')
   @ApiOperation({ summary: 'Get API Keys', description: 'Get API Keys' })
   @ApiResponse({ status: 200, description: 'success', type: [GetKeysDto] })
