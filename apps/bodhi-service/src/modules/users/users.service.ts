@@ -29,8 +29,8 @@ export class UsersService {
     return this.user.createOneWithEmail(email, opts);
   }
 
-  async validateKey(secret_key: string) {
-    return this.keys.validateKey(secret_key);
+  async validateKey(sk: string) {
+    return this.keys.validateKey(sk);
   }
 
   async resetKeyBalance(user_id: number, key_id: number, balance: number) {

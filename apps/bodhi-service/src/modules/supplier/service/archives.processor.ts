@@ -64,7 +64,7 @@ export class SupplierArchivesProcessor {
           //   const { client_usage_id, client_user_id } = usage;
           //   const res = await fetch(webhook.url, {
           //     method: 'POST',
-          //     headers: { 'Content-Type': 'application/json', 'X-SECRET-KEY': webhook.secret_key },
+          //     headers: { 'Content-Type': 'application/json', 'X-SECRET-KEY': webhook.sk },
           //     body: JSON.stringify({
           //       client_user_id,
           //       client_usage_id,

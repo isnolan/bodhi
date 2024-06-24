@@ -17,7 +17,7 @@ export class UserWebhook extends Base {
   url: string;
 
   @Column({ type: 'varchar', length: 48, comment: 'secret key' })
-  secret_key: string;
+  sk: string;
 
   @Column({ type: 'datetime', comment: 'expires', default: null, nullable: true })
   expires_at: Date;

@@ -17,7 +17,7 @@ export class UserKey extends Base {
   name: string; // 组织名称
 
   @Column({ type: 'varchar', length: 48, comment: 'secret key' })
-  secret_key: string;
+  sk: string;
 
   @Column({ type: 'decimal', precision: 6, scale: 3, comment: 'credits', default: 0 })
   credits: number;

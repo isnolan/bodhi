@@ -12,7 +12,7 @@ export class GetKeysDto {
 
   @ApiProperty()
   @IsString()
-  secret_key: string;
+  sk: string;
 
   @ApiProperty()
   @IsNumber()

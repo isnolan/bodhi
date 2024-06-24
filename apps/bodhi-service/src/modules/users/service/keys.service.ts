@@ -16,11 +16,11 @@ export class UserKeyService {
 
   /**
    * Validate api key, when request by api key.
-   * @param secret_key
+   * @param sk
    * @returns
    */
-  async validateKey(secret_key: string): Promise<UserKey> {
-    const query = { secret_key, state: UserKeyState.VALID };
+  async validateKey(sk: string): Promise<UserKey> {
+    const query = { sk, state: UserKeyState.VALID };
     const keys = await this.repository.findOne({
       where: [
         { expires_at: MoreThan(new Date()), ...query },
@@ -51,13 +51,13 @@ export class UserKeyService {
     }
 
     // create a new secret key
-    const secret_key = `sk-` + uuidv4();
-    return this.repository.save(this.repository.create({ user_id, ...opts, secret_key }));
+    const sk = `sk-` + uuidv4();
+    return this.repository.save(this.repository.create({ user_id, ...opts, sk }));
   }
 
   async getList(user_id: number): Promise<UserKey[]> {
     return this.repository.find({
-      select: ['id', 'name', 'secret_key', 'credits', 'remark', 'expires_at', 'update_at'],
+      select: ['id', 'name', 'sk', 'credits', 'remark', 'expires_at', 'update_at'],
       where: { user_id },
     });
   }

@@ -34,8 +34,8 @@ export class UsersController {
   async createKey(@Request() req, @Body() payload: CreateKeysDto): Promise<GetKeysDto> {
     const { user_id } = req.user;
     const { credits, name, remark, expires_at } = payload;
-    const { id, secret_key, update_at } = await this.keys.createKey(user_id, { name, remark, credits, expires_at });
-    return { id, secret_key, name, remark, credits, expires_at, update_at };
+    const { id, sk, update_at } = await this.keys.createKey(user_id, { name, remark, credits, expires_at });
+    return { id, sk, name, remark, credits, expires_at, update_at };
   }
 
   @Delete('keys/delete')
