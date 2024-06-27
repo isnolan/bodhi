@@ -71,6 +71,7 @@ export class SupplierArchivesProcessor {
               body: JSON.stringify({
                 conversation: { id: conversation.conversation_id, model: conversation.model },
                 message: { message_id, parent_id, role, parts, tokens },
+                bill: { key_id },
               }),
             });
             console.log(`[archives]webhook`, res.status, res.statusText);
