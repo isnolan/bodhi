@@ -10,11 +10,7 @@ export class ProjectDto {
   @IsString()
   name: string;
 
-  @ApiProperty({ description: 'webhook_url' })
+  @ApiProperty({ description: 'webhook' })
   @IsString()
-  webhook_url: string;
-
-  @ApiProperty({ description: 'remark' })
-  @IsString()
-  remark: string;
+  webhook: string;
 }

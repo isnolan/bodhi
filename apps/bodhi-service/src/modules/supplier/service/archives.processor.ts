@@ -57,21 +57,18 @@ export class SupplierArchivesProcessor {
       // sync to webhooks
       try {
         if (key_id > 0) {
-          const project = await this.users.findWebhookByKey(user_id, key_id);
+          const project = await this.users.findWebhookByKeyId(user_id, key_id);
           // console.log(`->projec`, project);
           if (project) {
-            const { webhook_url, webhook_secret } = project;
-            // TODO:  sync
-            // const usage = await this.users.findUsageById(user_usage_id);
-            // if (usage) {
-            //   const { client_usage_id, client_user_id } = usage;
-            const res = await fetch(webhook_url, {
+            const { sk, webhook, secret } = project;
+            const res = await fetch(webhook, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'X-SECRET-KEY': webhook_secret },
+              headers: { 'Content-Type': 'application/json', 'X-SECRET-KEY': secret },
               body: JSON.stringify({
-                conversation: { id: conversation.conversation_id, model: conversation.model },
-                message: { message_id, parent_id, role, parts, tokens },
-                bill: { key_id },
+                sk,
+                model: conversation.model,
+                conversation_id: conversation.conversation_id,
+                message: { role, parts, message_id, parent_id, tokens },
               }),
             });
             console.log(`[archives]webhook`, res.status, res.statusText);

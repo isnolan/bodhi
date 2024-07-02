@@ -16,14 +16,11 @@ export class UserProject extends Base {
   @Column({ type: 'varchar', length: 40, comment: 'name', default: '' })
   name: string; // 项目名称
 
-  @Column({ type: 'varchar', length: 255, comment: 'url', default: '' })
-  webhook_url: string;
+  @Column({ type: 'varchar', length: 255, comment: 'webhook', default: '' })
+  webhook: string;
 
-  @Column({ type: 'varchar', length: 48, comment: 'secret key' })
-  webhook_secret: string;
-
-  @Column({ type: 'varchar', length: 100, comment: 'remark', default: '' })
-  remark: string;
+  @Column({ type: 'varchar', length: 48, comment: 'secret' })
+  secret: string;
 
   @Column({ type: 'enum', enum: ProjectState, comment: 'state', default: ProjectState.VALID })
   state: ProjectState;

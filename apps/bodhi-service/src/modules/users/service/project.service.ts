@@ -17,7 +17,7 @@ export class UserProjectService {
 
   async findList(user_id: number): Promise<UserProject[]> {
     return this.repository.find({
-      select: ['id', 'name', 'webhook_url', 'remark'],
+      select: ['id', 'name', 'webhook'],
       where: { user_id, state: In([ProjectState.INVALID, ProjectState.VALID]) },
     });
   }
