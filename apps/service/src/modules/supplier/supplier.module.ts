@@ -6,7 +6,7 @@ import { ChatModule } from '../chat/chat.module';
 import { FilesModule } from '../files/files.module';
 import { ProviderModule } from '../provider/provider.module';
 import { UsersModule } from '../users/users.module';
-import Service from './service/';
+import Service from './service';
 import { SupplierService } from './supplier.service';
 @Module({
   imports: [
